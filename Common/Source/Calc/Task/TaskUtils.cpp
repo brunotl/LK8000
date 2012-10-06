@@ -39,19 +39,15 @@ void RefreshTaskWaypoint(int i) {
     }
   else
     {
-      DistanceBearing(WayPointList[Task[i-1].Index].Latitude, 
-                      WayPointList[Task[i-1].Index].Longitude,
-                      WayPointList[Task[i].Index].Latitude,   
+      DistanceBearing(WayPointList[Task[i].Index].Latitude,
                       WayPointList[Task[i].Index].Longitude,
+                      WayPointList[Task[i-1].Index].Latitude,
+                      WayPointList[Task[i-1].Index].Longitude,
                       &Task[i].Leg,
                       &Task[i].InBound);
-
-	// Apply Great Circle convergency
-	double chlon =  (WayPointList[Task[i-1].Index].Longitude - WayPointList[Task[i].Index].Longitude) * DEG_TO_RAD;
-	double medlat=  (WayPointList[Task[i-1].Index].Latitude + WayPointList[Task[i].Index].Latitude)   / 2;
-	double conv= (chlon * sin(medlat*DEG_TO_RAD)) * RAD_TO_DEG;
-	Task[i].InBound -= conv;
-
+      Task[i].InBound += 180;
+      if (Task[i].InBound >= 360)
+        Task[i].InBound -= 360;
 
       Task[i-1].OutBound = Task[i].InBound;
       Task[i-1].Bisector = BiSector(Task[i-1].InBound,Task[i-1].OutBound);
