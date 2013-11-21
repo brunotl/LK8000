@@ -318,7 +318,7 @@ bool CBtHandlerWince::LookupDevices() {
 
     LPWSAQUERYSET pwsaResults = (LPWSAQUERYSET) buf;
     DWORD dwSize = sizeof (buf);
-    ZeroMemory(pwsaResults, sizeof (WSAQUERYSET));
+    ZeroMemory(buf, dwSize);
     pwsaResults->dwSize = sizeof (WSAQUERYSET);
     pwsaResults->dwNameSpace = NS_BTH;
     pwsaResults->lpBlob = NULL;
