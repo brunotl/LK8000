@@ -211,6 +211,7 @@ CE_DEFS		:=-D_WIN32_WCE=$(CE_VERSION) -D_WIN32_IE=$(CE_VERSION)
 CE_DEFS		+=-DWIN32_PLATFORM_PSPC=$(CE_PLATFORM) -DMSOFT
 CE_DEFS		+=-DWIN32_RESOURCE
 endif
+CE_DEFS += -DUSE_GDI
 endif
 
 ifeq ($(CONFIG_PPC2002),y)
@@ -382,6 +383,8 @@ endif
 ####### sources
 
 SCREEN := \
+	$(SRC_SCREEN)/GDI/Canvas.cpp \
+	$(SRC_SCREEN)/GDI/Bitmap.cpp \
 	$(SRC_SCREEN)/LKColor.cpp \
 	$(SRC_SCREEN)/LKPen.cpp \
 	$(SRC_SCREEN)/LKBitmap.cpp \
