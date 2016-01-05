@@ -511,11 +511,11 @@ void MapWindow::DrawLook8000(LKSurface& Surface, const RECT& rc) {
                     rcx -= (TextSize.cx + NIBLSCALE(2));
                     rcy += TextSize.cy-NIBLSCALE(2);
 
-                    LKWriteText(Surface, BufferValue, rcx, rcy, 0, WTMODE_OUTLINED, WTALIGN_LEFT, OverColorRef, true);
+                    LKWriteText(Surface, BufferValue, rcx, rcy + (TextSize.cy / 3), 0, WTMODE_OUTLINED, WTALIGN_LEFT, OverColorRef, true);
 
-                    Surface.SelectObject(LK8OverlayBigFont);
                     LKWriteText(Surface, BufferUnit, rcx + TextSize.cx + NIBLSCALE(2), rcy + (TextSize.cy / 3), 0,
                             WTMODE_OUTLINED, WTALIGN_LEFT, OverColorRef, true);
+                    Surface.SelectObject(LK8OverlayBigFont);
                 }
             }
 
