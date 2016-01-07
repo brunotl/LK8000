@@ -503,10 +503,9 @@ void MapWindow::DrawLook8000(LKSurface& Surface, const RECT& rc) {
 
                 // Req. Speed For reach Gate
                 if (LKFormatValue(LK_START_SPEED, false, BufferValue, BufferUnit, BufferTitle)) {
-                    Surface.SelectObject(LK8OverlayBigFont);
+                    Surface.SelectObject(LK8TargetFont);
                     Surface.GetTextSize(BufferUnit, _tcslen(BufferUnit), &TextSize);
                     rcx -= TextSize.cx;
-                    Surface.SelectObject(LK8TargetFont);
                     Surface.GetTextSize(BufferValue, _tcslen(BufferValue), &TextSize);
                     rcx -= (TextSize.cx + NIBLSCALE(2));
                     rcy += TextSize.cy-NIBLSCALE(2);
