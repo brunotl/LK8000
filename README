@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fbrunotl%2FLK8000.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fbrunotl%2FLK8000?ref=badge_shield)
+
 WELCOME TO THE LK8000 DEVELOPMENT HUB
 
 THIS IS THE MASTER BRANCH, V6.1 CURRENTLY UNDER DEVELOPMENT
@@ -83,3 +85,7 @@ Desktop Target ( LINUX or PC ) :
     FULLSCREEN=[y|n]
         default = "n"
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fbrunotl%2FLK8000.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fbrunotl%2FLK8000?ref=badge_large)
