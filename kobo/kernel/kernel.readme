@@ -14,6 +14,7 @@ for had custom kernel to koboroot.tgz, add 'KERNEL=y' to LK8000 make command lin
 Kernel build instruction
 =======================================
 
+---------------------------------------
 Kernel need to be build using gcc 4.4
     this can be found in kobolabs repository : 
     https://github.com/kobolabs/Kobo-Reader/blob/master/toolchain/gcc-codesourcery-2010q1-202.bin
@@ -30,3 +31,22 @@ Kernel build :
 modules build :
     $make CROSS_COMPILE=arm-none-linux-gnueabi- ARCH=arm modules
     $make CROSS_COMPILE=arm-none-linux-gnueabi- ARCH=arm INSTALL_MOD_PATH=../kobo-fs/ modules_install
+---------------------------------------
+
+---------------------------------------
+Kernel need to be build using gcc 5.3.0 is needed :
+    this can be found in linaro website : 
+    https://publishing-ie-linaro-org.s3.amazonaws.com/releases/components/toolchain/binaries/5.3-2016.02/arm-linux-gnueabihf/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf.tar.xz
+
+
+kernel source for Kobo ClaraHD (mx6sll based kobo device): 
+        https://github.com/brunotl/kernel-kobo-imxv7        
+
+Kernel build :
+    $make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm zImage
+
+    $make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm modules
+    $make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm INSTALL_MOD_PATH=../kobo-fs/mx6sll-ntx modules_install
+
+
+---------------------------------------

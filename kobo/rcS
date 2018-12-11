@@ -129,8 +129,15 @@ fi
 MODEL=`dd if=/dev/mmcblk0 bs=8 count=1 skip=64`
 echo "${MODEL}" > /mnt/onboard/LK8000/kobo/MODEL
 
+
+if [ $CPU == mx6sll ] || [ $CPU == mx6ull ]; then
+    NEW_KERNEL=zImage-$PCB
+else 
+    NEW_KERNEL=uImage-$PCB
+fi
+
 # install OTG_kernel if available and not already installed.
-if [ "${OTG_kernel}" == "N" -a -f /mnt/onboard/LK8000/kobo/uImage-${PCB} ]; then
+if [ "${OTG_kernel}" == "N" -a -f /mnt/onboard/LK8000/kobo/${NEW_KERNEL} ]; then
     /bin/mount -t tmpfs none /dev
     /bin/mknod /dev/mmcblk0 b 179 0
 

@@ -75,6 +75,19 @@ $(Q)install -m 0755 -d  $(BIN)/$(1)/KoboRoot/drivers/mx50-ntx/usb
 $(Q)install -m 0755 -d  $(BIN)/$(1)/KoboRoot/drivers/mx50-ntx/usb/gadget
 $(Q)install -m 0644 kobo/modules/mx50-ntx/usb/gadget/g_serial.ko $(BIN)/$(1)/KoboRoot/drivers/mx50-ntx/usb/gadget
 
+$(Q)install -m 0755 -d  $(BIN)/$(1)/KoboRoot/drivers/mx6sll-ntx
+$(Q)install -m 0755 -d  $(BIN)/$(1)/KoboRoot/drivers/mx6sll-ntx/usb
+$(Q)install -m 0755 -d  $(BIN)/$(1)/KoboRoot/drivers/mx6sll-ntx/usb/serial
+$(Q)install -m 0644 kobo/modules/mx6sll-ntx/usb/serial/ch341.ko $(BIN)/$(1)/KoboRoot/drivers/mx6sll-ntx/usb/serial
+$(Q)install -m 0644 kobo/modules/mx6sll-ntx/usb/serial/cp210x.ko $(BIN)/$(1)/KoboRoot/drivers/mx6sll-ntx/usb/serial
+$(Q)install -m 0644 kobo/modules/mx6sll-ntx/usb/serial/ftdi_sio.ko $(BIN)/$(1)/KoboRoot/drivers/mx6sll-ntx/usb/serial
+$(Q)install -m 0644 kobo/modules/mx6sll-ntx/usb/serial/pl2303.ko $(BIN)/$(1)/KoboRoot/drivers/mx6sll-ntx/usb/serial
+$(Q)install -m 0644 kobo/modules/mx6sll-ntx/usb/serial/usb-serial-simple.ko $(BIN)/$(1)/KoboRoot/drivers/mx6sll-ntx/usb/serial
+$(Q)install -m 0644 kobo/modules/mx6sll-ntx/usb/serial/usbserial.ko $(BIN)/$(1)/KoboRoot/drivers/mx6sll-ntx/usb/serial
+$(Q)install -m 0755 -d  $(BIN)/$(1)/KoboRoot/drivers/mx6sll-ntx/usb/class
+$(Q)install -m 0644 kobo/modules/mx6sll-ntx/usb/class/cdc-acm.ko $(BIN)/$(1)/KoboRoot/drivers/mx6sll-ntx/usb/class
+
+
 $(Q)install -m 0755 -d  $(BIN)/$(1)/KoboRoot/etc
 $(Q)install -m 0755 -d  $(BIN)/$(1)/KoboRoot/opt/LK8000/bin
 $(Q)install -m 0755 -d  $(BIN)/$(1)/KoboRoot/opt/LK8000/lib
