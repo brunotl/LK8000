@@ -33,24 +33,7 @@ constexpr TCHAR infinity[] = { '\xE2', '\x88', '\x9E', '\0' };
  * return -1 if NextETE is Invalid.
  */
 static double GetNextETE(const DERIVED_INFO& info) {
-	double value = -1;
-	if(ISPARAGLIDER) {
-		LockTaskData();
-		if (ValidTaskPointFast(ActiveTaskPoint)) {
-			int index = (ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute()) ? RESWP_OPTIMIZED: Task[ActiveTaskPoint].Index;
-			value = WayPointCalc[index].NextETE;
-		}
-		UnlockTaskData();
-	} else  if (ISCAR || ISGAAIRCRAFT) {
-		LockTaskData();
-		if (ValidTaskPointFast(ActiveTaskPoint)) {
-			value = WayPointCalc[TASKINDEX].NextETE;
-		}
-		UnlockTaskData();
-	} else {
-		value = info.LegTimeToGo;
-	}
-
+	double value = info.LegTimeToGo;
 	if((value <= 0) || value >= (0.9*ERROR_TIME)) {
 		value = -1;
 	}
