@@ -340,8 +340,8 @@ bool Startup(const TCHAR* szCmdLine) {
   RadioPara.Squelch = 3;
   RadioPara.Vox = 5;
   RadioPara.Enabled = false; //devIsRadio(devA()) || devIsRadio(devB());
-  RadioPara.ActiveFrequency  = 118.00;
-  RadioPara.PassiveFrequency = 118.00;
+  RadioPara.ActiveFrequency  = 0.0;
+  RadioPara.PassiveFrequency = 0.0;
   RadioPara.Enabled8_33      = true;
 
   // Initialise main blackboard data

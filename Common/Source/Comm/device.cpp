@@ -1160,9 +1160,11 @@ extern BOOL ValidFrequency(double Freq);
 
 BOOL devPutFreqActive(double Freq, const TCHAR* StationName) {
   if( ValidFrequency(Freq)) {
-    RadioPara.ActiveFrequency=  Freq;
     CopyTruncateString(RadioPara.ActiveName, NAME_SIZE, StationName);
-    return for_all_device(&DeviceDescriptor_t::PutFreqActive, Freq, StationName);
+    if(RadioPara.ActiveFrequency != Freq) {
+      RadioPara.ActiveFrequency = Freq;
+      return for_all_device(&DeviceDescriptor_t::PutFreqActive, Freq, StationName);
+    }
   }
   return false;
 }
@@ -1176,10 +1178,11 @@ BOOL devPutFreqActive(const TCHAR* Freq, const TCHAR* StationName) {
  * @return FALSE if error on one device.
  */
 BOOL devPutFreqStandby(double Freq, const TCHAR* StationName) {
-  if( ValidFrequency(Freq)) {
-    RadioPara.PassiveFrequency=  Freq;
+  if(ValidFrequency(Freq)) {
     CopyTruncateString(RadioPara.PassiveName, NAME_SIZE, StationName);
-    return for_all_device(&DeviceDescriptor_t::PutFreqStandby, Freq, StationName);
+    if(RadioPara.PassiveFrequency != Freq) {
+      return for_all_device(&DeviceDescriptor_t::PutFreqStandby, Freq, StationName);
+    }
   }
   return false;
 }
