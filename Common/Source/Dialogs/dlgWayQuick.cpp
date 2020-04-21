@@ -123,16 +123,6 @@ static void SetRadioFrequency(WndButton* pWnd, bool bActive)
         devPutFreqStandby(wpt.Freq, wpt.Name);
       }
   }
-
-#ifdef STATUS_RADIO   // Status Popup not realy needed
-  TCHAR szFreq[60];
-  _stprintf(szFreq,_T("Standby %6.3f ") ,Ferquency);
-
-  DoStatusMessage(_T(""), WayPointList[SelectedWaypoint].Name );
-  DoStatusMessage(_T(""), szFreq );
-
-  retStatus=3;
-#endif
   UnlockTaskData();
 
   if(pWnd) {
