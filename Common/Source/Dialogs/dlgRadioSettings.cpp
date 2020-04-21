@@ -164,7 +164,23 @@ static void UpdateStationName() {
     }
 }
 
+static
+void SetNameCaption(WindowControl* pWnd, const TCHAR* Name, bool Tx, bool Rx) {
+  if(pWnd) {
+    TCHAR Name[DEVICE_NAME_LEN + 16];
+    TCHAR ShortName[DEVICE_NAME_LEN];
+    CopyTruncateString(ShortName, DEVICE_NAME_LEN, Name);
 
+    if(Tx) {
+      _stprintf(Name,_T(">%s<"),ShortName);
+    } else if(Rx) {
+      _stprintf(Name,_T("<%s>"),ShortName);
+    } else {
+      _stprintf(Name,_T("[%s]"),ShortName);
+    }
+    pWnd->SetCaption(Name);
+  }
+}
 
 
 static int OnRemoteUpdate() {
@@ -173,32 +189,10 @@ static int OnRemoteUpdate() {
 
     UpdateStationName();
 
+    SetNameCaption(wpnewActive, RadioPara.ActiveName, RadioPara.TX, RadioPara.RX_active);
+    SetNameCaption(wpnewPassive, RadioPara.PassiveName, false, RadioPara.RX_standy);
+
     TCHAR Name[250];
-    TCHAR ActiveName[DEVICE_NAME_LEN+8];
-    CopyTruncateString(ActiveName, DEVICE_NAME_LEN, RadioPara.ActiveName);
-
-    if(RadioPara.TX)
-      _stprintf(Name,_T(">%s<"),ActiveName);
-    else
-      if(RadioPara.RX_active)
-        _stprintf(Name,_T("<%s>"),ActiveName);
-      else
-        _stprintf(Name,_T("[%s]"),ActiveName);
-    if(wpnewActive)
-      wpnewActive->SetCaption(Name);
-    _stprintf(Name,_T("%6.03f"),RadioPara.ActiveFrequency);
-    if(wpnewActiveFreq)
-      wpnewActiveFreq->SetCaption(Name);
-
-    TCHAR PassiveName[DEVICE_NAME_LEN+8];
-    CopyTruncateString(PassiveName, DEVICE_NAME_LEN, RadioPara.PassiveName );
-
-    if(RadioPara.RX_standy)
-      _stprintf(Name,_T("<%s>"),PassiveName);
-    else
-      _stprintf(Name,_T("[%s]"),PassiveName);
-    if(wpnewPassive)
-     wpnewPassive->SetCaption(Name);
     _stprintf(Name,_T("%6.03f"),RadioPara.PassiveFrequency);
     if(wpnewPassiveFreq)
      wpnewPassiveFreq->SetCaption(Name);
@@ -234,17 +228,17 @@ static int OnRemoteUpdate() {
 }
 
 static int OnUpdate(void) {
+
+  SetNameCaption(wpnewActive, RadioPara.ActiveName, RadioPara.TX, RadioPara.RX_active);
+  SetNameCaption(wpnewPassive, RadioPara.PassiveName, false, RadioPara.RX_standy);
+
   TCHAR Name[DEVICE_NAME_LEN+8];
 
 
-	if(wpnewActive)
-		wpnewActive->SetCaption(RadioPara.ActiveName);
 	_stprintf(Name,_T("%7.3f"),RadioPara.ActiveFrequency);
 	if(wpnewActiveFreq)
 		wpnewActiveFreq->SetCaption(Name);
 
-	if(wpnewPassive)
-		wpnewPassive->SetCaption(RadioPara.PassiveName);
 	_stprintf(Name,_T("%7.3f"),RadioPara.PassiveFrequency);
 	if(wpnewPassiveFreq)
 		wpnewPassiveFreq->SetCaption(Name);
