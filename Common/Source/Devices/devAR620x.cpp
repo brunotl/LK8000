@@ -296,11 +296,6 @@ uint8_t  szTmp[MAX_CMD_LEN];
         if(iAR620DebugLevel) StartupStore(_T(". AR620x Active Station %7.3fMHz %s%s"), Freq, StationName,NEWLINE);
         len = SetAR620xStation(szTmp ,ACTIVE_STATION, Freq, StationName);
         SendCommand(d, szTmp,len);
-        RadioPara.ActiveFrequency=  Freq;
-        if(StationName != NULL)
-          _sntprintf(RadioPara.ActiveName, NAME_SIZE,_T("%s"),StationName) ;
-
-
       }
   return(TRUE);
 }
@@ -315,9 +310,6 @@ uint8_t  szTmp[MAX_CMD_LEN];
       {
         len = SetAR620xStation(szTmp ,PASSIVE_STATION, Freq, StationName);
         SendCommand(d, szTmp,len);
-        RadioPara.PassiveFrequency =  Freq;
-        if(StationName != NULL)
-          _sntprintf(RadioPara.PassiveName, NAME_SIZE  ,_T("%s"),StationName) ;
         if(iAR620DebugLevel) StartupStore(_T(". AR620x Standby Station %7.3fMHz %s%s"), Freq, StationName,NEWLINE);
       }
   return(TRUE);
