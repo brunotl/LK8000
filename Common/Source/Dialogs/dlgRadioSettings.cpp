@@ -210,6 +210,14 @@ void SetDualModeCaption(WindowControl* pWnd) {
   }
 }
 
+static 
+void SetAutoCaption(const TCHAR* WndName, bool Auto) {
+  WindowControl* wAuto = wf->FindByName(WndName);
+  if(wAuto) {
+    wAuto->SetCaption(Auto ? MsgToken(1324) : _T(""));   //  M1324 "B>"
+  }
+}
+
 static int OnRemoteUpdate() {
   if(RadioPara.Changed) {
     RadioPara.Changed =FALSE;
@@ -245,22 +253,10 @@ static int OnUpdate(void) {
 
   SetVolumeCaption(wpnewVol);
 
-    WindowControl* wAuto = wf->FindByName(TEXT("cmdAutoActive"));
-    if(bAutoActive) {
-      wAuto->SetCaption(MsgToken(1324));   //  M1324 "B>"
-    } else  {
-      wAuto->SetCaption(_T(""));
-    }
-
-    wAuto = wf->FindByName(TEXT("cmdAutoPassive"));
-    if(bAutoPassiv) {
-      wAuto->SetCaption(MsgToken(1324));   //  M1324 "B>"
-    } else  {
-      wAuto->SetCaption(_T(""));
-    }
-
-
-return 0;
+  SetAutoCaption(TEXT("cmdAutoActive"), bAutoActive);
+  SetAutoCaption(TEXT("cmdAutoPassive"), bAutoPassiv);
+  
+  return 0;
 }
 
 
