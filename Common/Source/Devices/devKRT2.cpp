@@ -27,7 +27,18 @@
 //#define RESEND_ON_NAK       /* switch for command retry on transmission fail  */
 
 
-int KRT2_Convert_Answer(DeviceDescriptor_t *d, char *szCommand, int len);
+static int KRT2_Convert_Answer(DeviceDescriptor_t *d, char *szCommand, int len);
+
+static BOOL KRT2IsRadio(PDeviceDescriptor_t d);
+static BOOL KRT2PutVolume(PDeviceDescriptor_t d, int Volume) ;
+static BOOL KRT2PutSquelch(PDeviceDescriptor_t d, int Squelch) ;
+static BOOL KRT2PutFreqActive(PDeviceDescriptor_t d, double Freq, const TCHAR* StationName) ;
+static BOOL KRT2PutFreqStandby(PDeviceDescriptor_t d, double Freq,  const TCHAR* StationName) ;
+static BOOL KRT2StationSwap(PDeviceDescriptor_t d);
+static BOOL KRT2ParseString(PDeviceDescriptor_t d, char  *String, int len, NMEA_INFO *info);
+static BOOL KRT2Install(PDeviceDescriptor_t d);
+static BOOL KRT2RadioMode(PDeviceDescriptor_t d, int mode);
+
 
 #ifdef TESTBENCH
 int uiKRT2DebugLevel = 1;
@@ -271,20 +282,6 @@ BOOL KRT2RadioMode(PDeviceDescriptor_t d, int mode) {
       }
   return(TRUE);
 }
-
-
-BOOL KRT2RequestAllData(PDeviceDescriptor_t d) {
-/*  TCHAR  szTmp[255];
-
-  LockComm();
-  if(d != NULL)
-    if(!d->Disabled)
-      if (d->Com)
-        d->Com->WriteString(szTmp);
-  UnlockComm();*/
-  return(TRUE);
-}
-
 
 BOOL KRT2ParseString(DeviceDescriptor_t *d, char *String, int len, NMEA_INFO *GPS_INFO)
 //(PDeviceDescriptor_t d, TCHAR *String, NMEA_INFO *info)
