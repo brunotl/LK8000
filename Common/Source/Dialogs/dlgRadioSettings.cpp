@@ -143,28 +143,39 @@ static void OnCloseClicked(WndButton* pWnd){
   }
 }
 
+// update Station name with waypoint name.
+static void UpdateStationName() {
+    constexpr TCHAR unknown_name[] =_T("  ???  ");
 
-
-
-static int OnRemoteUpdate(void)
-{
-int Idx=0;
-  if(RadioPara.Changed)
-  {
-    RadioPara.Changed =FALSE;
-    TCHAR Name[250];
-    if( _tcslen(RadioPara.ActiveName) == 0)
-      Idx = SearchStation(RadioPara.ActiveFrequency);
-    if(Idx !=0)
-    {
-        if( HoldOff ==0)
-        {
-          HoldOff = HOLDOFF_TIME;
-          devPutFreqActive(RadioPara.ActiveFrequency, WayPointList[Idx].Name);
-        }
+    if( _tcslen(RadioPara.ActiveName) == 0) {
+      LockTaskData();
+      int Idx = SearchStation(RadioPara.ActiveFrequency);
+      const TCHAR* new_name = ((Idx != 0) ? WayPointList[Idx].Name : unknown_name);
+      devPutFreqActive(RadioPara.ActiveFrequency, new_name);
+      UnlockTaskData();
     }
+
+    if( _tcslen(RadioPara.PassiveName) == 0) {
+      LockTaskData();
+      int Idx = SearchStation(RadioPara.PassiveFrequency);
+      const TCHAR* new_name = ((Idx != 0) ? WayPointList[Idx].Name : unknown_name);
+      devPutFreqActive(RadioPara.PassiveFrequency, new_name);
+      UnlockTaskData();
+    }
+}
+
+
+
+
+static int OnRemoteUpdate() {
+  if(RadioPara.Changed) {
+    RadioPara.Changed =FALSE;
+
+    UpdateStationName();
+
+    TCHAR Name[250];
     TCHAR ActiveName[DEVICE_NAME_LEN+8];
-		CopyTruncateString(ActiveName, DEVICE_NAME_LEN, RadioPara.ActiveName);
+    CopyTruncateString(ActiveName, DEVICE_NAME_LEN, RadioPara.ActiveName);
 
     if(RadioPara.TX)
       _stprintf(Name,_T(">%s<"),ActiveName);
@@ -179,19 +190,8 @@ int Idx=0;
     if(wpnewActiveFreq)
       wpnewActiveFreq->SetCaption(Name);
 
-
-    if( _tcslen(RadioPara.PassiveName) == 0)
-      Idx = SearchStation(RadioPara.PassiveFrequency);
-    if(Idx !=0)
-    {
-        if( HoldOff ==0)
-        {
-          HoldOff = HOLDOFF_TIME;
-          devPutFreqStandby(RadioPara.PassiveFrequency, WayPointList[Idx].Name);
-        }
-    }
     TCHAR PassiveName[DEVICE_NAME_LEN+8];
-		CopyTruncateString(PassiveName, DEVICE_NAME_LEN, RadioPara.PassiveName );
+    CopyTruncateString(PassiveName, DEVICE_NAME_LEN, RadioPara.PassiveName );
 
     if(RadioPara.RX_standy)
       _stprintf(Name,_T("<%s>"),PassiveName);
