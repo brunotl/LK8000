@@ -314,8 +314,6 @@ static void OnActiveButton(WndButton* pWnd){
 	return;
       }
       devPutFreqActive(Frequency, WayPointList[res].Name);
-    	_tcscpy(RadioPara.ActiveName, WayPointList[res].Name);
-      RadioPara.ActiveFrequency = Frequency;
 
       ActiveRadioIndex = res;
     }
@@ -340,10 +338,6 @@ static void OnPassiveButton(WndButton* pWnd){
         return;
       }
       devPutFreqStandby(Frequency, WayPointList[res].Name);
-
-
-      _tcscpy(RadioPara.PassiveName, WayPointList[res].Name);
-      RadioPara.PassiveFrequency = Frequency;
       PassiveRadioIndex = res;
     }
     OnUpdate();
