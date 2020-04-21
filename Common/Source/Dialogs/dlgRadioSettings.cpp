@@ -191,6 +191,18 @@ void SetFrequencyCaption(WindowControl* pWnd, double Frequency) {
   }
 }
 
+void SetVolumeCaption(WindowControl* pWnd) {
+  TCHAR Name[64];
+  if (pWnd) {
+    if (VolMode == VOL)
+      _stprintf(Name, _T("V [%i]"), RadioPara.Volume);
+    else
+      _stprintf(Name, _T("S [%i]"), RadioPara.Squelch);
+    pWnd->SetCaption(Name);
+  }
+}
+
+
 static int OnRemoteUpdate() {
   if(RadioPara.Changed) {
     RadioPara.Changed =FALSE;
@@ -203,28 +215,14 @@ static int OnRemoteUpdate() {
     SetFrequencyCaption(wpnewActiveFreq, RadioPara.ActiveFrequency);
     SetFrequencyCaption(wpnewPassiveFreq, RadioPara.PassiveFrequency);
 
+    if( lVolume !=  RadioPara.Volume)
+          VolMode = VOL;
+    lSquelch =  RadioPara.Squelch;
+    lVolume =  RadioPara.Volume;
 
-    TCHAR Name[250];
-/*
-        if( lSquelch !=  RadioPara.Squelch)
-        {
-              VolMode = SQL;
-              SqCnt =0;
-        }
-*/
-        if( lVolume !=  RadioPara.Volume)
-              VolMode = VOL;
-        lSquelch =  RadioPara.Squelch;
-        lVolume =  RadioPara.Volume;
-        if(wpnewVol)
-        {
-      if(VolMode == VOL)
-            _stprintf(Name,_T("V[%i]"),RadioPara.Volume);
-      else
-        _stprintf(Name,_T("S [%i]"),RadioPara.Squelch);
-          wpnewVol->SetCaption(Name);
-        }
+    SetVolumeCaption(wpnewVol);
 
+        TCHAR Name[250];
         if(RadioPara.Dual)
           _stprintf(Name,_T("[Dual Off]"));
         else
@@ -244,18 +242,7 @@ static int OnUpdate(void) {
   SetFrequencyCaption(wpnewActiveFreq, RadioPara.ActiveFrequency);
   SetFrequencyCaption(wpnewPassiveFreq, RadioPara.PassiveFrequency);
 
-  TCHAR Name[DEVICE_NAME_LEN+8];
-
-    if(wpnewVol)
-    {
-        if(VolMode == VOL)   {
-           _stprintf(Name,_T("V%i"),lVolume);
-           wpnewVol->SetCaption(Name);
-        }    else      {
-        _stprintf(Name,_T("S%i"),lSquelch);
-          wpnewVol->SetCaption(Name);
-        }
-    }
+  SetVolumeCaption(wpnewVol);
 
     WindowControl* wAuto = wf->FindByName(TEXT("cmdAutoActive"));
     if(bAutoActive) {
