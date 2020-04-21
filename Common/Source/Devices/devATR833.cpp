@@ -187,9 +187,8 @@ uint8_t Arg[2];
       {
         Arg[0] = (int) Freq;
         Arg[1] =((int)((Freq*1000.0)+0.5)- Arg[0]  *1000) /5;
-
         Send_Command( d, 0x13 , 2, Arg);  // Send Activ
-        RadioPara.ActiveFrequency =  Freq;
+
         if(iATR833DebugLevel) StartupStore(_T(". ATR833 Active Station %7.3fMHz %i.%03i %s%s"), Freq, Arg[0], Arg[1]*5, StationName,NEWLINE);
       }
   return(TRUE);
@@ -206,10 +205,8 @@ uint8_t Arg[2];
         Arg[0] = (int) Freq;
         Arg[1] =((int)((Freq*1000.0)+0.5)- Arg[0]  *1000) /5;
         Send_Command( d, 0x12 , 2, Arg);  // Send Activ      
-        RadioPara.PassiveFrequency =  Freq;
-        if(StationName != NULL)
-          _sntprintf(RadioPara.PassiveName  ,NAME_SIZE,_T("%s"),StationName) ;
-         if(iATR833DebugLevel) StartupStore(_T(". ATR833 Standby Station %7.3fMHz %i.%03i %s%s"), Freq, Arg[0] , Arg[1]*5,  StationName,NEWLINE);
+
+        if(iATR833DebugLevel) StartupStore(_T(". ATR833 Standby Station %7.3fMHz %i.%03i %s%s"), Freq, Arg[0] , Arg[1]*5,  StationName,NEWLINE);
       }
   return(TRUE);
 }
