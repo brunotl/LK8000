@@ -1158,14 +1158,16 @@ BOOL devPutFreqSwap() {
 extern BOOL ValidFrequency(double Freq);
 
 BOOL devPutFreqActive(double Freq, const TCHAR* StationName) {
-if( ValidFrequency(Freq))
-{
-  RadioPara.ActiveFrequency=  Freq;
-	CopyTruncateString(RadioPara.ActiveName, NAME_SIZE, StationName);
-  return for_all_device(&DeviceDescriptor_t::PutFreqActive, Freq, StationName);
+  if( ValidFrequency(Freq)) {
+    RadioPara.ActiveFrequency=  Freq;
+    CopyTruncateString(RadioPara.ActiveName, NAME_SIZE, StationName);
+    return for_all_device(&DeviceDescriptor_t::PutFreqActive, Freq, StationName);
+  }
+  return false;
 }
-else
-	return false;
+
+BOOL devPutFreqActive(const TCHAR* Freq, const TCHAR* StationName) {
+  return devPutFreqActive(StrToDouble(Freq, nullptr),  StationName);
 }
 
 /**
@@ -1173,16 +1175,17 @@ else
  * @return FALSE if error on one device.
  */
 BOOL devPutFreqStandby(double Freq, const TCHAR* StationName) {
-if( ValidFrequency(Freq))
-{
-	RadioPara.PassiveFrequency=  Freq;
-	CopyTruncateString(RadioPara.PassiveName, NAME_SIZE, StationName);
-  return for_all_device(&DeviceDescriptor_t::PutFreqStandby, Freq, StationName);
-}
-else
-	return false;
+  if( ValidFrequency(Freq)) {
+    RadioPara.PassiveFrequency=  Freq;
+    CopyTruncateString(RadioPara.PassiveName, NAME_SIZE, StationName);
+    return for_all_device(&DeviceDescriptor_t::PutFreqStandby, Freq, StationName);
+  }
+  return false;
 }
 
+BOOL devPutFreqStandby(const TCHAR* Freq, const TCHAR* StationName) {
+  return devPutFreqStandby(StrToDouble(Freq, nullptr),  StationName);
+}
 
 static BOOL 
 FlarmDeclareSetGet(PDeviceDescriptor_t d, TCHAR *Buffer) {

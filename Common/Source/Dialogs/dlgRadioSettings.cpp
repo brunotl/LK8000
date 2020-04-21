@@ -300,22 +300,13 @@ TCHAR Name[250];
 
 
 static void OnActiveButton(WndButton* pWnd){
-
-  if (HoldOff ==0)
-  {
+  if (HoldOff ==0) {
     int res = dlgWayPointSelect(0, 90.0, 1, 3);
-    if(res > RESWP_END )
-    if(ValidWayPoint(res))
-    {
-      double  Frequency = StrToDouble(WayPointList[res].Freq,NULL);
-      if(!ValidFrequency(Frequency))
-      {
-   // 	DoStatusMessage(_T("No valid Frequency!") );
-	return;
+    if(ValidNotResWayPoint(res)) {
+      const WAYPOINT& wpt = WayPointList[res];
+      if(devPutFreqActive(wpt.Freq, wpt.Name)) {
+        ActiveRadioIndex = res;
       }
-      devPutFreqActive(Frequency, WayPointList[res].Name);
-
-      ActiveRadioIndex = res;
     }
     OnUpdate();
     HoldOff = HOLDOFF_TIME;
@@ -324,21 +315,13 @@ static void OnActiveButton(WndButton* pWnd){
 
 
 static void OnPassiveButton(WndButton* pWnd){
-  if (HoldOff ==0)
-  {
-   int res = dlgWayPointSelect(0, 90.0, 1,3);
-
-   if(res > RESWP_END )
-     if(ValidWayPoint(res))
-    {
-      double Frequency = StrToDouble(WayPointList[res].Freq,NULL);
-      if(Frequency < 100.0)
-      {
-     //    DoStatusMessage(_T("No valid Frequency!") );
-        return;
+  if (HoldOff ==0) {
+    int res = dlgWayPointSelect(0, 90.0, 1,3);
+    if(ValidNotResWayPoint(res)) {
+      const WAYPOINT& wpt = WayPointList[res];
+      if(devPutFreqStandby(wpt.Freq, wpt.Name)) {
+        PassiveRadioIndex = res;
       }
-      devPutFreqStandby(Frequency, WayPointList[res].Name);
-      PassiveRadioIndex = res;
     }
     OnUpdate();
     HoldOff = HOLDOFF_TIME;
@@ -395,17 +378,13 @@ TCHAR	Name[NAME_SIZE+1] = _T("  ???   ");
 
 static void OnRadioActiveAutoClicked(WndButton* pWnd){
   if(bAutoActive) {
-	  bAutoActive = false;
+    bAutoActive = false;
   } else {
-		bAutoActive = true;
-		if ( ValidWayPoint(BestAlternate))
-		{
-			double fFreq = StrToDouble(WayPointList[BestAlternate].Freq,NULL);
-
-			if(ValidFrequency(fFreq)) {
-				devPutFreqActive(	fFreq , WayPointList[BestAlternate].Name);
-			}
-		}
+    bAutoActive = true;
+    if ( ValidWayPoint(BestAlternate)) {
+      const WAYPOINT& wpt = WayPointList[BestAlternate];
+      devPutFreqActive(wpt.Freq, wpt.Name);
+    }
   }
   OnUpdate();
 }
@@ -414,16 +393,13 @@ static void OnRadioActiveAutoClicked(WndButton* pWnd){
 static void OnRadioStandbyAutoClicked(WndButton* pWnd)
 {
   if(bAutoPassiv) {
-	  bAutoPassiv = false;
+    bAutoPassiv = false;
   } else {
-	  bAutoPassiv = true;
-		if ( ValidWayPoint(BestAlternate))
-		{
-			double fFreq = StrToDouble(WayPointList[BestAlternate].Freq,NULL);
-			if(ValidFrequency(fFreq))	{
-				devPutFreqStandby(	fFreq, WayPointList[BestAlternate].Name);
-			}
-		}
+    bAutoPassiv = true;
+    if ( ValidWayPoint(BestAlternate)) {
+      const WAYPOINT& wpt = WayPointList[BestAlternate];
+      devPutFreqStandby(wpt.Freq, wpt.Name);
+    }
   }
   OnUpdate();
 }

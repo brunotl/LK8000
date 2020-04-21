@@ -113,15 +113,15 @@ static void OnTaskClicked(WndButton* pWnd){
 
 static void SetRadioFrequency(WndButton* pWnd, bool bActive)
 {
-  double Ferquency;
   LKASSERT(SelectedWaypoint>=0);
   LockTaskData();
-  LKASSERT(ValidWayPointFast(SelectedWaypoint));
-  Ferquency = StrToDouble(WayPointList[SelectedWaypoint].Freq,NULL);
-  if(bActive) {
-    devPutFreqActive(Ferquency, WayPointList[SelectedWaypoint].Name);
-  } else {
-    devPutFreqStandby(Ferquency, WayPointList[SelectedWaypoint].Name);
+  if(ValidWayPointFast(SelectedWaypoint)) {
+      const WAYPOINT& wpt = WayPointList[SelectedWaypoint];
+      if(bActive) {
+        devPutFreqActive(wpt.Freq, wpt.Name);
+      } else {
+        devPutFreqStandby(wpt.Freq, wpt.Name);
+      }
   }
 
 #ifdef STATUS_RADIO   // Status Popup not realy needed
@@ -133,6 +133,7 @@ static void SetRadioFrequency(WndButton* pWnd, bool bActive)
 
   retStatus=3;
 #endif
+  UnlockTaskData();
 
   if(pWnd) {
     WndForm * pForm = pWnd->GetParentWndForm();
@@ -140,7 +141,6 @@ static void SetRadioFrequency(WndButton* pWnd, bool bActive)
       pForm->SetModalResult(mrOK);
     }
   }
-  UnlockTaskData();
 }
 
 static void OnRadioFrequencyClicked(WndButton* pWnd){

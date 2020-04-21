@@ -581,18 +581,15 @@ void SearchBestAlternate(NMEA_INFO *Basic,
 	}
 
 
-		if(ValidWayPoint(BestAlternate))
-		{
-			double fFreq = StrToDouble(WayPointList[BestAlternate].Freq,NULL);
-			if(bAutoActive)			{
-				devPutFreqActive(fFreq, WayPointList[BestAlternate].Name);
-			}
-
-			if(bAutoPassiv) {
-				devPutFreqStandby(fFreq, WayPointList[BestAlternate].Name);
-			}
+	if(ValidWayPoint(BestAlternate)) {
+		const WAYPOINT& wpt = WayPointList[BestAlternate];
+		if(bAutoActive) {
+			devPutFreqActive(wpt.Freq, wpt.Name);
 		}
-
+		if(bAutoPassiv) {
+			devPutFreqStandby(wpt.Freq, wpt.Name);
+		}
+	}
   }
 } // end of search for the holy grail
 
