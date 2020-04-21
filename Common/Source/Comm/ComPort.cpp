@@ -154,9 +154,9 @@ void ComPort::ProcessChar(char c) {
         ComCheck_AddChar(c);
     }
 
-    if(/*RadioPara.Enabled && */devParseStream(devIdx, &c, 1, &GPS_INFO)) {
+    if(devParseStream(devIdx, &c, 1, &GPS_INFO)) {
         // if this port is used for stream device, leave immediately.
-  //       don't return mayby more devices on one Port (shared Port)
+        // don't return mayby more devices on one Port (shared Port)
     }
 
     // last char need to be reserved for '\0' for avoid buffer overflow
