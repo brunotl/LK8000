@@ -42,8 +42,7 @@
   extern void Globals_Init(void);
 #endif
 
-typedef struct _Radio_t
-{
+struct Radio_t {
 	double ActiveFrequency;    //active station frequency
 	double PassiveFrequency;   // passive (or standby) station frequency
 	TCHAR PassiveName[NAME_SIZE + 1] ;    // passive (or standby) station name
@@ -61,7 +60,7 @@ typedef struct _Radio_t
 	BOOL RX_standy;            // Radio reception on passive        (standby) station
 	BOOL lowBAT;               // Battery low flag                  (TRUE = Batt low)
 	BOOL TXtimeout;            // Timeout while transmission (2Min)
-}Radio_t;
+};
 
 GEXTERN bool MenuActive GEXTFALSE;
 GEXTERN Poco::Event dataTriggerEvent;
