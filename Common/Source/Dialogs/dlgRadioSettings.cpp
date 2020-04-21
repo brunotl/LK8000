@@ -182,6 +182,14 @@ void SetNameCaption(WindowControl* pWnd, const TCHAR* Name, bool Tx, bool Rx) {
   }
 }
 
+static
+void SetFrequencyCaption(WindowControl* pWnd, double Frequency) {
+  if(pWnd) {
+    TCHAR Name[64];
+    _stprintf(Name,_T("%6.03f"), Frequency);
+    pWnd->SetCaption(Name);
+  }
+}
 
 static int OnRemoteUpdate() {
   if(RadioPara.Changed) {
@@ -192,10 +200,11 @@ static int OnRemoteUpdate() {
     SetNameCaption(wpnewActive, RadioPara.ActiveName, RadioPara.TX, RadioPara.RX_active);
     SetNameCaption(wpnewPassive, RadioPara.PassiveName, false, RadioPara.RX_standy);
 
+    SetFrequencyCaption(wpnewActiveFreq, RadioPara.ActiveFrequency);
+    SetFrequencyCaption(wpnewPassiveFreq, RadioPara.PassiveFrequency);
+
+
     TCHAR Name[250];
-    _stprintf(Name,_T("%6.03f"),RadioPara.PassiveFrequency);
-    if(wpnewPassiveFreq)
-     wpnewPassiveFreq->SetCaption(Name);
 /*
         if( lSquelch !=  RadioPara.Squelch)
         {
@@ -232,17 +241,10 @@ static int OnUpdate(void) {
   SetNameCaption(wpnewActive, RadioPara.ActiveName, RadioPara.TX, RadioPara.RX_active);
   SetNameCaption(wpnewPassive, RadioPara.PassiveName, false, RadioPara.RX_standy);
 
+  SetFrequencyCaption(wpnewActiveFreq, RadioPara.ActiveFrequency);
+  SetFrequencyCaption(wpnewPassiveFreq, RadioPara.PassiveFrequency);
+
   TCHAR Name[DEVICE_NAME_LEN+8];
-
-
-	_stprintf(Name,_T("%7.3f"),RadioPara.ActiveFrequency);
-	if(wpnewActiveFreq)
-		wpnewActiveFreq->SetCaption(Name);
-
-	_stprintf(Name,_T("%7.3f"),RadioPara.PassiveFrequency);
-	if(wpnewPassiveFreq)
-		wpnewPassiveFreq->SetCaption(Name);
-
 
     if(wpnewVol)
     {
