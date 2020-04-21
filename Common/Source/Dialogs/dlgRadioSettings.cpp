@@ -20,19 +20,6 @@
 #include "NavFunctions.h"
 #include "Util/TruncateString.hpp"
 
-static WndForm *wf=NULL;
-
-static WndButton *wpnewActive     = NULL;
-static WndButton *wpnewActiveFreq = NULL;
-static WndButton *wpnewPassive    = NULL;
-static WndButton *wpnewPassiveFreq= NULL;
-static WndButton *wpnewDual       = NULL;
-static WndButton  *wpnewVolDwn  = NULL;
-static WndButton  *wpnewVolUp  = NULL;
-static WndButton  *wpnewExChg  = NULL;
-static WndButton *wpnewVol = NULL;
-//static WndProperty *wpVolume;
-
 static int SqCnt=0;
 static int HoldOff = 0;
 #define HOLDOFF_TIME  1 // x 0.5s
@@ -165,7 +152,8 @@ static void UpdateStationName() {
 }
 
 static
-void SetNameCaption(WindowControl* pWnd, const TCHAR* Name, bool Tx, bool Rx) {
+void SetNameCaption(WndForm* pForm, const TCHAR* WndName, const TCHAR* Name, bool Tx, bool Rx) {
+  WindowControl* pWnd = pForm->FindByName(WndName);
   if(pWnd) {
     TCHAR Name[DEVICE_NAME_LEN + 16];
     TCHAR ShortName[DEVICE_NAME_LEN];
@@ -183,7 +171,8 @@ void SetNameCaption(WindowControl* pWnd, const TCHAR* Name, bool Tx, bool Rx) {
 }
 
 static
-void SetFrequencyCaption(WindowControl* pWnd, double Frequency) {
+void SetFrequencyCaption(WndForm* pForm, const TCHAR* WndName, double Frequency) {
+  WindowControl* pWnd = pForm->FindByName(WndName);
   if(pWnd) {
     TCHAR Name[64];
     _stprintf(Name,_T("%6.03f"), Frequency);
@@ -191,9 +180,10 @@ void SetFrequencyCaption(WindowControl* pWnd, double Frequency) {
   }
 }
 
-void SetVolumeCaption(WindowControl* pWnd) {
-  TCHAR Name[64];
+void SetVolumeCaption(WndForm* pForm, const TCHAR* WndName) {
+  WindowControl* pWnd = pForm->FindByName(WndName);
   if (pWnd) {
+    TCHAR Name[64];
     if (VolMode == VOL)
       _stprintf(Name, _T("V [%i]"), RadioPara.Volume);
     else
@@ -203,7 +193,8 @@ void SetVolumeCaption(WindowControl* pWnd) {
 }
 
 static
-void SetDualModeCaption(WindowControl* pWnd) {
+void SetDualModeCaption(WndForm* pForm, const TCHAR* WndName) {
+  WindowControl* pWnd = pForm->FindByName(WndName);
   if(pWnd) {
     // TODO : use localized string
     pWnd->SetCaption(RadioPara.Dual ? _T("[Dual Off]") : _T("[Dual On]"));
@@ -211,50 +202,50 @@ void SetDualModeCaption(WindowControl* pWnd) {
 }
 
 static 
-void SetAutoCaption(const TCHAR* WndName, bool Auto) {
-  WindowControl* wAuto = wf->FindByName(WndName);
-  if(wAuto) {
-    wAuto->SetCaption(Auto ? MsgToken(1324) : _T(""));   //  M1324 "B>"
+void SetAutoCaption(WndForm* pForm, const TCHAR* WndName, bool Auto) {
+  WindowControl* pWnd = pForm->FindByName(WndName);
+  if(pWnd) {
+    pWnd->SetCaption(Auto ? MsgToken(1324) : _T(""));   //  M1324 "B>"
   }
 }
 
-static int OnRemoteUpdate() {
+static int OnRemoteUpdate(WndForm* pForm) {
   if(RadioPara.Changed) {
     RadioPara.Changed =FALSE;
 
     UpdateStationName();
 
-    SetNameCaption(wpnewActive, RadioPara.ActiveName, RadioPara.TX, RadioPara.RX_active);
-    SetNameCaption(wpnewPassive, RadioPara.PassiveName, false, RadioPara.RX_standy);
+    SetNameCaption(pForm, TEXT("cmdActive"), RadioPara.ActiveName, RadioPara.TX, RadioPara.RX_active);
+    SetNameCaption(pForm, TEXT("cmdPassive"), RadioPara.PassiveName, false, RadioPara.RX_standy);
 
-    SetFrequencyCaption(wpnewActiveFreq, RadioPara.ActiveFrequency);
-    SetFrequencyCaption(wpnewPassiveFreq, RadioPara.PassiveFrequency);
+    SetFrequencyCaption(pForm, TEXT("cmdActiveFreq"), RadioPara.ActiveFrequency);
+    SetFrequencyCaption(pForm, TEXT("cmdPassiveFreq"), RadioPara.PassiveFrequency);
 
     if( lVolume !=  RadioPara.Volume)
           VolMode = VOL;
     lSquelch =  RadioPara.Squelch;
     lVolume =  RadioPara.Volume;
 
-    SetVolumeCaption(wpnewVol);
-    SetDualModeCaption(wpnewDual);
+    SetVolumeCaption(pForm, TEXT("cmdVol"));
+    SetDualModeCaption(pForm, TEXT("cmdDual"));
 
     return 1;
   }
   return 0;
 }
 
-static int OnUpdate(void) {
+static int OnUpdate(WndForm* pForm) {
 
-  SetNameCaption(wpnewActive, RadioPara.ActiveName, RadioPara.TX, RadioPara.RX_active);
-  SetNameCaption(wpnewPassive, RadioPara.PassiveName, false, RadioPara.RX_standy);
+  SetNameCaption(pForm, TEXT("cmdActive"), RadioPara.ActiveName, RadioPara.TX, RadioPara.RX_active);
+  SetNameCaption(pForm, TEXT("cmdPassive"), RadioPara.PassiveName, false, RadioPara.RX_standy);
 
-  SetFrequencyCaption(wpnewActiveFreq, RadioPara.ActiveFrequency);
-  SetFrequencyCaption(wpnewPassiveFreq, RadioPara.PassiveFrequency);
+  SetFrequencyCaption(pForm, TEXT("cmdActiveFreq"), RadioPara.ActiveFrequency);
+  SetFrequencyCaption(pForm, TEXT("cmdPassiveFreq"), RadioPara.PassiveFrequency);
 
-  SetVolumeCaption(wpnewVol);
+  SetVolumeCaption(pForm, TEXT("cmdVol"));
 
-  SetAutoCaption(TEXT("cmdAutoActive"), bAutoActive);
-  SetAutoCaption(TEXT("cmdAutoPassive"), bAutoPassiv);
+  SetAutoCaption(pForm, TEXT("cmdAutoActive"), bAutoActive);
+  SetAutoCaption(pForm, TEXT("cmdAutoPassive"), bAutoPassiv);
   
   return 0;
 }
@@ -263,7 +254,7 @@ static int OnUpdate(void) {
 static void OnDualButton(WndButton* pWnd){
   RadioPara.Dual = !RadioPara.Dual;
   devPutRadioMode((int)RadioPara.Dual);
-  SetDualModeCaption(wpnewDual);
+  SetDualModeCaption(pWnd->GetParentWndForm(), _T("cmdDual"));
 }
 
 
@@ -274,7 +265,7 @@ static void OnActiveButton(WndButton* pWnd){
       const WAYPOINT& wpt = WayPointList[res];
       devPutFreqActive(wpt.Freq, wpt.Name);
     }
-    OnUpdate();
+    OnUpdate(pWnd->GetParentWndForm());
     HoldOff = HOLDOFF_TIME;
   }
 }
@@ -287,7 +278,7 @@ static void OnPassiveButton(WndButton* pWnd){
       const WAYPOINT& wpt = WayPointList[res];
       devPutFreqStandby(wpt.Freq, wpt.Name);
     }
-    OnUpdate();
+    OnUpdate(pWnd->GetParentWndForm());
     HoldOff = HOLDOFF_TIME;
   }
 }
@@ -311,7 +302,7 @@ _stprintf(szFreq, _T("%7.3f"),RadioPara.ActiveFrequency);
       }
       devPutFreqActive(Frequency,Name);
     }
-    OnUpdate();
+    OnUpdate(pWnd->GetParentWndForm());
 }
 
 static void OnPassiveFreq(WndButton* pWnd){
@@ -333,7 +324,7 @@ TCHAR	Name[NAME_SIZE+1] = _T("  ???   ");
      }
      devPutFreqStandby(Frequency,Name);
    }
-   OnUpdate();
+   OnUpdate(pWnd->GetParentWndForm());
 }
 
 
@@ -347,7 +338,7 @@ static void OnRadioActiveAutoClicked(WndButton* pWnd){
       devPutFreqActive(wpt.Freq, wpt.Name);
     }
   }
-  OnUpdate();
+  OnUpdate(pWnd->GetParentWndForm());
 }
 
 
@@ -362,13 +353,13 @@ static void OnRadioStandbyAutoClicked(WndButton* pWnd)
       devPutFreqStandby(wpt.Freq, wpt.Name);
     }
   }
-  OnUpdate();
+  OnUpdate(pWnd->GetParentWndForm());
 }
 
 
 static void OnExchange(WndButton* pWnd){
   devPutFreqSwap();
-  OnUpdate();
+  OnUpdate(pWnd->GetParentWndForm());
 }
 
 static void SendVolSq(void){
@@ -387,7 +378,7 @@ static void OnMuteButton(WndButton* pWnd){
       case VOL: VolMode = SQL;  SqCnt =0; break;
       case SQL: VolMode = VOL;  SqCnt =11;break;
     }
-    OnUpdate();
+    OnUpdate(pWnd->GetParentWndForm());
 }
 
 
@@ -416,7 +407,7 @@ static void OnVolUpButton(WndButton* pWnd){
         HoldOff = HOLDOFF_TIME;
       }
     }
-    OnUpdate();
+    OnUpdate(pWnd->GetParentWndForm());
 }
 
 
@@ -448,7 +439,7 @@ static void OnVolDownButton(WndButton* pWnd){
 	  }
   }
 
-  OnUpdate();
+  OnUpdate(pWnd->GetParentWndForm());
   SendVolSq();
   HoldOff = HOLDOFF_TIME;
 }
@@ -464,12 +455,12 @@ static bool OnTimerNotify(WndForm* pWnd) {
   {
     VolMode = VOL;
     SqCnt = 0;
-    OnUpdate();
+    OnUpdate(pWnd);
   }
   if (HoldOff >0)
     HoldOff--;
   else
-    OnRemoteUpdate();
+    OnRemoteUpdate(pWnd);
 
 
   return 0;
@@ -477,7 +468,6 @@ static bool OnTimerNotify(WndForm* pWnd) {
 
 
 static CallBackTableEntry_t CallBackTable[]={
-
   ClickNotifyCallbackEntry(OnDualButton),
   ClickNotifyCallbackEntry(OnActiveButton),
   ClickNotifyCallbackEntry(OnActiveFreq),
@@ -488,6 +478,15 @@ static CallBackTableEntry_t CallBackTable[]={
   ClickNotifyCallbackEntry(OnCloseClicked),
   ClickNotifyCallbackEntry(OnRadioActiveAutoClicked),
   ClickNotifyCallbackEntry(OnRadioStandbyAutoClicked),
+  ClickNotifyCallbackEntry(OnActiveButton),
+  ClickNotifyCallbackEntry(OnActiveFreq),
+  ClickNotifyCallbackEntry(OnPassiveButton),
+  ClickNotifyCallbackEntry(OnPassiveFreq),
+  ClickNotifyCallbackEntry(OnMuteButton),
+  ClickNotifyCallbackEntry(OnDualButton),
+  ClickNotifyCallbackEntry(OnVolDownButton),
+  ClickNotifyCallbackEntry(OnVolUpButton),
+  ClickNotifyCallbackEntry(OnExchange),
   EndCallBackEntry()
 };
 
@@ -495,59 +494,16 @@ static CallBackTableEntry_t CallBackTable[]={
 void dlgRadioSettingsShowModal(void){
   SHOWTHREAD(_T("dlgRadioSettingsShowModal"));
 
-//  WndProperty *wp;
-//  int ival;
-
-    wf = dlgLoadFromXML(CallBackTable, IDR_XML_RADIOSETTINGS );
-  if (!wf) return;
+  std::unique_ptr<WndForm> pForm(dlgLoadFromXML(CallBackTable, IDR_XML_RADIOSETTINGS ));
+  if (!pForm) return;
 
   VolMode = VOL; // start with volume
 
-  if (wf) {
-    wpnewActive = (WndButton*)wf->FindByName(TEXT("cmdActive"));
-    LKASSERT( wpnewActive !=NULL);
-    wpnewActive->SetOnClickNotify(OnActiveButton);
-
-    wpnewActiveFreq = (WndButton*)wf->FindByName(TEXT("cmdActiveFreq"));
-    LKASSERT( wpnewActiveFreq !=NULL);
-    wpnewActiveFreq->SetOnClickNotify(OnActiveFreq);
-
-    wpnewPassive  = (WndButton*)wf->FindByName(TEXT("cmdPassive"));
-    LKASSERT(   wpnewPassive   !=NULL)
-    wpnewPassive->SetOnClickNotify(OnPassiveButton);
-
-    wpnewPassiveFreq = (WndButton*)wf->FindByName(TEXT("cmdPassiveFreq"));
-    LKASSERT(   wpnewPassiveFreq   !=NULL)
-    wpnewPassiveFreq->SetOnClickNotify(OnPassiveFreq);
-
-   wpnewVol  = (WndButton*)wf->FindByName(TEXT("cmdVol"));
-    LKASSERT(   wpnewVol   !=NULL)
-    wpnewVol->SetOnClickNotify(OnMuteButton);
-
-   wpnewDual  = (WndButton*)wf->FindByName(TEXT("cmdDual"));
-   LKASSERT(   wpnewDual   !=NULL)
-   wpnewDual->SetOnClickNotify(OnDualButton);
-
-   wpnewVolDwn = ((WndButton *)wf->FindByName(TEXT("cmdVolDown")));
-   LKASSERT(   wpnewVolDwn   !=NULL)
-   wpnewVolDwn->SetOnClickNotify(OnVolDownButton);
-
-   wpnewVolUp =     ((WndButton *)wf->FindByName(TEXT("cmdVolUp")));
-   LKASSERT(   wpnewVolUp   !=NULL)
-   wpnewVolUp->SetOnClickNotify(OnVolUpButton);
-
-   wpnewExChg  =        ((WndButton *)wf->FindByName(TEXT("cmdXchange")));
-   LKASSERT(   wpnewExChg    !=NULL)
-   wpnewExChg ->SetOnClickNotify(OnExchange);
-
-   wf->SetTimerNotify(300, OnTimerNotify);
- //  RadioPara.Changed = true;
-   OnUpdate();
-   wf->ShowModal();
 
 
-    delete wf;
-  }
-  wf = NULL;
-  return ;
+  pForm->SetTimerNotify(300, OnTimerNotify);
+  OnUpdate(pForm.get());
+
+  pForm->ShowModal();
+
 }
