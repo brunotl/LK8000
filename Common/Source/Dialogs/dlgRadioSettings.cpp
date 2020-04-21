@@ -202,6 +202,13 @@ void SetVolumeCaption(WindowControl* pWnd) {
   }
 }
 
+static
+void SetDualModeCaption(WindowControl* pWnd) {
+  if(pWnd) {
+    // TODO : use localized string
+    pWnd->SetCaption(RadioPara.Dual ? _T("[Dual Off]") : _T("[Dual On]"));
+  }
+}
 
 static int OnRemoteUpdate() {
   if(RadioPara.Changed) {
@@ -221,17 +228,11 @@ static int OnRemoteUpdate() {
     lVolume =  RadioPara.Volume;
 
     SetVolumeCaption(wpnewVol);
+    SetDualModeCaption(wpnewDual);
 
-        TCHAR Name[250];
-        if(RadioPara.Dual)
-          _stprintf(Name,_T("[Dual Off]"));
-        else
-          _stprintf(Name,_T("[Dual On]"));
-        if(wpnewDual)
-              wpnewDual->SetCaption(Name);
-      return 1;
-    }
-    return 0;
+    return 1;
+  }
+  return 0;
 }
 
 static int OnUpdate(void) {
@@ -264,17 +265,9 @@ return 0;
 
 
 static void OnDualButton(WndButton* pWnd){
-TCHAR Name[250];
-
-    RadioPara.Dual = !RadioPara.Dual;
-    devPutRadioMode((int)RadioPara.Dual);
-    if(RadioPara.Dual)
-      _stprintf(Name,_T("Dual Off"));
-    else
-      _stprintf(Name,_T("Dual On"));
-    if(wpnewDual)
-       wpnewDual->SetCaption(Name);
-
+  RadioPara.Dual = !RadioPara.Dual;
+  devPutRadioMode((int)RadioPara.Dual);
+  SetDualModeCaption(wpnewDual);
 }
 
 
