@@ -33,8 +33,6 @@ static WndButton  *wpnewExChg  = NULL;
 static WndButton *wpnewVol = NULL;
 //static WndProperty *wpVolume;
 
-static int ActiveRadioIndex=-1;
-static int PassiveRadioIndex=-1;
 static int SqCnt=0;
 static int HoldOff = 0;
 #define HOLDOFF_TIME  1 // x 0.5s
@@ -159,7 +157,6 @@ int Idx=0;
       Idx = SearchStation(RadioPara.ActiveFrequency);
     if(Idx !=0)
     {
-        ActiveRadioIndex = Idx;
         if( HoldOff ==0)
         {
           HoldOff = HOLDOFF_TIME;
@@ -187,7 +184,6 @@ int Idx=0;
       Idx = SearchStation(RadioPara.PassiveFrequency);
     if(Idx !=0)
     {
-        PassiveRadioIndex = Idx;
         if( HoldOff ==0)
         {
           HoldOff = HOLDOFF_TIME;
@@ -304,9 +300,7 @@ static void OnActiveButton(WndButton* pWnd){
     int res = dlgWayPointSelect(0, 90.0, 1, 3);
     if(ValidNotResWayPoint(res)) {
       const WAYPOINT& wpt = WayPointList[res];
-      if(devPutFreqActive(wpt.Freq, wpt.Name)) {
-        ActiveRadioIndex = res;
-      }
+      devPutFreqActive(wpt.Freq, wpt.Name);
     }
     OnUpdate();
     HoldOff = HOLDOFF_TIME;
@@ -319,9 +313,7 @@ static void OnPassiveButton(WndButton* pWnd){
     int res = dlgWayPointSelect(0, 90.0, 1,3);
     if(ValidNotResWayPoint(res)) {
       const WAYPOINT& wpt = WayPointList[res];
-      if(devPutFreqStandby(wpt.Freq, wpt.Name)) {
-        PassiveRadioIndex = res;
-      }
+      devPutFreqStandby(wpt.Freq, wpt.Name);
     }
     OnUpdate();
     HoldOff = HOLDOFF_TIME;
@@ -344,8 +336,6 @@ _stprintf(szFreq, _T("%7.3f"),RadioPara.ActiveFrequency);
       if(iIdx != 0)
       {
     	 	_tcscpy(Name, WayPointList[iIdx].Name);
-        ActiveRadioIndex = iIdx;
-
       }
       devPutFreqActive(Frequency,Name);
     }
@@ -368,7 +358,6 @@ TCHAR	Name[NAME_SIZE+1] = _T("  ???   ");
      if(iIdx != 0)
      {
      	 _tcscpy(Name, WayPointList[iIdx].Name);
-			 PassiveRadioIndex = iIdx;
      }
      devPutFreqStandby(Frequency,Name);
    }
@@ -406,14 +395,10 @@ static void OnRadioStandbyAutoClicked(WndButton* pWnd)
 
 
 static void OnExchange(WndButton* pWnd){
-int tmp;
 TCHAR szTempStr[NAME_SIZE+1];
 double fTmp;
 // if (HoldOff ==0)
  {
-   tmp =   ActiveRadioIndex;
-   ActiveRadioIndex = PassiveRadioIndex;
-   PassiveRadioIndex = tmp;
    devPutFreqSwap();
     fTmp =   RadioPara.ActiveFrequency;
     RadioPara.ActiveFrequency = RadioPara.PassiveFrequency;
