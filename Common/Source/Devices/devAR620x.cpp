@@ -51,7 +51,18 @@ IntConvertStruct sStatus;
 
 volatile BOOL bSending = false;
 //volatile BOOL bReceiving = false;
-int AR620x_Convert_Answer(DeviceDescriptor_t *d, uint8_t  *szCommand, int len, uint16_t CRC);
+static int AR620x_Convert_Answer(DeviceDescriptor_t *d, uint8_t  *szCommand, int len, uint16_t CRC);
+
+static BOOL AR620xIsRadio(PDeviceDescriptor_t d);
+static BOOL AR620xPutVolume(PDeviceDescriptor_t d, int Volume) ;
+static BOOL AR620xPutSquelch(PDeviceDescriptor_t d, int Squelch) ;
+static BOOL AR620xPutFreqActive(PDeviceDescriptor_t d, double Freq, const TCHAR* StationName) ;
+static BOOL AR620xPutFreqStandby(PDeviceDescriptor_t d, double Freq,  const TCHAR* StationName) ;
+static BOOL AR620xStationSwap(PDeviceDescriptor_t d);
+static BOOL AR620xParseString(PDeviceDescriptor_t d, char  *String, int len, NMEA_INFO *info);
+static BOOL AR620xInstall(PDeviceDescriptor_t d);
+static BOOL AR620xRadioMode(PDeviceDescriptor_t d, int mode);
+
 
 BOOL AR620xInstall(PDeviceDescriptor_t d){
 
