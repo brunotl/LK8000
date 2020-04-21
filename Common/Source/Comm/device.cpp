@@ -1144,9 +1144,10 @@ BOOL devPutRadioMode(int mode) {
  * @return FALSE if error on one device.
  */
 BOOL devPutFreqSwap() {
+  std::swap(RadioPara.ActiveFrequency, RadioPara.PassiveFrequency);
+  std::swap(RadioPara.ActiveName, RadioPara.PassiveName);
   return for_all_device(&DeviceDescriptor_t::StationSwap);
-
-}
+}  
 
 
 

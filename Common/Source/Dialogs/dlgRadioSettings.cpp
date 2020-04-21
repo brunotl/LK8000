@@ -395,19 +395,8 @@ static void OnRadioStandbyAutoClicked(WndButton* pWnd)
 
 
 static void OnExchange(WndButton* pWnd){
-TCHAR szTempStr[NAME_SIZE+1];
-double fTmp;
-// if (HoldOff ==0)
- {
-   devPutFreqSwap();
-    fTmp =   RadioPara.ActiveFrequency;
-    RadioPara.ActiveFrequency = RadioPara.PassiveFrequency;
-    RadioPara.PassiveFrequency=  fTmp;
-    _tcscpy( szTempStr,  RadioPara.ActiveName);
-    _tcscpy(  RadioPara.ActiveName, RadioPara.PassiveName);
-    _tcscpy(  RadioPara.PassiveName, szTempStr);
-    OnUpdate();
-  }
+  devPutFreqSwap();
+  OnUpdate();
 }
 
 static void SendVolSq(void){
