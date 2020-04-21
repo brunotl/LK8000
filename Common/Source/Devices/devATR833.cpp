@@ -412,7 +412,6 @@ TCHAR szTempStr[180] = _T("");
 uint16_t processed=0;
 LKASSERT(szCommand !=NULL);
 LKASSERT(d !=NULL);
- double fTmp;
 int Idx=0;
   switch (szCommand[0])
   {  
@@ -430,16 +429,9 @@ int Idx=0;
     /*****************************************************************************************/
     case 0x11:               // Swap Frequency
       RadioPara.Changed = true;
-       fTmp =  RadioPara.PassiveFrequency;
-      RadioPara.PassiveFrequency =  RadioPara.ActiveFrequency;
-      RadioPara.ActiveFrequency = fTmp;
-      Idx = SearchStation(RadioPara.ActiveFrequency);
-      if(Idx != 0)
-        _sntprintf(RadioPara.ActiveName,NAME_SIZE,_T("%s"),WayPointList[Idx].Name);
-      Idx = SearchStation(RadioPara.PassiveFrequency);
-      if(Idx != 0)
-        _sntprintf(RadioPara.PassiveName,NAME_SIZE,_T("%s"),WayPointList[Idx].Name);
-      if (iATR833DebugLevel) StartupStore(_T("ATR833 Swap %s"),    NEWLINE);
+      std::swap(RadioPara.ActiveFrequency, RadioPara.PassiveFrequency);
+      std::swap(RadioPara.ActiveName, RadioPara.PassiveName);
+      if (iATR833DebugLevel) StartupStore(_T("ATR833 Swap"));
       processed  = 1;
     break;
     /*****************************************************************************************/
