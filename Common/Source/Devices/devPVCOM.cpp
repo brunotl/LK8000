@@ -13,7 +13,35 @@
 #include "device.h"
 #include "devBase.h"
 
-bool PVCOM_ProcessPEYI(PDeviceDescriptor_t d, const TCHAR *, NMEA_INFO *);
+static bool PVCOM_ProcessPEYI(PDeviceDescriptor_t d, const TCHAR *, NMEA_INFO *);
+static int PVCOMNMEAddCheckSumStrg( TCHAR szStrg[] );
+
+static BOOL PVCOMIsRadio(PDeviceDescriptor_t d);
+static BOOL PVCOMPutVolume(PDeviceDescriptor_t d, int Volume) ;
+static BOOL PVCOMPutSquelch(PDeviceDescriptor_t d, int Squelch) ;
+static BOOL PVCOMPutFreqActive(PDeviceDescriptor_t d, double Freq, const TCHAR* StationName) ;
+static BOOL PVCOMPutFreqStandby(PDeviceDescriptor_t d, double Freq,  const TCHAR* StationName) ;
+static BOOL PVCOMStationSwap(PDeviceDescriptor_t d);
+static BOOL PVCOMRequestAllData(PDeviceDescriptor_t d) ;
+static BOOL PVCOMParseString(PDeviceDescriptor_t d, TCHAR *String, NMEA_INFO *info);
+static BOOL PVCOMInstall(PDeviceDescriptor_t d);
+static BOOL PVCOMRadioMode(PDeviceDescriptor_t d, int mode);
+
+struct TSpaceInfo {
+  double eulerRoll;
+  double eulerPitch;
+  double rollRate;
+  double pitchRate;
+  double yawRate;
+  double accelX;
+  double accelY;
+  double accelZ;
+  double virosbandometer;
+  double trueHeading;
+  double magneticHeading;
+  double localDeclination;
+};
+
 
 void ReplaceNMEAControlChars(TCHAR *String)
 {
