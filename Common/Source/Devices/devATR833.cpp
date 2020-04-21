@@ -32,8 +32,21 @@ int DeviceTimeout = 2;
 //#define RESEND_ON_NAK       /* switch for command retry on transmission fail  */
 #define BIT(n) (1 << (n))
 
-bool Send_Command(PDeviceDescriptor_t d, uint8_t Command, uint8_t Len, uint8_t *uiArg);
-int ATR833_Convert_Answer(DeviceDescriptor_t *d, uint8_t *szCommand, int len);
+static bool Send_Command(PDeviceDescriptor_t d, uint8_t Command, uint8_t Len, uint8_t *uiArg);
+static int ATR833_Convert_Answer(DeviceDescriptor_t *d, uint8_t *szCommand, int len);
+
+static BOOL ATR833IsRadio(PDeviceDescriptor_t d);
+static BOOL ATR833PutVolume(PDeviceDescriptor_t d, int Volume) ;
+static BOOL ATR833PutSquelch(PDeviceDescriptor_t d, int Squelch) ;
+static BOOL ATR833PutFreqActive(PDeviceDescriptor_t d, double Freq, const TCHAR* StationName) ;
+static BOOL ATR833PutFreqStandby(PDeviceDescriptor_t d, double Freq,  const TCHAR* StationName) ;
+static BOOL ATR833StationSwap(PDeviceDescriptor_t d);
+static BOOL ATR833RequestAllData(PDeviceDescriptor_t d) ;
+static BOOL ATR833ParseString(PDeviceDescriptor_t d, char  *String, int len, NMEA_INFO *info);
+static BOOL ATR833Install(PDeviceDescriptor_t d);
+static BOOL ATR833RadioMode(PDeviceDescriptor_t d, int mode);
+
+
 #ifdef TESTBENCH
 int  iATR833DebugLevel = 2;
 #else
