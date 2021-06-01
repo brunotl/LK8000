@@ -13,10 +13,12 @@
 #include <oboe/Oboe.h>
 #include <Form/Form.hpp>
 #include "Java/String.hxx"
+#include "utils/fdistream.h"
 
 Java::TrivialClass LK8000Activity::cls;
 jmethodID LK8000Activity::check_permissions_method;
 jmethodID LK8000Activity::scan_qrcode_method;
+jmethodID LK8000Activity::select_task_file_method;
 jmethodID LK8000Activity::share_file_method;
 
 LK8000Activity* LK8000Activity::activity_instance = nullptr;
@@ -29,6 +31,9 @@ void LK8000Activity::Initialise(JNIEnv *env, jobject obj) {
 
   scan_qrcode_method = env->GetMethodID(cls, "scanQRCode", "()V");
   assert(scan_qrcode_method);
+
+  select_task_file_method = env->GetMethodID(cls, "selectTaskFile", "()V");
+  assert(select_task_file_method);
 
   share_file_method = env->GetMethodID(cls, "shareFile", "(Ljava/lang/String;)V");
   assert(share_file_method);
@@ -85,6 +90,10 @@ void LK8000Activity::ScanQRCode() {
   Java::GetEnv()->CallVoidMethod(obj, scan_qrcode_method);
 }
 
+void LK8000Activity::SelectTaskFile() {
+    JNIEnv *env = Java::GetEnv();
+    env->CallVoidMethod(obj, select_task_file_method);
+}
 void LK8000Activity::ShareFile(const char *path) {
   JNIEnv *env = Java::GetEnv();
 
@@ -151,5 +160,52 @@ Java_org_LK8000_LK8000_loadQRCodeData(JNIEnv *env, jclass clazz, jstring data_st
         }
       }
     }
+  }
+}
+
+namespace {
+  class unique_fd {
+  public:
+    unique_fd() = delete;
+    unique_fd(const unique_fd&) = delete;
+    unique_fd& operator=(const unique_fd&) = delete;
+
+    explicit unique_fd(int fd) : _fd(fd) {}
+
+    unique_fd(unique_fd&& uf) noexcept {
+      _fd = uf._fd;
+      uf._fd = -1;
+    }
+
+    ~unique_fd() {
+      if (_fd != -1) {
+        close(_fd);
+      }
+    }
+
+    explicit operator bool() const {
+      return _fd != -1;
+    }
+
+    operator int () const {
+      return _fd;
+    }
+
+  private:
+    int _fd;
+  };
+
+} // namespace
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_LK8000_LK8000_loadTaskFile(JNIEnv *env, jclass clazz, jint fd, jstring filename) {
+  std::string name = Java::String::ToString(env, filename);
+  unique_fd file_descriptor(fd);
+  fdistream istream(file_descriptor);
+
+  std::string line;
+  while (std::getline(istream, line)) {
+    StartupStore("%s", line.c_str());
   }
 }
