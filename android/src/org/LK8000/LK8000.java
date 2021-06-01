@@ -26,6 +26,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -34,6 +35,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -42,7 +44,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
+import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.InputDevice;
@@ -54,6 +58,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ServiceCompat;
 import androidx.core.content.ContextCompat;
@@ -61,6 +66,7 @@ import androidx.core.content.ContextCompat;
 import org.LK8000.QRCode.QRCodeScannerActivity;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -468,26 +474,72 @@ public class LK8000 extends Activity {
   private static native void setDefaultStreamValues(int SampleRate, int FramesPerBurst);
 
   private final int SCAN_QRCODE = 0;
+  private final int SELECT_TASK_FILE = 1;
 
   void scanQRCode() {
     Intent intent = new Intent(this, QRCodeScannerActivity.class);
     startActivityForResult(intent, SCAN_QRCODE);
   }
 
+  void selectTaskFile() {
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+      Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+      intent.addCategory(Intent.CATEGORY_OPENABLE);
+      intent.setType("*/*");
+      startActivityForResult(intent, SELECT_TASK_FILE);
+    }
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+  public String getFilename(Uri uri) {
+    String fileName = null;
+    String scheme = uri.getScheme();
+    if (scheme.equals("file")) {
+      fileName = uri.getLastPathSegment();
+    } else if (scheme.equals("content")) {
+      String[] proj = {DocumentsContract.Document.COLUMN_DISPLAY_NAME};
+      Cursor cursor = getContentResolver().query(uri, proj, null, null, null);
+      if (cursor != null && cursor.getCount() != 0) {
+        int columnIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME);
+        cursor.moveToFirst();
+        fileName = cursor.getString(columnIndex);
+        cursor.close();
+      }
+    }
+    return fileName;
+  }
+
   @Override
   protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
+    if (data == null) {
+      return;
+    }
     if (requestCode == SCAN_QRCODE) {
-      if (resultCode == Activity.RESULT_OK && data != null) {
+      if (resultCode == Activity.RESULT_OK) {
         String data_string = data.getStringExtra("data");
         if (data_string != null) {
           loadQRCodeData(data_string);
+        }
+      }
+    } else if (requestCode == SELECT_TASK_FILE) {
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+
+        Uri uri = data.getData();
+        ContentResolver cr = getContentResolver();
+        try {
+          String filename = getFilename(uri);
+          ParcelFileDescriptor pfd = cr.openFileDescriptor(uri, "r");
+          loadTaskFile(pfd.detachFd(), filename);
+        } catch (FileNotFoundException e) {
+          e.printStackTrace();
         }
       }
     }
   }
 
   private static native void loadQRCodeData(String data_string);
+  private static native void loadTaskFile(int fd, String filename);
 
   void shareFile(String path) {
     try {

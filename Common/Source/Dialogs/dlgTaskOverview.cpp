@@ -515,7 +515,6 @@ static void OnSaveClicked(WndButton* pWnd){
 
 
 static void OnLoadClicked(WndButton* pWnd){ // 091216
-  TCHAR file_name[MAX_PATH];
   WndForm* pForm = pWnd->GetParentWndForm();
   WndProperty* wp = pForm->FindByName<WndProperty>(TEXT("prpFile"));
   if (!wp) return;
@@ -524,65 +523,62 @@ static void OnLoadClicked(WndButton* pWnd){ // 091216
 
   DataFieldFileReader* dfe = (DataFieldFileReader*) wp->GetDataField();
 
-  int file_index = dfe->GetAsInteger();
   LPCTSTR szFileName = dfe->GetPathFile();
+  if (!szFileName || !szFileName[0]) {
+    return;
+  }
+
+  if (ValidTaskPoint(ActiveTaskPoint) && ValidTaskPoint(1)) {
+    TCHAR msg[180];
+    _sntprintf(msg,180, TEXT("%s %s ?"), MsgToken(891), MsgToken(907)); // Clear old task and load task
+    if(MessageBoxX(msg, _T(" "), mbYesNo) != IdYes) {
+      return;
+    }
+  }
 
 #ifdef ANDROID
   if (_tcscmp(szFileName, _T("QRCODE")) == 0) {
-
-    bool load_task = true;
-    if (ValidTaskPoint(ActiveTaskPoint) && ValidTaskPoint(1)) {
-      TCHAR msg[180];
-      _sntprintf(msg,180, TEXT("%s %s ?"), MsgToken<891>(), MsgToken<907>()); // Clear old task and load task
-      if (MessageBoxX(msg, _T(" "), mbYesNo) != IdYes) {
-        load_task = false;
-      }
+    LK8000Activity* activity = LK8000Activity::Get();
+    if(activity) {
+      activity->ScanQRCode();
     }
+    return;
+  }
 
-    if (load_task) {
-      LK8000Activity* activity = LK8000Activity::Get();
-      assert(activity);
-      if(activity) {
-        activity->ScanQRCode();
-        return;
-      }
+  if (_tcscmp(szFileName, _T("BROWSE")) == 0) {
+    LK8000Activity* activity = LK8000Activity::Get();
+    if(activity) {
+      activity->SelectTaskFile();
     }
     return;
   }
 #endif
 
   LPCTSTR wextension = _tcsrchr(szFileName, _T('.'));
+  if(wextension) {
+    TCHAR szFilePath[MAX_PATH];
+    LocalPath(szFilePath, _T(LKD_TASKS), szFileName);
 
-  if (file_index>0) {
-    if (ValidTaskPoint(ActiveTaskPoint) && ValidTaskPoint(1) && (_tcsicmp(wextension,_T(LKS_WP_CUP))!=0)) {
-      _stprintf(file_name, TEXT("%s '%s' ?"), MsgToken<891>(), dfe->GetAsString()); // Clear old task and load
-      if(MessageBoxX(file_name, _T(" "), mbYesNo) == IdNo) {
-        return;
-      }
+    bool bOK = false;
+    if(_tcsicmp(wextension,_T(LKS_TSK))==0) {
+      bOK = CTaskFileHelper().Load(szFilePath);
+    }
+    else if (_tcsicmp(wextension,_T(LKS_WP_CUP))==0) {
+      bOK = LoadCupTask(szFilePath);
+    }
+    else if (_tcsicmp(wextension,_T(LKS_WP_GPX))==0) {
+      bOK = LoadGpxTask(szFilePath);
+    }
+    else if (_tcsicmp(wextension,_T(LKS_XCTSK))==0) {
+      bOK = LoadXctrackTaskFile(szFilePath);
     }
 
-    if(wextension) {
-      TCHAR szFilePath[MAX_PATH];
-      LocalPath(szFilePath, _T(LKD_TASKS), szFileName);
-
-      bool bOK = false;
-      if(_tcsicmp(wextension,_T(LKS_TSK))==0) {
-        bOK = CTaskFileHelper().Load(szFilePath);
-      }
-      else if (_tcsicmp(wextension,_T(LKS_WP_CUP))==0) {
-        bOK = LoadCupTask(szFilePath);
-      } else if (_tcsicmp(wextension,_T(LKS_WP_GPX))==0) {
-        bOK = LoadGpxTask(szFilePath);
-      } else if (_tcsicmp(wextension,_T(LKS_XCTSK))==0) {
-        bOK = LoadXctrackTask(szFilePath);
-      }
-      if(!bOK) {
-        MessageBoxX(MsgToken<467>(),_T(" "), mbOk);
-      }
-      OverviewRefreshTask(pForm);
-      UpdateFilePointer(pForm);
-      UpdateCaption(pForm);
+    if(!bOK) {
+      MessageBoxX(MsgToken(467),_T(" "), mbOk);
     }
+    OverviewRefreshTask(pForm);
+    UpdateFilePointer(pForm);
+    UpdateCaption(pForm);
   } else {
     // LKTOKEN  _@M467_ = "No Task to load"
     MessageBoxX(MsgToken<467>(),_T(" "), mbOk);
@@ -699,6 +695,7 @@ void dlgTaskOverviewShowModal(int Idx){
       dfe->Clear();
 #ifdef ANDROID      
       dfe->addFile(_T("< Scan QRCode >"), _T("QRCODE"));
+      dfe->addFile(_T("< External File >"), _T("BROWSE"));
 #endif
       dfe->ScanDirectoryTop(_T(LKD_TASKS), suffix_filters, dfe->GetNumFiles());
     }
