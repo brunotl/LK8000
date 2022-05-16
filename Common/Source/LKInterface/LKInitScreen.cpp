@@ -11,6 +11,7 @@
 #include "DoInits.h"
 #include "ScreenGeometry.h"
 #include "Util/Clamp.hpp"
+#include "Event/Idle.hpp"
 #ifdef ANDROID
 #include "Android/Main.hpp"
 #include "Android/NativeView.hpp"
@@ -18,9 +19,6 @@
 #ifdef KOBO
 #include "Kobo/Model.hpp"
 #endif
-//#ifdef WIN32
-//#include <windows.h>
-//#endif
 #ifdef USE_X11
 #include <X11/Xlib.h>
 #endif
@@ -431,6 +429,17 @@ unsigned int TerrainQuantization(void) {
   };
   goto _ret;
   #endif
+
+#ifndef UNDER_CE
+  if (IsUserIdle(2000)) {
+     return 1;
+  }
+
+  if (IsUserIdle(1000)) {
+     return 2;
+  }
+
+#endif
 
   //
   // WINDOWS PC 

@@ -259,6 +259,11 @@ public:
         }
 
         dtquant = TerrainQuantization();
+        if(!IsDirty() && last_dtquant < dtquant) {
+            // no need to resize
+            return;
+        }
+        last_dtquant = dtquant;
 
         try {
             const unsigned res_x = iround((rc.right - rc.left) / dtquant);
@@ -294,6 +299,7 @@ public:
 private:
     bool _dirty = true; // indicate screen_buffer is up-to-date
 
+    unsigned int last_dtquant = (~0);
     unsigned int dtquant;
     unsigned int epx; // step size used for slope calculations
 
@@ -1175,14 +1181,13 @@ bool DrawTerrain(LKSurface& Surface, const RECT& rc, const ScreenProjection& _Pr
         if (!trenderer) {
             trenderer = std::make_unique<TerrainRenderer>(rc);
         } else {
+            if(trenderer->IsDirty() || (!UpToDate(TerrainContrast, TerrainBrightness, TerrainRamp, Shading, _Proj))) {
+                trenderer->SetDirty();
+            }
             trenderer->SetSize(rc);
         }
     } catch(std::exception& e) {
         return false;
-    }
-
-    if(trenderer->IsDirty() || (!UpToDate(TerrainContrast, TerrainBrightness, TerrainRamp, Shading, _Proj))) {
-        trenderer->SetDirty();
     }
 
     if(trenderer->IsDirty()) {
