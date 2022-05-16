@@ -16,6 +16,7 @@
 
 #include "Window.h"
 #include "Screen/LKWindowSurface.h"
+#include "Event/Idle.hpp"
 
 extern HINSTANCE _hInstance; // Set by WinMain
 
@@ -167,25 +168,32 @@ LRESULT CALLBACK Window::WinMsgHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
              * WM_SYSKEYDOWN message is posted to the active window because no window has the keyboard focus.
              */
             if(!((lParam>>29)&0x01)) {
+                ResetUserIdle();
                 if(OnKeyDown(wParam)) return 0;
             }
             break;
         case WM_KEYDOWN:
+            ResetUserIdle();
             if(OnKeyDown(wParam)) return 0;
             break;
         case WM_KEYUP:
+            ResetUserIdle();
             if(OnKeyUp(wParam)) return 0;
             break;
         case WM_LBUTTONDBLCLK:
+            ResetUserIdle();
             if(OnLButtonDblClick((POINT){GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)})) return 0;
             break;
         case WM_MOUSEMOVE:
+            ResetUserIdle();
             if(OnMouseMove((POINT){GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)})) return 0;
             break;
         case WM_LBUTTONDOWN:
+            ResetUserIdle();
             if(OnLButtonDown((POINT){GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)})) return 0;
             break;
         case WM_LBUTTONUP:
+            ResetUserIdle();
             if(OnLButtonUp((POINT){GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)})) return 0;
             break;
         case WM_SETFOCUS:
