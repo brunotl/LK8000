@@ -206,10 +206,6 @@ public:
         dtquant = TerrainQuantization();
         LKASSERT(dtquant>=1);
 
-#ifdef USE_TERRAIN_BLUR
-        blursize = std::max(0U, (dtquant - 1U) / 2U); // always 0
-#endif
-
         /*
         screen_size  dtq  blur  res_x  res_y terrain_pixels
           320x240     1    0    320    240      76800      
@@ -265,6 +261,48 @@ public:
         return auto_brightness;
     }
 
+    void SetSize(const RECT& rc) {
+        if (!screen_buffer) {
+            return;
+        }
+
+        if (!height_buffer) {
+            return;
+        }
+
+        dtquant = TerrainQuantization();
+
+        try {
+            const unsigned res_x = iround((rc.right - rc.left) / dtquant);
+            const unsigned res_y = iround((rc.bottom - rc.top) / dtquant);
+
+            if (screen_buffer->GetWidth() != res_x || screen_buffer->GetHeight() != res_y) {
+                screen_buffer = std::make_unique<CSTScreenBuffer>(res_x, res_y);
+
+                prev_iso_band = nullptr;
+                current_iso_band = nullptr;
+
+                _dirty = true;
+            }
+
+            const size_t ixs = screen_buffer->GetCorrectedWidth();
+            const size_t iys = screen_buffer->GetHeight();
+            height_buffer->Resize(ixs, iys);
+
+        } catch (std::bad_alloc& e) {
+
+            screen_buffer = nullptr;
+            height_buffer = nullptr;
+
+            const tstring error = to_tstring(e.what());
+            StartupStore(_T("TerrainRenderer : %s"), error.c_str());
+            OutOfMemory(_T(__FILE__), __LINE__);
+            ToggleMultimapTerrain();
+
+            throw e; // forward exception to caller...
+        }
+    }
+
 private:
     bool _dirty = true; // indicate screen_buffer is up-to-date
 
@@ -273,10 +311,6 @@ private:
 
     double pixelsize_d;
 
-#ifdef USE_TERRAIN_BLUR
-// only used if blur...
-    int blursize;
-#endif
     std::unique_ptr<CSTScreenBuffer> screen_buffer;
     std::unique_ptr<CSTHeightBuffer> height_buffer;
     std::unique_ptr<int16_t[]> prev_iso_band;
@@ -299,8 +333,14 @@ private:
 public:
 
     bool DoShading() const {
-        assert(height_buffer && height_buffer->GetBuffer());
+        if (!Shading) {
+            return false;
+        }
+        if (!terrain_doshading[TerrainRamp]) {
+            return false;
+        }
 
+        assert(height_buffer && height_buffer->GetBuffer());
         const size_t ixs = height_buffer->GetWidth();
         const size_t iys = height_buffer->GetHeight();
 
@@ -318,7 +358,7 @@ public:
             }
         }
 
-        return (Shading && terrain_doshading[TerrainRamp]);
+        return true;
     }
 
     /**
@@ -793,7 +833,7 @@ public:
     void FixOldMapWater() {
         // this exist only for compatibility with old topology file without water shape
         // in this case all altitude equal to zero are water.
-        // if topology file contain water shape this fonction have zero overhead in this case.
+        // if topology file contain water shape this fonction have zero overhead.
         if(!LKWaterTopology) {
 
             const size_t ixs = height_buffer->GetWidth();
@@ -1053,6 +1093,7 @@ public:
             screen_buffer->SetDirty();
 
 #ifdef USE_TERRAIN_BLUR
+            unsigned blursize = std::max(0U, (dtquant - 1U) / 2U); // always 0
             if (blursize > 0) {
                 screen_buffer->Blur(blursize);
             }
@@ -1100,11 +1141,6 @@ bool UpToDate(short TerrainContrast, short TerrainBrightness, short TerrainRamp,
     return true;
 }
 
-bool operator!=(const RECT& a, const RECT& b) {
-    return (a.bottom != b.bottom) || (a.right != b.right)
-            || (a.left != b.left)  || (a.top != b.top);
-}
-
 } // namespace
 
 /**
@@ -1118,18 +1154,11 @@ bool DrawTerrain(LKSurface& Surface, const RECT& rc, const ScreenProjection& _Pr
         return false;
     }
 
-    static RECT oldrc = {};
-
-    if (rc != oldrc) {
-        // Resolution has changed, probably PAN mode on with bottombar full opaque
-        // We paint full screen, so we resize it.
-        trenderer = nullptr;
-    }
-
     try {
         if (!trenderer) {
-            oldrc = rc;
             trenderer = std::make_unique<TerrainRenderer>(rc);
+        } else {
+            trenderer->SetSize(rc);
         }
     } catch(std::exception& e) {
         return false;
