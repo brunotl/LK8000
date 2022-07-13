@@ -11,12 +11,10 @@
 
 package org.LK8000;
 
-import android.annotation.TargetApi;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.util.Log;
-import android.os.Build;
 
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
@@ -24,16 +22,17 @@ import com.felhr.usbserial.UsbSerialInterface;
 import java.util.Arrays;
 
 
-@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public final class UsbSerialPort implements AndroidPort {
     private static final String TAG = "UsbSerialPort";
 
-    public UsbSerialPort(UsbDevice device,int baud) {
+    public UsbSerialPort(UsbDevice device, int iface, int baud) {
         _UsbDevice = device;
         _baudRate = baud;
+        _iface = iface;
     }
 
-    private UsbDevice _UsbDevice;
+    private final UsbDevice _UsbDevice;
+    private final int _iface;
     private UsbDeviceConnection _UsbConnection;
     private UsbSerialDevice _SerialPort;
     private PortListener portListener;
@@ -45,7 +44,7 @@ public final class UsbSerialPort implements AndroidPort {
 
         _UsbConnection = manager.openDevice(_UsbDevice);
         if (_UsbConnection != null) {
-            _SerialPort = UsbSerialDevice.createUsbSerialDevice(_UsbDevice, _UsbConnection);
+            _SerialPort = UsbSerialDevice.createUsbSerialDevice(_UsbDevice, _UsbConnection, _iface);
             if (_SerialPort != null) {
                 if (_SerialPort.open()) {
                     _SerialPort.setBaudRate(getBaudRate());
@@ -113,7 +112,7 @@ public final class UsbSerialPort implements AndroidPort {
         return length;
     }
 
-    private UsbSerialInterface.UsbReadCallback _ReadCallback = new UsbSerialInterface.UsbReadCallback() {
+    private final UsbSerialInterface.UsbReadCallback _ReadCallback = new UsbSerialInterface.UsbReadCallback() {
         @Override
         public void onReceivedData(byte[] arg0) {
             InputListener listner = inputListener;
@@ -123,7 +122,7 @@ public final class UsbSerialPort implements AndroidPort {
         }
     };
 
-    protected final void stateChanged() {
+    private void stateChanged() {
         PortListener portListener = this.portListener;
         if (portListener != null)
             portListener.portStateChanged();

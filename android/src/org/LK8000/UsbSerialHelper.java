@@ -13,7 +13,6 @@ package org.LK8000;
 
 import static android.content.pm.PackageManager.FEATURE_USB_HOST;
 
-import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,7 +27,10 @@ import com.felhr.usbserial.UsbSerialDevice;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UsbSerialHelper extends BroadcastReceiver {
 
@@ -40,7 +42,7 @@ public class UsbSerialHelper extends BroadcastReceiver {
     private Context _Context;
 
     private final HashMap<String, UsbDevice> _AvailableDevices = new HashMap<>();
-    private final HashMap<UsbDevice, UsbSerialPort> _PendingConnection = new HashMap<>();
+    private final HashMap<UsbDevice, List<UsbSerialPort>> _PendingConnection = new HashMap<>();
 
     static synchronized void Initialise(Context context) {
         if (context.getPackageManager().hasSystemFeature(FEATURE_USB_HOST)) {
@@ -124,12 +126,14 @@ public class UsbSerialHelper extends BroadcastReceiver {
                 if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                     Log.d(TAG, "permission granted for device " + device);
 
-                    UsbSerialPort port = _PendingConnection.get(device);
+                    List<UsbSerialPort> ports = _PendingConnection.get(device);
                     _PendingConnection.remove(device);
-                    if (port != null) {
+                    if (ports != null) {
                         UsbManager usbmanager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
                         if (usbmanager != null) {
-                            port.open(usbmanager);
+                            for (UsbSerialPort port : ports) {
+                                port.open(usbmanager);
+                            }
                         }
                     } else {
                         AddAvailable(device);
@@ -147,7 +151,7 @@ public class UsbSerialHelper extends BroadcastReceiver {
             if (exists(supported_ids, vid, pid)) {
                 try {
                     Log.v(TAG, "UsbDevice Found : " + device);
-                    _AvailableDevices.put(device.getDeviceName(), device);
+                    _AvailableDevices.put(getDeviceName(device), device);
                 } catch (SecurityException ignored) {
                     // Permission may be required to get serial number if app targets SDK >= 29
                     UsbManager usbmanager = (UsbManager) _Context.getSystemService(Context.USB_SERVICE);
@@ -222,15 +226,30 @@ public class UsbSerialHelper extends BroadcastReceiver {
         UsbSerialPort port = null;
 
         if(usbmanager != null) {
+            UsbDevice device = null;
+            int iface = -1;
 
-            UsbDevice device = GetAvailable(name);
+            Pattern pattern = Pattern.compile("^(.*) \\(([1-4])\\)");
+            Matcher matcher = pattern.matcher(name);
+            if (matcher.matches()) {
+                device = GetAvailable(matcher.group(1)); // name
+                iface = Integer.decode(matcher.group(2)); // interface
+            }
+            if (device == null) {
+                device = GetAvailable(name);
+            }
             if (device != null) {
-                port = new UsbSerialPort(device,baud);
+                port = new UsbSerialPort(device, iface, baud);
                 if (usbmanager.hasPermission(device)) {
                     port.open(usbmanager);
-
                 } else {
-                    _PendingConnection.put(device, port);
+                    List<UsbSerialPort> ports = _PendingConnection.get(device);
+                    if (ports != null) {
+                        ports.add(port);
+                    }
+                    else {
+                        _PendingConnection.put(device, Arrays.asList(port));
+                    }
                     requestPermission(usbmanager, device);
                 }
             }
@@ -254,7 +273,14 @@ public class UsbSerialHelper extends BroadcastReceiver {
         int n = 0;
         for (Map.Entry<String, UsbDevice> entry : _AvailableDevices.entrySet()) {
             UsbDevice device = entry.getValue();
-            device_names[n++] = getDeviceName(device);
+            int port_count = device.getInterfaceCount();
+            if (port_count > 1) {
+                for (int port = 0; port < port_count; port++) {
+                    device_names[n++] = entry.getKey() + " (" + port + ")";
+                }
+            } else {
+                device_names[n++] = entry.getKey();
+            }
         }
         return device_names;
     }
