@@ -1,9 +1,10 @@
 #!/bin/bash
 set -e -u
 
-ARCHIVE_URL=https://github.com/labapart/gattlib/archive/refs/heads/master.zip
-ARCHIVE=gattlib-master.zip
-ARCHIVEDIR=gattlib-master
+
+ARCHIVE_URL=https://github.com/labapart/gattlib/archive/ec9e5cd38a747d64dc673e5514c0f12e2bb99fbc.zip
+ARCHIVE=gattlib-ec9e5cd38a747d64dc673e5514c0f12e2bb99fbc.zip
+ARCHIVEDIR=gattlib-ec9e5cd38a747d64dc673e5514c0f12e2bb99fbc
 . $KOBO_SCRIPT_DIR/build-common.sh
 
 pushd $ARCHIVEDIR
