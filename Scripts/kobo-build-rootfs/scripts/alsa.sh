@@ -15,12 +15,15 @@ pushd $ARCHIVEDIR
     autoconf
     ./configure \
         --host=$CROSSTARGET \
-        --prefix=$DEVICEROOT \
+        --prefix= \
+        --with-sysroot=$DEVICEROOT \
         --disable-aload --disable-rawmidi \
         --disable-hwdep --disable-seq --disable-alisp \
-        --disable-old-symbols --disable-python --disable-static
+        --disable-old-symbols --disable-python --disable-static \
+        --with-pcm-plugins=all --with-ctl-plugins=all \
+        --with-plugindir=/lib/alsa-lib --with-configdir=/etc --datarootdir=/etc
 
 	$MAKE -j$MAKE_JOBS
-	$MAKE install
+	$MAKE install DESTDIR=$DEVICEROOT
 popd
 markbuilt
