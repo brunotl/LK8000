@@ -90,12 +90,13 @@ Frame::payload_t serialize_name() {
 }
 
 MacAddr generate_id() {
-  MacAddr addr;
 
   DeviceSettings settings(_T("FlyBeeper"));
   try {
-    addr.manufacturer = settings.get<uint8_t>("fanet-manufacturer");
-    addr.id = settings.get<uint16_t>("fanet-id");
+    return {
+      settings.get<uint8_t>("fanet-manufacturer"),
+      settings.get<uint16_t>("fanet-id")
+    };
   }
   catch(std::exception& e) { }
 
@@ -103,8 +104,7 @@ MacAddr generate_id() {
   std::mt19937 gen(rd());  // mersenne_twister_engine seeded with rd()
   std::uniform_int_distribution<uint16_t> distrib(1, std::numeric_limits<uint16_t>::max());
 
-  addr.manufacturer = 0xFC;
-  addr.id = distrib(gen);
+  MacAddr addr = { 0xFC, distrib(gen) };
 
   settings.set<int>("fanet-manufacturer", addr.manufacturer);
   settings.set<int>("fanet-id", addr.id);
