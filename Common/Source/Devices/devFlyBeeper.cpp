@@ -112,22 +112,16 @@ MacAddr generate_id() {
 
   DeviceSettings settings(_T("FlyBeeper"));
   try {
-    return {
-      settings.get<uint8_t>("fanet-manufacturer"),
-      settings.get<uint16_t>("fanet-id")
-    };
+    return MacAddr{ settings.get<uint32_t>("fanet-id") };
   }
   catch(std::exception& e) { }
 
   std::random_device rd;   // a seed source for the random number engine
   std::mt19937 gen(rd());  // mersenne_twister_engine seeded with rd()
-  std::uniform_int_distribution<uint16_t> distrib(1, std::numeric_limits<uint16_t>::max());
+  std::uniform_int_distribution<uint16_t> distrib(1, 0xFFFE);
 
   MacAddr addr = { 0xFC, distrib(gen) };
-
-  settings.set<int>("fanet-manufacturer", addr.manufacturer);
-  settings.set<int>("fanet-id", addr.id);
-
+  settings.set<int>("fanet-id", addr.get());
   return addr;
 }
 
