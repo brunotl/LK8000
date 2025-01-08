@@ -117,6 +117,40 @@ add_library( LK8000 SHARED
     Common/Source/Form/WndButtonImage.cpp
     Common/Source/Form/Clipboard.cpp
 
+    Common/Source/Form/WindowControls.h
+    Common/Source/Form/WindowControls.cpp
+    Common/Source/Form/WndProperty.h
+    Common/Source/Form/WndProperty.cpp
+    Common/Source/Form/WndButton.cpp
+    Common/Source/Form/WndButton.h
+    Common/Source/Form/WndForm.cpp
+    Common/Source/Form/WndForm.h
+    Common/Source/Form/WndFrame.cpp
+    Common/Source/Form/WndFrame.h
+    Common/Source/Form/WndListFrame.cpp
+    Common/Source/Form/WndListFrame.h
+    Common/Source/Form/WndOwnerDrawFrame.cpp
+    Common/Source/Form/WndOwnerDrawFrame.h
+
+    Common/Source/Form/ComboList.h
+    Common/Source/Form/ComboList.cpp
+    Common/Source/Form/DataField.h
+    Common/Source/Form/DataField.cpp
+    Common/Source/Form/DataFieldBoolean.cpp
+    Common/Source/Form/DataFieldBoolean.h
+    Common/Source/Form/DataFieldEnum.cpp
+    Common/Source/Form/DataFieldEnum.h
+    Common/Source/Form/DataFieldFileReader.cpp
+    Common/Source/Form/DataFieldFileReader.h
+    Common/Source/Form/DataFieldFloat.cpp
+    Common/Source/Form/DataFieldFloat.h
+    Common/Source/Form/DataFieldInteger.cpp
+    Common/Source/Form/DataFieldInteger.h
+    Common/Source/Form/DataFieldString.cpp
+    Common/Source/Form/DataFieldString.h
+    Common/Source/Form/DataFieldTime.cpp
+    Common/Source/Form/DataFieldTime.h
+
     Common/Source/xcs/Event/Shared/Timer.cpp
     Common/Source/xcs/Event/Shared/TimerQueue.cpp
 
@@ -278,7 +312,6 @@ add_library( LK8000 SHARED
     Common/Source/TunedParameter.cpp
     Common/Source/units.cpp
     Common/Source/Utils.cpp
-    Common/Source/WindowControls.cpp
     Common/Source/Sysop.cpp
     Common/Source/LKSnailTrail.cpp
 

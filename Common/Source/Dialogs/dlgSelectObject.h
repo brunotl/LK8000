@@ -17,8 +17,8 @@
 #include <memory>
 #include <vector>
 #include <set>
-#include "WindowControls.h"
 #include "utils/stringext.h"
+#include "Form/Form.hpp"
 
 class LKSurface;
 struct GeoPoint;

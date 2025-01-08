@@ -9,7 +9,6 @@
 #include "externs.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include <ctype.h>
 #include "Event/Event.h"
 #include "Sound/Sound.h"

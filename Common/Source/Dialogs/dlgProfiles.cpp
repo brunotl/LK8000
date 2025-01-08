@@ -10,10 +10,10 @@
 #include "LKProfiles.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include "resource.h"
 #include "utils/printf.h"
 #include "LocalPath.h"
+#include "Form/DataFieldFileReader.h"
 
 static WndForm *wf=NULL;
 static short profilemode=0;

@@ -10,7 +10,6 @@
 #include "InputEvents.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include "utils/TextWrapArray.h"
 #include "resource.h"
 

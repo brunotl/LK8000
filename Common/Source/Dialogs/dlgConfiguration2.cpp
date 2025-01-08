@@ -7,10 +7,9 @@
 */
 
 #include "externs.h"
-#include "WindowControls.h"
 #include "Waypointparser.h"
 #include "Dialogs.h"
-
+#include "Form/Form.hpp"
 
 extern int page2mode(void);
 

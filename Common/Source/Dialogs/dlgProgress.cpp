@@ -11,7 +11,6 @@
 
 #include "externs.h"
 #include "dlgProgress.h"
-#include "WindowControls.h"
 #include "dlgTools.h"
 #include "LKObjects.h"
 #include "resource.h"

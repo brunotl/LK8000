@@ -9,7 +9,6 @@
 #include "externs.h"
 #include "Sideview.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "ContestMgr.h"
 #include "dlgTools.h"
 #include "Event/Event.h"

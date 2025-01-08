@@ -10,7 +10,6 @@
 #include "Logger.h"
 #include "LKMapWindow.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "dlgTools.h"
 #include "InputEvents.h"
 #include "resource.h"

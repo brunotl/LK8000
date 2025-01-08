@@ -9,7 +9,6 @@
 #include "externs.h"
 #include <limits.h>
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include "RGB.h"
 #include "Dialogs.h"
 #include "utils/stringext.h"
@@ -20,6 +19,13 @@
 #include "Library/rapidxml/rapidxml.hpp"
 #include "Library/rapidxml/rapidxml_iterators.hpp"
 #include "Form/WndButtonImage.h"
+#include "Form/DataFieldBoolean.h"
+#include "Form/DataFieldEnum.h"
+#include "Form/DataFieldFileReader.h"
+#include "Form/DataFieldInteger.h"
+#include "Form/DataFieldFloat.h"
+#include "Form/DataFieldTime.h"
+#include "Form/DataFieldString.h"
 
 #include <stdio.h>
 

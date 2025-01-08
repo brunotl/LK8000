@@ -12,7 +12,9 @@
 #define _DIALOGS_DLGSELECTITEM_H_
 
 #include "Compiler.h"
-#include "WindowControls.h"
+#include "Form/WndListFrame.h"
+
+class WndOwnerDrawFrame;
 
 class dlgSelectItem {
 public:

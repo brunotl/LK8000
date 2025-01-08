@@ -11,7 +11,6 @@
 #include "Terrain.h"
 #include "LKProcess.h"
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include "McReady.h"
 
 #include "Modeltype.h"
@@ -37,6 +36,7 @@
 #include "Tracking/Tracking.h"
 #include "Devices/DeviceRegister.h"
 #include "Library/TimeFunctions.h"
+#include "Form/DataFieldFileReader.h"
 
 #ifdef ANDROID
 #include <jni.h>

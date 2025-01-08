@@ -19,7 +19,6 @@
 #include "dlgTools.h"
 #include "Dialogs.h"
 #include "Parser.h"
-#include "WindowControls.h"
 
 
 //______________________________________________________________________defines_

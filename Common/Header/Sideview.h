@@ -75,6 +75,7 @@ extern unsigned short Sideview_VGBox_Number;
 
 // END OF VG STUFF
 
+struct DiagrammStruct;
 
 
 int SetSplitScreenSize(int);

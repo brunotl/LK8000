@@ -11,7 +11,6 @@
 #include "LKProcess.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include "resource.h"
 #include "Library/TimeFunctions.h"
 

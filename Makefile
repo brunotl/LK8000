@@ -1446,9 +1446,24 @@ SRC_FILES :=\
 	$(SRC)/TunedParameter.cpp		\
 	$(SRC)/units.cpp \
 	$(SRC)/Utils.cpp		\
-	$(SRC)/WindowControls.cpp \
+	$(SRC)/Form/WindowControls.cpp \
+	$(SRC)/Form/WndProperty.cpp \
+	$(SRC)/Form/WndButton.cpp \
 	$(SRC)/Form/WndButtonImage.cpp \
+	$(SRC)/Form/WndForm.cpp \
+	$(SRC)/Form/WndOwnerDrawFrame.cpp \
+	$(SRC)/Form/WndFrame.cpp \
+	$(SRC)/Form/WndListFrame.cpp \
 	$(SRC)/Form/Clipboard.cpp \
+	$(SRC)/Form/ComboList.cpp \
+	$(SRC)/Form/DataField.cpp \
+	$(SRC)/Form/DataFieldBoolean.cpp \
+	$(SRC)/Form/DataFieldEnum.cpp \
+	$(SRC)/Form/DataFieldFileReader.cpp \
+	$(SRC)/Form/DataFieldInteger.cpp \
+	$(SRC)/Form/DataFieldFloat.cpp \
+	$(SRC)/Form/DataFieldTime.cpp \
+	$(SRC)/Form/DataFieldString.cpp \
 	$(SRC)/Geographic/GeoPoint.cpp \
 	$(SRC)/Geographic/TransverseMercator.cpp \
 	$(SRC)/NMEA/Info.cpp \

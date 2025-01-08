@@ -11,7 +11,6 @@
 #include "LKProcess.h"
 #include "LKProfiles.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "resource.h"
 
 

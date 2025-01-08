@@ -18,7 +18,6 @@
 #include "devLX.h"
 #include "dlgTools.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "Devices/DeviceRegister.h"
 
 //______________________________________________________________________defines_

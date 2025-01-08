@@ -8,7 +8,6 @@
 
 #include "externs.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include <ctype.h>
 #include "dlgTools.h"
 #include "ComCheck.h"

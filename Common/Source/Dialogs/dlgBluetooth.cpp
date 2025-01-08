@@ -12,7 +12,6 @@
 #include "dlgTools.h"
 #include "BtHandler.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "Message.h"
 #include "resource.h"
 

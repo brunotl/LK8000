@@ -7,7 +7,6 @@
  */
 
 #include "externs.h"
-#include "WindowControls.h"
 #include "RGB.h"
 #include "resource.h"
 #include "LKObjects.h"
@@ -23,6 +22,7 @@
 #include "LKInterface.h"
 #include "utils/printf.h"
 #include "LocalPath.h"
+#include "Form/DataFieldFileReader.h"
 
 #ifdef KOBO
   #include "Kobo/Kernel.hpp"

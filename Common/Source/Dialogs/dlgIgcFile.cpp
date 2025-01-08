@@ -11,7 +11,6 @@
 #include "externs.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include "Comm/Obex/CObexPush.h"
 #include "Message.h"
 #include <iterator>

@@ -10,7 +10,6 @@
 #include "externs.h"
 #include "Dialogs.h"
 #include "externs.h"
-#include "WindowControls.h"
 #include "dlgTools.h"
 #include "InputEvents.h"
 #include "Dialogs.h"

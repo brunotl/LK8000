@@ -9,10 +9,10 @@
  * Created on March 10, 2024
  */
 
-#ifndef FORM_WNDBUTTONIMAGE_H
-#define	FORM_WNDBUTTONIMAGE_H
+#ifndef _FORM_WNDBUTTONIMAGE_H
+#define	_FORM_WNDBUTTONIMAGE_H
 
-#include "WindowControls.h"
+#include "WndButton.h"
 #include "Screen/LKIcon.h"
 
 class WndButtonImage : public WndButton {
@@ -26,4 +26,4 @@ private:
   LKIcon Icon;
 };
 
-#endif // FORM_WNDBUTTONIMAGE_H
+#endif // _FORM_WNDBUTTONIMAGE_H

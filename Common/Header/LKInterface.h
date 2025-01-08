@@ -22,7 +22,7 @@ bool	CustomKeyHandler(CustomKeyMode_t key);
 const TCHAR* CustomKeyLabel(CustomKeyMode_t key);
 void AddCustomKeyList(WndForm* pForm, const TCHAR* WndName, CustomKeyMode_t value);
 void GetCustomKey(WndForm* pForm, const TCHAR* WndName, CustomKeyMode_t& value);
-void GetCustomKey(WndForm* pForm, const TCHAR* WndName, int& value);
+
 
 CustomKeyMode_t CustomKeyFromMenu(unsigned pos);
 

@@ -10,7 +10,6 @@
 #include "dlgTools.h"
 #include "Calculations2.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "Event/Event.h"
 #include "resource.h"
 #include "NavFunctions.h"

@@ -13,6 +13,13 @@
 #define	FORM_HPP
 
 #include "WindowControls.h"
+#include "WndProperty.h"
+#include "WndButton.h"
+#include "WndForm.h"
+#include "WndOwnerDrawFrame.h"
+#include "WndFrame.h"
+#include "WndListFrame.h"
+ 
+#include "DataField.h"
 
 #endif	/* FORM_HPP */
-

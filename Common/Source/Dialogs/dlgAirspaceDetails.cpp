@@ -7,7 +7,6 @@
 */
 
 #include "externs.h"
-#include "WindowControls.h"
 #include "dlgTools.h"
 #include "InputEvents.h"
 #include "Airspace/Airspace.h"

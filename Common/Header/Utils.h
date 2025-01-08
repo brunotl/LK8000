@@ -11,6 +11,9 @@
 
 struct FlarmId;
 struct windrotary_s;
+struct NMEA_INFO;
+struct DERIVED_INFO;
+struct DeviceDescriptor_t;
 
 extern bool LockSettingsInFlight;
 extern bool LoggerShortName;

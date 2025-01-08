@@ -9,7 +9,6 @@
 #include "externs.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include "Multimap.h"
 #include "resource.h"
 #include "NavFunctions.h"

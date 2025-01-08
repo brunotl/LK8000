@@ -9,7 +9,6 @@
 #include "devCProbe.h"
 #include "dlgTools.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "resource.h"
 #include "Baro.h"
 #include "Calc/Vario.h"

@@ -8,7 +8,6 @@
 
 #include "externs.h"
 #include "LKInterface.h"
-#include "WindowControls.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
 #include "resource.h"

@@ -11,7 +11,6 @@
 #include "McReady.h"
 #include "LKProfiles.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "dlgTools.h"
 #include "TeamCodeCalculation.h"
 #include "NavFunctions.h"

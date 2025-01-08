@@ -8,6 +8,7 @@
 
 #include "externs.h"
 #include "dlgSelectItem.h"
+#include "LKObjects.h"
 
 #ifdef HAVE_HATCHED_BRUSH
 

@@ -12,7 +12,6 @@
 #include "LKProfiles.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include "resource.h"
 #include "LKInterface.h"
 
@@ -27,9 +26,12 @@ static void OnCloseClicked(WndButton* pWnd) {
 
 
 static void setVariables(WndForm* pForm) {
-  auto wp = pForm->FindByName<WndProperty>(TEXT("prpCustomKeyTime"));
+  auto wp = pForm->FindByName<WndProperty>(_T("prpCustomKeyTime"));
   if (wp) {
-    wp->GetDataField()->SetAsFloat(CustomKeyTime);
+    DataField* dfe = wp->GetDataField();
+		if (dfe) {
+      dfe->Set(CustomKeyTime);
+    }
     wp->RefreshDisplay();
   }
   AddCustomKeyList(pForm, _T("prpCustomKeyModeLeftUpCorner"), CustomKeyModeLeftUpCorner);
@@ -41,23 +43,27 @@ static void setVariables(WndForm* pForm) {
 }
 
 static void getVariables(WndForm* pForm) {
+  auto wp = pForm->FindByName<WndProperty>(_T("prpCustomKeyTime"));
+  if (wp) {
+    DataField* dfe = wp->GetDataField();
+		if (dfe) {
+      CustomKeyTime = dfe->GetAsInteger();
+    }
+  }
   GetCustomKey(pForm, _T("prpCustomKeyModeLeftUpCorner"), CustomKeyModeLeftUpCorner);
   GetCustomKey(pForm, _T("prpCustomKeyModeRightUpCorner"), CustomKeyModeRightUpCorner);
   GetCustomKey(pForm, _T("prpCustomKeyModeCenter"), CustomKeyModeCenter);
-  GetCustomKey(pForm, _T("prpCustomKeyTime"), CustomKeyTime);
   GetCustomKey(pForm, _T("prpCustomKeyModeLeft"), CustomKeyModeLeft);
   GetCustomKey(pForm, _T("prpCustomKeyModeRight"), CustomKeyModeRight);
   GetCustomKey(pForm, _T("prpCustomKeyModeAircraftIcon"), CustomKeyModeAircraftIcon);
 }
 
 
-static CallBackTableEntry_t CallBackTable[]={
-  ClickNotifyCallbackEntry(OnCloseClicked),
-  EndCallBackEntry()
-};
-
-
 void dlgCustomKeysShowModal(void){
+  const CallBackTableEntry_t CallBackTable[]={
+    ClickNotifyCallbackEntry(OnCloseClicked),
+    EndCallBackEntry()
+  };
 
   std::unique_ptr<WndForm> pForm(dlgLoadFromXML(CallBackTable, IDR_XML_CUSTOMKEYS));
 

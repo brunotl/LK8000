@@ -9,7 +9,6 @@
 #include "externs.h"
 #include "dlgTools.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "LKObjects.h"
 #include "resource.h"
 

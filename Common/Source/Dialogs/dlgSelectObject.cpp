@@ -11,7 +11,6 @@
 
 #include "externs.h"
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include "resource.h"
 #include "Util/TruncateString.hpp"
 #include "Dialogs.h"

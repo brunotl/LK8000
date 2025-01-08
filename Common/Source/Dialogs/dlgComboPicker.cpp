@@ -8,7 +8,6 @@
 
 #include "externs.h"
 #include "InputEvents.h"
-#include "WindowControls.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
 #include "resource.h"
@@ -18,18 +17,18 @@ WndProperty * wComboPopupWndProperty;
 DataField * ComboPopupDataField = NULL;
 ComboList * ComboListPopup=NULL;
 
-static TCHAR sSavedInitialValue[ComboPopupITEMMAX];
+static TCHAR sSavedInitialValue[ComboList::ITEMMAX];
 static int iSavedInitialDataIndex=-1;
 
 static void OnPaintComboPopupListItem(WndOwnerDrawFrame * Sender, LKSurface& Surface) {
 
     if (Sender) {
 
-        if (ComboListPopup->ComboPopupDrawListIndex >= 0 &&
-                ComboListPopup->ComboPopupDrawListIndex < ComboListPopup->ComboPopupItemCount) {
+        if (ComboListPopup->DrawListIndex >= 0 &&
+                ComboListPopup->DrawListIndex < ComboListPopup->size()) {
 
             // Fill Background with Highlight color if Selected Item
-            if (!Sender->HasFocus() && ComboListPopup->ComboPopupItemIndex == ComboListPopup->ComboPopupDrawListIndex) {
+            if (!Sender->HasFocus() && ComboListPopup->ItemIndex == ComboListPopup->DrawListIndex) {
                 RECT rc = Sender->GetClientRect();
                 Surface.FillRect(&rc, LKBrush_Higlighted);
             }
@@ -37,7 +36,7 @@ static void OnPaintComboPopupListItem(WndOwnerDrawFrame * Sender, LKSurface& Sur
             const int w = Sender->GetWidth();
             const int h = Sender->GetHeight();
 
-            const TCHAR* szText = ComboListPopup->ComboPopupItemList[ComboListPopup->ComboPopupDrawListIndex]->StringValueFormatted;
+            const TCHAR* szText = ComboListPopup->ItemList[ComboListPopup->DrawListIndex].ValueFormatted.c_str();
 
             Surface.SetBackgroundTransparent();
             Surface.SetTextColor(RGB_BLACK);
@@ -51,21 +50,21 @@ static void OnPaintComboPopupListItem(WndOwnerDrawFrame * Sender, LKSurface& Sur
 static void OnComboPopupListInfo(WndListFrame * Sender, WndListFrame::ListInfo_t *ListInfo)
 { // callback function for the ComboPopup
   if (ListInfo->DrawIndex == -1) { // initialize
-    ListInfo->ItemCount = ComboListPopup->ComboPopupItemCount;
+    ListInfo->ItemCount = ComboListPopup->size();
     ListInfo->ScrollIndex = 0;
     ListInfo->ItemIndex = ComboListPopup->PropertyDataFieldIndexSaved;
   }
   else {
-    ComboListPopup->ComboPopupDrawListIndex = ListInfo->DrawIndex + ListInfo->ScrollIndex;
-    ComboListPopup->ComboPopupItemIndex=ListInfo->ItemIndex + ListInfo->ScrollIndex;
+    ComboListPopup->DrawListIndex = ListInfo->DrawIndex + ListInfo->ScrollIndex;
+    ComboListPopup->ItemIndex = ListInfo->ItemIndex + ListInfo->ScrollIndex;
   }
 }
 
 static void OnHelpClicked(WindowControl * Sender) {
-  int idx = ComboListPopup->ComboPopupItemIndex;  
+  int idx = ComboListPopup->ItemIndex;  
   if (idx >=0) {
-    const ComboListEntry_t* pItem = ComboListPopup->ComboPopupItemList[idx];
-    ComboPopupDataField->SetFromCombo(pItem->DataFieldIndex, pItem->StringValue);
+    const auto& Item = ComboListPopup->ItemList[idx];
+    ComboPopupDataField->SetFromCombo(Item.DataFieldIndex, Item.Value.c_str());
   }
   wComboPopupWndProperty->OnHelp();
 }
@@ -90,7 +89,7 @@ static void OnComboPopupListEnter(WindowControl * Sender, WndListFrame::ListInfo
 }
 
 static void OnCancelClicked(WndButton* pWnd){
-  ComboListPopup->ComboPopupItemIndex = -1;
+  ComboListPopup->ItemIndex = -1;
   if(pWnd) {
     WndForm* pForm = pWnd->GetParentWndForm();
     if(pForm) {
@@ -109,13 +108,7 @@ static CallBackTableEntry_t CallBackTable[]={
   EndCallBackEntry()
 };
 
-
-
-
-
-
-
-int dlgComboPicker(WndProperty* theProperty){
+int dlgComboPicker(WndProperty* pWnd){
 
   static bool bInComboPicker=false;
   bool bInitialPage=true;
@@ -129,14 +122,14 @@ int dlgComboPicker(WndProperty* theProperty){
 
   while (bOpenCombo)
   {
-    LKASSERT(theProperty!=NULL);
-    wComboPopupWndProperty = theProperty;
+    LKASSERT(pWnd);
+    wComboPopupWndProperty = pWnd;
 
     std::unique_ptr<WndForm> wf(dlgLoadFromXML(CallBackTable, ScreenLandscape ? IDR_XML_COMBOPICKER_L : IDR_XML_COMBOPICKER_P));
 
     if (!wf) return -1;
 
-    wf->SetCaption(theProperty->GetCaption());
+    wf->SetCaption(pWnd->GetCaption());
 
 
     // allow item to be focused / hightlighted
@@ -160,8 +153,8 @@ int dlgComboPicker(WndProperty* theProperty){
 
     if (bInitialPage) { // save values for "Cancel" from first page only
       bInitialPage=false;
-      iSavedInitialDataIndex=ComboListPopup->ComboPopupItemList[ComboListPopup->PropertyDataFieldIndexSaved]->DataFieldIndex;
-      ComboPopupDataField->CopyString(sSavedInitialValue,false);
+      iSavedInitialDataIndex = ComboListPopup->ItemList[ComboListPopup->PropertyDataFieldIndexSaved].DataFieldIndex;
+      ComboPopupDataField->CopyString(sSavedInitialValue, false);
     }
 
     WindowControl* pBtHelp = wf->FindByName(TEXT("cmdHelp"));
@@ -173,29 +166,27 @@ int dlgComboPicker(WndProperty* theProperty){
 
     bOpenCombo=false;  //tell  combo to exit loop after close
 
-    if (ComboListPopup->ComboPopupItemIndex >=0) // OK/Select
+    if (ComboListPopup->ItemIndex >=0) // OK/Select
     {
       #if 0
       ComboPopupDataField->GetCombo()->LastModalResult=1; // OK Hit Used then calling via SendMessage()
       #endif
 
-      if (ComboListPopup->ComboPopupItemList[ComboListPopup->ComboPopupItemIndex]->DataFieldIndex
-                          ==ComboPopupReopenMOREDataIndex)
-      { // we're last in list and the want more past end of list so select last real list item and reopen
+      if (ComboListPopup->ItemList[ComboListPopup->ItemIndex].DataFieldIndex == ComboList::ReopenMOREDataIndex) {
+        // we're last in list and the want more past end of list so select last
+        // real list item and reopen
         ComboPopupDataField->SetDetachGUI(true);  // we'll reopen, so don't call xcsoar data changed routine yet
-        ComboListPopup->ComboPopupItemIndex--;
+        ComboListPopup->ItemIndex--;
         bOpenCombo=true; // reopen combo with new selected index at center
-      }
-      else if (ComboListPopup->ComboPopupItemList[ComboListPopup->ComboPopupItemIndex]->DataFieldIndex
-                          ==ComboPopupReopenLESSDataIndex) // same as above but lower items needed
-      {
+      } 
+      else if (ComboListPopup->ItemList[ComboListPopup->ItemIndex].DataFieldIndex == ComboList::ReopenLESSDataIndex) {
+        // same as above but lower items needed
         ComboPopupDataField->SetDetachGUI(true);
-        ComboListPopup->ComboPopupItemIndex++;
+        ComboListPopup->ItemIndex++;
         bOpenCombo=true;
       }
-      int iDataIndex = ComboListPopup->ComboPopupItemList[ComboListPopup->ComboPopupItemIndex]->DataFieldIndex;
-      ComboPopupDataField->SetFromCombo(iDataIndex,
-        ComboListPopup->ComboPopupItemList[ComboListPopup->ComboPopupItemIndex]->StringValue);
+      int iDataIndex = ComboListPopup->ItemList[ComboListPopup->ItemIndex].DataFieldIndex;
+      ComboPopupDataField->SetFromCombo(iDataIndex, ComboListPopup->ItemList[ComboListPopup->ItemIndex].Value.c_str());
     }
     else // Cancel
     { // if we've detached the GUI during the load, then there is nothing to do here
@@ -224,10 +215,12 @@ int dlgComboPicker(WndProperty* theProperty){
 
 
     wComboPopupWndProperty->RefreshDisplay();
-    ComboListPopup->FreeComboPopupItemList();
+    ComboListPopup->clear();
+    ComboListPopup = nullptr;
 
   } // loop reopen combo if <<More>> << LESS>> picked
 
+  wComboPopupWndProperty = nullptr;
   bInComboPicker=false;
   return 1;
 

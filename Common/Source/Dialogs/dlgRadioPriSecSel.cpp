@@ -9,7 +9,6 @@
 
 #include "externs.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "dlgTools.h"
 #include "resource.h"
 #include "Util/TruncateString.hpp"

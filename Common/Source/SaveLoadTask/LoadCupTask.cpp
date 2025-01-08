@@ -14,8 +14,6 @@
 #include "Util/tstring.hpp"
 #include "NavFunctions.h"
 #include "utils/zzip_stream.h"
-
-#include "WindowControls.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
 #include "resource.h"

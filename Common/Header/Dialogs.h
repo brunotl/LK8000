@@ -4,6 +4,7 @@
 #include "options.h"
 #include "Enums.h"
 class CAirspace;
+struct WAYPOINT;
 
 MsgReturn_t MessageBoxX(LPCTSTR lpText, LPCTSTR lpCaption, MsgType_t uType, bool wfullscreen=false);
 

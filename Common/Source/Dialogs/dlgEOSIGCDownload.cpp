@@ -8,7 +8,6 @@
 #include "externs.h"
 #include "dlgTools.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "resource.h"
 #include "Util/Clamp.hpp"
 #include "OS/Sleep.h"

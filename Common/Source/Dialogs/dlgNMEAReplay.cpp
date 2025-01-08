@@ -8,9 +8,9 @@
 
 #include "externs.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "dlgTools.h"
 #include "resource.h"
+#include "Form/DataFieldFileReader.h"
 
 static WndForm *wf=NULL;
 

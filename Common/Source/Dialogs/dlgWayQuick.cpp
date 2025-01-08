@@ -11,7 +11,6 @@
 #include "Dialogs.h"
 #include "LKObjects.h"
 #include "Bitmaps.h"
-#include "WindowControls.h"
 #include "dlgTools.h"
 #include "TeamCodeCalculation.h"
 #include "NavFunctions.h"

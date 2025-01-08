@@ -250,12 +250,11 @@ typedef struct{
 }MapWaypointLabel_t;
 
 
-typedef struct
-{
+struct DiagrammStruct {
   double fXMin, fXMax;
   double fYMin, fYMax;
   RECT rc;
-} DiagrammStruct;
+};
 
 class ScreenProjection;
 

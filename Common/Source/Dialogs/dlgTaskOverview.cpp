@@ -12,12 +12,12 @@
 #include "LKMapWindow.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include "CTaskFileHelper.h"
 #include "resource.h"
 #include "utils/printf.h"
 #include "Waypoints/SetHome.h"
 #include "LocalPath.h"
+#include "Form/DataFieldFileReader.h"
 
 #ifdef ANDROID
 #include "Android/LK8000Activity.h"

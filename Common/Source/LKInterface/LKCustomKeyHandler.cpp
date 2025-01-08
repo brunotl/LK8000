@@ -14,8 +14,8 @@
 #include "Dialogs.h"
 #include "Sideview.h"
 #include "Sound/Sound.h"
-#include "WindowControls.h"
 #include "Dialogs/dlgMacCready.h"
+#include "Form/Form.hpp"
 
 extern void ShowMenu();
 
@@ -576,17 +576,6 @@ size_t to_label_index(CustomKeyMode_t key) {
 
 static_assert(CustomKeyMode_t::ckTOP == static_cast<CustomKeyMode_t>(std::size(_CustomKeyLabel)), "invalid _CustomKeyLabel array size");
 
-template<typename TypeT>
-void GetCustomKey(WndForm* pForm, const TCHAR* WndName, TypeT& value) {
-	auto pWnd = pForm->FindByName<WndProperty>(WndName);
-	if (pWnd) {
-		DataField* dfe = pWnd->GetDataField();
-		if (dfe) {
-			value = static_cast<TypeT>(dfe->GetAsInteger());
-		}
-	}
-}
-
 } // namespace
 
 
@@ -612,9 +601,11 @@ void AddCustomKeyList(WndForm* pForm, const TCHAR* WndName, CustomKeyMode_t valu
 }
 
 void GetCustomKey(WndForm* pForm, const TCHAR* WndName, CustomKeyMode_t& value) {
-	GetCustomKey<CustomKeyMode_t>(pForm, WndName, value);
-}
-
-void GetCustomKey(WndForm* pForm, const TCHAR* WndName, int& value) {
-	GetCustomKey<int>(pForm, WndName, value);
+	auto pWnd = pForm->FindByName<WndProperty>(WndName);
+	if (pWnd) {
+		DataField* dfe = pWnd->GetDataField();
+		if (dfe) {
+			value = static_cast<CustomKeyMode_t>(dfe->GetAsInteger());
+		}
+	}
 }

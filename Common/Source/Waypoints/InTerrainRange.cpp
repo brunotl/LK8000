@@ -10,8 +10,7 @@
 #include "Waypointparser.h"
 #include "RasterTerrain.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
-
+#include "Form/Form.hpp"
 
 extern int WaypointOutOfTerrainRangeDontAskAgain;
 

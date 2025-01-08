@@ -9,7 +9,6 @@
 #include "devFlarm.h"
 #include "dlgTools.h"
 #include "Dialogs.h"
-#include "WindowControls.h"
 #include "resource.h"
 #include "dlgIGCProgress.h"
 #include "Util/Clamp.hpp"

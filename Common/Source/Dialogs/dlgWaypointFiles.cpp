@@ -9,8 +9,8 @@
 #include "LKProfiles.h"
 #include "Dialogs.h"
 #include "dlgTools.h"
-#include "WindowControls.h"
 #include "resource.h"
+#include "Form/DataFieldFileReader.h"
 
 
 static void getVariables(WndForm * pForm) {

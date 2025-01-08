@@ -9,6 +9,7 @@
 #define _RGB_H_
 
 #include "Screen/LKColor.h"
+#include "Asset.hpp"
 
 // MapWindow::TextColor() supported colours
 constexpr	LKColor RGB_BLACK(0,0,0);
