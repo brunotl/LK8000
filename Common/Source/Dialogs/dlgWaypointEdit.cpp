@@ -153,7 +153,7 @@ static void SetUnits(WndForm* wf) {
     for(const auto name : { TEXT("prpLongitudeS"), TEXT("prpLatitudeS") } ) {
       wp = wf->FindByName<WndProperty>(name);
       if (wp) {
-        DataField* pDataField = wp->GetDataField();
+        auto pDataField = wp->GetDataField();
         if(pDataField) {
             pDataField->SetDisplayFormat(TEXT("%.02fs"));
             pDataField->SetEditFormat(TEXT("%.02fs"));
@@ -203,7 +203,7 @@ static void SetValues(WndForm* wf) {
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpUTMzoneY"));
       if (wp) {
-	  DataField* dfe = wp->GetDataField();
+	  auto dfe = wp->GetDataField();
 	  if(dfe){
 		  std::for_each(std::begin(cYZone), std::end(cYZone), std::bind(&DataField::addEnumText, dfe, _1, nullptr));
 		  dfe->Set(YZoneToenum(utmYZone));
@@ -230,7 +230,7 @@ static void SetValues(WndForm* wf) {
 
 	   wp = wf->FindByName<WndProperty>(TEXT("prpLongitudeSign"));
 	  if (wp) {
-		DataField* dfe = wp->GetDataField();
+		auto dfe = wp->GetDataField();
 		dfe->addEnumText((TEXT("W")));
 		dfe->addEnumText((TEXT("E")));
 		dfe->Set(sign);
@@ -284,7 +284,7 @@ static void SetValues(WndForm* wf) {
 
 	  wp = wf->FindByName<WndProperty>(TEXT("prpLatitudeSign"));
 	  if (wp) {
-		DataField* dfe = wp->GetDataField();
+		auto dfe = wp->GetDataField();
 		dfe->addEnumText((TEXT("S")));
 		dfe->addEnumText((TEXT("N")));
 		dfe->Set(sign);
@@ -343,7 +343,7 @@ static void SetValues(WndForm* wf) {
 
   wp = wf->FindByName<WndProperty>(TEXT("prpFlags"));
   if (wp) {
-    DataField* dfe = wp->GetDataField();
+    auto dfe = wp->GetDataField();
 	// LKTOKEN _@M1226_ "Turnpoint"
     dfe->addEnumText(MsgToken<1226>());
 	// LKTOKEN _@M1224_ "Airport"
@@ -378,7 +378,7 @@ static void GetValues(WndForm* wf) {
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpUTMzoneY"));
       if (wp) {
-	  DataField* dfe = wp->GetDataField();
+	  auto dfe = wp->GetDataField();
 	  if(dfe){
 		  utmYZone = enumToYZone(dfe->GetAsInteger());
 	  }

@@ -120,7 +120,7 @@ void dlgWindSettingsShowModal(void){
 
     wp = wf->FindByName<WndProperty>(TEXT("prpAutoWind"));
     if (wp) {
-      DataField* dfe = wp->GetDataField();
+      auto dfe = wp->GetDataField();
 	// LKTOKEN  _@M418_ = "Manual"
       dfe->addEnumText(MsgToken<418>());
 	// LKTOKEN  _@M175_ = "Circling"

@@ -15,7 +15,7 @@ class DataFieldInteger : public DataField {
  private:
   int mMin;
   int mMax;
-  int mValue;
+  int mValue = 0;
   int mStep;
   PeriodClock mTmLastStep;
   int mSpeedup;
@@ -25,7 +25,7 @@ class DataFieldInteger : public DataField {
   int SpeedUp(bool keyup);
 
  public:
-  DataFieldInteger(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat, int Min, int Max, int Default,
+  DataFieldInteger(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat, int Min, int Max,
                    int Step, DataAccessCallback_t&& OnDataAccess);
 
   void Inc() override;

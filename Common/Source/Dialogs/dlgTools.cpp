@@ -39,6 +39,9 @@ extern HINSTANCE _hInstance;
   #include <linux/input.h>
 #endif
 
+#include <string_view>
+using std::string_view_literals::operator""sv;
+
 static void OnButtonClick(WndButton* pWnd){
   if(pWnd) {
     WndForm * pForm = pWnd->GetParentWndForm();
@@ -385,13 +388,11 @@ void LoadChildsFromXML(WindowControl *Parent,
     int Font = AttributeToLong(*child, "Font", ParentFont);
     int Border = AttributeToLong(*child, "Border", 0);
     std::string_view align = AttributeToString(*child, "halign", "");
-    if (align == "center") {
+    if (align == "center"sv) {
       X = (Parent->GetWidth() - Width) / 2;
     }
 
-    if (strcmp(child->name(), "WndProperty") == 0) {
-
-      WndProperty *W;
+    if (child->name() == "WndProperty"sv) {
 
       int CaptionWidth = DLGSCALE(AttributeToLong(*child, "CaptionWidth", 0));
       int MultiLine = AttributeToLong(*child, "MultiLine", 0);
@@ -399,15 +400,13 @@ void LoadChildsFromXML(WindowControl *Parent,
 
       const char* OnHelpCallback = AttributeToString(*child, "OnHelp", "");
 
-      WC = W =
+      auto W =
         new WndProperty(Parent, Name, Caption, X, Y,
                         Width, Height, CaptionWidth,
                         MultiLine, CallBackLookup<WndProperty::OnHelpCallback_t>(LookUpTable, OnHelpCallback));
 
       W->SetHelpText(utf8_to_tstring(AttributeToString(*child, "Help", "")).c_str());
-
       W->SetReadOnly(ReadOnly != 0);
-
       W->SetUseKeyboard(AttributeToLong(*child, "Keyboard", 0));
 
       xml_node* dataFieldNode = child->first_node("DataField");
@@ -423,68 +422,59 @@ void LoadChildsFromXML(WindowControl *Parent,
         double Step = AttributeToDouble(*dataFieldNode, "Step", 1);
         int Fine = AttributeToLong(*dataFieldNode, "Fine", 0);
 
-        if (strcasecmp(DataType, "enum")==0){
-          W->SetDataField(
-              new DataFieldEnum(*W, EditFormat, DisplayFmt, false,
-                    CallBackLookup<DataField::DataAccessCallback_t>(LookUpTable, OnDataAccess)));
-        } else if (strcasecmp(DataType, "filereader")==0){
-          W->SetDataField(
-              new DataFieldFileReader(*W, EditFormat, DisplayFmt,
-                    CallBackLookup<DataField::DataAccessCallback_t>(LookUpTable, OnDataAccess))
-          );
-        } else if (strcasecmp(DataType, "boolean")==0){
-          W->SetDataField(
-              new DataFieldBoolean(*W, EditFormat, DisplayFmt, false, MsgToken<958>(), MsgToken<959>(), // ON OFF
-                    CallBackLookup<DataField::DataAccessCallback_t>(LookUpTable, OnDataAccess))
-          );
-        } else if (strcasecmp(DataType, "double")==0){
-          W->SetDataField(
-			        new DataFieldFloat(*W, EditFormat, DisplayFmt, Min, Max, 0, Step, Fine,
-                    CallBackLookup<DataField::DataAccessCallback_t>(LookUpTable, OnDataAccess))
-          );
-        } else if (strcasecmp(DataType, "integer")==0){
-          W->SetDataField(
-              new DataFieldInteger(*W, EditFormat, DisplayFmt, (int)Min, (int)Max, (int)0, (int)Step,
-                    CallBackLookup<DataField::DataAccessCallback_t>(LookUpTable, OnDataAccess))
-          );
-        } else if (strcasecmp(DataType, "string")==0){
-          W->SetDataField(
-              new DataFieldString(*W, EditFormat, DisplayFmt, TEXT(""),
-                    CallBackLookup<DataField::DataAccessCallback_t>(LookUpTable, OnDataAccess))
-          );
-        } else if (strcasecmp(DataType, "time")==0){
-          W->SetDataField(
-      			  new DataFieldTime(*W, EditFormat, DisplayFmt, Min, Max, 0, Step, Fine,
-                    CallBackLookup<DataField::DataAccessCallback_t>(LookUpTable, OnDataAccess))
-          );
-        } else {
+        auto callback = [&]() {
+          return CallBackLookup<DataField::DataAccessCallback_t>(LookUpTable, OnDataAccess);
+        };
+
+        if (strcasecmp(DataType, "enum") == 0) {
+          W->CreateDataField<DataFieldEnum>(EditFormat, DisplayFmt, callback());
+        }
+        else if (strcasecmp(DataType, "filereader") == 0) {
+           W->CreateDataField<DataFieldFileReader>(EditFormat, DisplayFmt, callback());
+        }
+        else if (strcasecmp(DataType, "boolean") == 0) {
+          W->CreateDataField<DataFieldBoolean>(EditFormat, DisplayFmt, callback());
+        }
+        else if (strcasecmp(DataType, "double") == 0) {
+          W->CreateDataField<DataFieldFloat>(EditFormat, DisplayFmt, Min, Max, Step, Fine, callback());
+        }
+        else if (strcasecmp(DataType, "integer") == 0) {
+          W->CreateDataField<DataFieldInteger>(EditFormat, DisplayFmt, Min, Max, Step, callback());
+        }
+        else if (strcasecmp(DataType, "string") == 0) {
+          W->CreateDataField<DataFieldString>(EditFormat, DisplayFmt, callback());
+        }
+        else if (strcasecmp(DataType, "time") == 0) {
+          W->CreateDataField<DataFieldTime>(EditFormat, DisplayFmt, Min, Max, Step, Fine, callback());
+        }
+        else {
           // Unknown DataType
           assert(false);
         }
       }
 
-    } else if (strcmp(child->name(), "WndButton") == 0) {
+      WC = W;
 
+    }
+    else if (child->name() == "WndButton"sv) {
       const char* ClickCallback = AttributeToString(*child, "OnClickNotify", "");
 
       WC = new WndButton(Parent, Name, Caption, X, Y, Width, Height,
                       CallBackLookup<WndButton::ClickNotifyCallback_t>(LookUpTable, ClickCallback));
-
-    } else if (strcmp(child->name(), "WndOwnerDrawFrame") == 0) {
-
+    }
+    else if (child->name() == "WndOwnerDrawFrame"sv) {
       const char* PaintCallback = AttributeToString(*child, "OnPaint", "");
 
       WC = new WndOwnerDrawFrame(Parent, Name, X, Y, Width, Height,
                       CallBackLookup<WndOwnerDrawFrame::OnPaintCallback_t>(LookUpTable, PaintCallback));
-
-    } else if (strcmp(child->name(), "WndFrame") == 0) {
-
+    }
+    else if (child->name() == "WndFrame"sv) {
       WC = new WndFrame(Parent, Name, X, Y, Width, Height);
 
       LoadChildsFromXML(WC, LookUpTable, *child, ParentFont);  // recursivly create dialog
 
-    } else if (strcmp(child->name(), "WndListFrame") == 0) {
-
+    }
+    else if (child->name() == "WndListFrame"sv) {
       const char* ListCallback = AttributeToString(*child, "OnListInfo", "");
 
       WC = new WndListFrame(Parent, Name, X, Y, Width, Height,
@@ -492,18 +482,18 @@ void LoadChildsFromXML(WindowControl *Parent,
 
       LoadChildsFromXML(WC, LookUpTable, *child, ParentFont);  // recursivly create dialog
 
-    } else if (strcmp(child->name(), "WndButtonImage") == 0) {
-
+    }
+    else if (child->name() == "WndButtonImage"sv) {
       const char* ClickCallback = AttributeToString(*child, "OnClickNotify", "");
 
       WC = new WndButtonImage(Parent, Name, Caption, X, Y, Width, Height,
                       CallBackLookup<WndButton::ClickNotifyCallback_t>(LookUpTable, ClickCallback));
     }
     else {
-        LKASSERT(false); // unknow control.
+      LKASSERT(false);  // unknow control.
     }
 
-    if (WC != nullptr) {
+    if (WC) {
 
       if (Font != -1) {
         FontReference FontRef = GetFontRef(Font);
@@ -546,7 +536,8 @@ WndForm *dlgLoadFromXML(const CallBackTableEntry_t *LookUpTable, unsigned resID)
   try {
     constexpr int Flags = rapidxml::parse_trim_whitespace | rapidxml::parse_normalize_whitespace;
     xmldoc.parse<Flags>(xml_string.data());
-  } catch (rapidxml::parse_error& e) {
+  }
+  catch (rapidxml::parse_error& e) {
     StartupStore(TEXT(".. XML Dialog parse failed : %s"), to_tstring(e.what()).c_str());
     return nullptr;
   }

@@ -20,7 +20,7 @@ static void getVariables(WndForm * pForm) {
     _stprintf(tmp,_T("prpFile%1u"),i+1);
     WndProperty* wp = pForm->FindByName<WndProperty>(tmp);
     if (wp) {
-      DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(wp->GetDataField());
+      DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(wp->GetDataField().get());
       if(dfe) {
         const TCHAR* str = dfe->GetPathFile();
         if(!str) {
@@ -80,7 +80,7 @@ static void setVariables(WndForm * pForm) {
     auto wp = pForm->FindByName<WndProperty>(tmp);
 
     if (wp) {
-      DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(wp->GetDataField());
+      DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(wp->GetDataField().get());
       if(dfe) {
         const TCHAR* suffix_filters[] = {
           _T(LKS_AIRSPACES),

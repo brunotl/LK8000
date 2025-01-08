@@ -10,15 +10,11 @@
 #include <algorithm>
 #include <cassert>
 
-DataFieldEnum::DataFieldEnum(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat, int Default,
+DataFieldEnum::DataFieldEnum(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat,
                              DataAccessCallback_t&& OnDataAccess)
-    : DataField(Owner, EditFormat, DisplayFormat, std::move(OnDataAccess)), mValue(Default) {
-
-  if (Default >= 0) {
-    mValue = Default;
-  } else {
-    mValue = 0;
-  }
+    : DataField(Owner, EditFormat, DisplayFormat, std::forward<DataAccessCallback_t>(OnDataAccess))
+{
+  mValue = 0;
   mOnDataAccess(this, daGet);
 }
 

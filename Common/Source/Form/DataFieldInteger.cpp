@@ -14,13 +14,10 @@
 
 // DataFieldInteger class implementation
 DataFieldInteger::DataFieldInteger(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat, int Min,
-                                   int Max, int Default, int Step, DataAccessCallback_t&& OnDataAccess)
-    : DataField(Owner, EditFormat, DisplayFormat, std::move(OnDataAccess)),
-      mMin(Min),
-      mMax(Max),
-      mValue(Default),
-      mStep(Step),
-      mSpeedup(0) {
+                                   int Max, int Step, DataAccessCallback_t&& OnDataAccess)
+    : DataField(Owner, EditFormat, DisplayFormat, std::forward<DataAccessCallback_t>(OnDataAccess)),
+      mMin(Min), mMax(Max), mStep(Step), mSpeedup(0)
+{
   SupportCombo = true;
   mOnDataAccess(this, daGet);
 }

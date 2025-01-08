@@ -43,7 +43,7 @@ void OnCloseClicked(WndButton* pWnd){
 void ResetFilter(WndForm* pForm, const TCHAR* Name) {
   auto pWnd = pForm->FindByName<WndProperty>(Name);
   if (pWnd) {
-    DataField* dfe = pWnd->GetDataField();
+    auto dfe = pWnd->GetDataField();
     if(dfe) {
       dfe->Set(TEXT("*"));
     }
@@ -355,7 +355,7 @@ bool dlgSelectObject::OnTimerNotify(WndForm* pForm) {
       if(wList) {
         auto wpDirection = pForm->FindByName<WndProperty>(TEXT("prpFltDirection"));
         if (wpDirection) {
-          SetDirectionData(wpDirection->GetDataField());
+          SetDirectionData(wpDirection->GetDataField().get());
           wpDirection->RefreshDisplay();
         }
         UpdateList();
@@ -387,7 +387,7 @@ bool dlgSelectObject::FormKeyDown(WndForm* pForm, unsigned KeyCode) {
 
     auto wp = pForm->FindByName<WndProperty>(TEXT("prpFltType"));
     if (wp) {
-      DataField* dfe = wp->GetDataField();
+      auto dfe = wp->GetDataField();
       if (dfe) {
         dfe->Set(CAirspaceManager::GetAirspaceTypeText(idx));
       }

@@ -7,17 +7,14 @@
  */
 
 #include "DataFieldBoolean.h"
+#include "LKLanguage.h"
 
-DataFieldBoolean::DataFieldBoolean(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat, int Default,
-                                   const TCHAR* TextTrue, const TCHAR* TextFalse, DataAccessCallback_t&& OnDataAccess)
-    : DataField(Owner, EditFormat, DisplayFormat, std::move(OnDataAccess)) {
-  if (Default) {
-    mValue = true;
-  } else {
-    mValue = false;
-  }
-  _tcscpy(mTextTrue, TextTrue);
-  _tcscpy(mTextFalse, TextFalse);
+DataFieldBoolean::DataFieldBoolean(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat,
+                                   DataAccessCallback_t&& OnDataAccess)
+    : DataField(Owner, EditFormat, DisplayFormat, std::forward<DataAccessCallback_t>(OnDataAccess))
+{
+  _tcscpy(mTextTrue, MsgToken<958>());
+  _tcscpy(mTextFalse, MsgToken<959>());
   SupportCombo = true;
   mOnDataAccess(this, daGet);
 }

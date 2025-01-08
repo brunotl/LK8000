@@ -586,7 +586,7 @@ const TCHAR* CustomKeyLabel(CustomKeyMode_t key) {
 void AddCustomKeyList(WndForm* pForm, const TCHAR* WndName, CustomKeyMode_t value) {
 	auto pWnd = pForm->FindByName<WndProperty>(WndName);
 	if (pWnd) {
-		DataField* dfe = pWnd->GetDataField();
+		auto dfe = pWnd->GetDataField();
 		if (dfe) {
 			if (dfe->getCount() == 0) {
 				for (auto& item : _CustomKeyLabel) {
@@ -603,7 +603,7 @@ void AddCustomKeyList(WndForm* pForm, const TCHAR* WndName, CustomKeyMode_t valu
 void GetCustomKey(WndForm* pForm, const TCHAR* WndName, CustomKeyMode_t& value) {
 	auto pWnd = pForm->FindByName<WndProperty>(WndName);
 	if (pWnd) {
-		DataField* dfe = pWnd->GetDataField();
+		auto dfe = pWnd->GetDataField();
 		if (dfe) {
 			value = static_cast<CustomKeyMode_t>(dfe->GetAsInteger());
 		}

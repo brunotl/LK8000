@@ -32,85 +32,85 @@ static void setVariables(void) {
 
   wp = wf->FindByName<WndProperty>(TEXT("prpIP11"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP11);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP12"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP12);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP13"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP13);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP14"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP14);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP15"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP15);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP16"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP16);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP17"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP17);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP21"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP21);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP22"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP22);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP23"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP23);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP24"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP24);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP31"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP31);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP32"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP32);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpIP33"));
   if (wp) {
-    DataField* dfb = wp->GetDataField();
+    auto dfb = wp->GetDataField();
     dfb->Set(ConfIP33);
     wp->RefreshDisplay();
   }

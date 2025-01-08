@@ -674,7 +674,7 @@ static WndForm* InitStartup(BYTE mode) {
         // File selection shared  by PROFILEs choices
         //
         if (pWndProfile) {
-            DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(pWndProfile->GetDataField());
+            DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(pWndProfile->GetDataField().get());
             if(dfe) {
                 if (mode == RUN_PROFILE) {
                     dfe->ScanDirectoryTop(_T(LKD_CONF), _T(LKS_PRF));
@@ -863,7 +863,7 @@ short dlgStartupShowModal(void) {
 
     wp = wf->FindByName<WndProperty>(TEXT("prpProfile"));
     if (wp) {
-        DataFieldFileReader* dfe = (DataFieldFileReader*) wp->GetDataField();
+        DataFieldFileReader* dfe = (DataFieldFileReader*) wp->GetDataField().get();
 
         if (RUN_MODE == RUN_PROFILE) {
             if (_tcslen(dfe->GetPathFile()) > 0) {

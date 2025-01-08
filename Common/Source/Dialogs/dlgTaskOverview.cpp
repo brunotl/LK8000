@@ -40,7 +40,7 @@ static bool fai_ok = false;
 static void UpdateFilePointer(WndForm* pWnd) {
   WndProperty *wp = pWnd->FindByName<WndProperty>(TEXT("prpFile"));
   if (wp) {
-    DataFieldFileReader* dfe = (DataFieldFileReader*)wp->GetDataField();
+    DataFieldFileReader* dfe = (DataFieldFileReader*)wp->GetDataField().get();
     if (_tcslen(LastTaskFileName)>0) {
       dfe->Lookup(LastTaskFileName);
     } else {
@@ -203,7 +203,7 @@ tstring GetHomeWaypointName() {
 static 
 void UpdateHomeWaypoint(WndProperty * pWnd) {
   if (pWnd) {
-    DataField* df = pWnd->GetDataField();
+    auto df = pWnd->GetDataField();
     if (df) {
       df->Set(GetHomeWaypointName().c_str());
     }
@@ -471,7 +471,7 @@ static void OnSaveClicked(WndButton* pWnd){
   WndForm* pForm = pWnd->GetParentWndForm();
   WndProperty* wp = pForm->FindByName<WndProperty>(TEXT("prpFile"));
   if (!wp) return;
-  DataFieldFileReader* dfe = (DataFieldFileReader*)wp->GetDataField();
+  DataFieldFileReader* dfe = (DataFieldFileReader*)wp->GetDataField().get();
   int file_index = dfe->GetAsInteger();
 
   // TODO enhancement: suggest a good new name not already in the list
@@ -532,7 +532,7 @@ static void OnLoadClicked(WndButton* pWnd){ // 091216
 
   wp->OnLButtonDown((POINT){0,0});
 
-  DataFieldFileReader* dfe = (DataFieldFileReader*) wp->GetDataField();
+  DataFieldFileReader* dfe = (DataFieldFileReader*) wp->GetDataField().get();
 
   int file_index = dfe->GetAsInteger();
   LPCTSTR szFileName = dfe->GetPathFile();
@@ -609,7 +609,7 @@ static void OnDeleteClicked(WndButton* pWnd){
   if (!wp) return;
   wp->OnLButtonDown((POINT){0,0});
 
-  DataFieldFileReader* dfe = (DataFieldFileReader*) wp->GetDataField();
+  DataFieldFileReader* dfe = (DataFieldFileReader*) wp->GetDataField().get();
 
   int file_index = dfe->GetAsInteger();
   if (file_index>0) {
@@ -698,7 +698,7 @@ void dlgTaskOverviewShowModal(int Idx){
   WndProperty* wp = wf->FindByName<WndProperty>(TEXT("prpFile"));
   if (wp) {
     wp->SetVisible(false);
-    DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(wp->GetDataField());
+    DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(wp->GetDataField().get());
     if(dfe) {
       const TCHAR* suffix_filters[] = {
         _T(LKS_TSK),

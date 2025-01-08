@@ -10,8 +10,10 @@
 #include <cmath>
 
 DataFieldTime::DataFieldTime(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat, double Min,
-                             double Max, double Default, double Step, int Fine, DataAccessCallback_t&& OnDataAccess)
-    : DataFieldFloat(Owner, EditFormat, DisplayFormat, Min, Max, Default, Step, Fine, std::move(OnDataAccess)) {}
+                             double Max, double Step, int Fine, DataAccessCallback_t&& OnDataAccess)
+    : DataFieldFloat(Owner, EditFormat, DisplayFormat, Min, Max, Step, Fine, std::forward<DataAccessCallback_t>(OnDataAccess))
+{
+}
 
 const TCHAR* DataFieldTime::GetAsDisplayString() {
   double hours = 0;

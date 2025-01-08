@@ -23,8 +23,7 @@ static void OnStartClicked(WndButton* pWnd) {
   WndProperty* wp;
   wp = wf->FindByName<WndProperty>(TEXT("prpIGCFile"));
   if (wp) {
-    DataFieldFileReader* dfe;
-    dfe = (DataFieldFileReader*)wp->GetDataField();
+    DataFieldFileReader* dfe = (DataFieldFileReader*)wp->GetDataField().get();
     ReplayLogger::SetFilename(dfe->GetPathFile());
   }
   ReplayLogger::Start();
@@ -84,7 +83,7 @@ void dlgLoggerReplayShowModal(void){
 
     wp = wf->FindByName<WndProperty>(TEXT("prpIGCFile"));
     if (wp) {
-      DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(wp->GetDataField());
+      DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(wp->GetDataField().get());
       if(dfe) {
         dfe->ScanDirectoryTop(_T(LKD_LOGS), _T(LKS_IGC));
         dfe->Lookup(ReplayLogger::GetFilename());

@@ -14,13 +14,10 @@
 #include "Utils.h"
 
 DataFieldFloat::DataFieldFloat(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat, double Min,
-                               double Max, double Default, double Step, int Fine, DataAccessCallback_t&& OnDataAccess)
-    : DataField(Owner, EditFormat, DisplayFormat, std::move(OnDataAccess)),
-      mMin(Min),
-      mMax(Max),
-      mStep(Step),
-      mFine(Fine),
-      mValue(Default) {
+                               double Max, double Step, int Fine, DataAccessCallback_t&& OnDataAccess)
+    : DataField(Owner, EditFormat, DisplayFormat, std::forward<DataAccessCallback_t>(OnDataAccess)),
+      mMin(Min), mMax(Max), mStep(Step), mFine(Fine)
+{
   SupportCombo = true;
   mOnDataAccess(this, daGet);
 }

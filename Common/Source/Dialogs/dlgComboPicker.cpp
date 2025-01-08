@@ -14,7 +14,7 @@
 
 
 WndProperty * wComboPopupWndProperty;
-DataField * ComboPopupDataField = NULL;
+std::weak_ptr<DataField> ComboPopupDataFieldWeakPtr;
 ComboList * ComboListPopup=NULL;
 
 static TCHAR sSavedInitialValue[ComboList::ITEMMAX];
@@ -61,10 +61,13 @@ static void OnComboPopupListInfo(WndListFrame * Sender, WndListFrame::ListInfo_t
 }
 
 static void OnHelpClicked(WindowControl * Sender) {
-  int idx = ComboListPopup->ItemIndex;  
-  if (idx >=0) {
-    const auto& Item = ComboListPopup->ItemList[idx];
-    ComboPopupDataField->SetFromCombo(Item.DataFieldIndex, Item.Value.c_str());
+  auto ptr = ComboPopupDataFieldWeakPtr.lock();
+  if (ptr) {
+    int idx = ComboListPopup->ItemIndex;  
+    if (idx >=0) {
+      const auto& Item = ComboListPopup->ItemList[idx];
+      ptr->SetFromCombo(Item.DataFieldIndex, Item.Value.c_str());
+    }
   }
   wComboPopupWndProperty->OnHelp();
 }
@@ -138,23 +141,28 @@ int dlgComboPicker(WndProperty* pWnd){
       wComboPopupListEntry->SetCanFocus(true);
     }
 
-    ComboPopupDataField = wComboPopupWndProperty->GetDataField();
-    LKASSERT(ComboPopupDataField!=NULL);
-    ComboPopupDataField->CreateComboList();   
-    ComboListPopup = ComboPopupDataField->GetCombo();
+    auto ptr = wComboPopupWndProperty->GetDataField();
+    if (ptr) {
+      ComboPopupDataFieldWeakPtr = ptr;
+      ptr->CreateComboList();   
+      ComboListPopup = ptr->GetCombo();
 
-    auto wComboPopupListFrame = wf->FindByName<WndListFrame>(TEXT("frmComboPopupList"));
-    if (wComboPopupListFrame) {
-      wComboPopupListFrame->SetBorderKind(BORDERLEFT | BORDERTOP | BORDERRIGHT|BORDERBOTTOM);
-      wComboPopupListFrame->SetEnterCallback(OnComboPopupListEnter);
-      wComboPopupListFrame->ResetList();
-      wComboPopupListFrame->SetItemIndex(ComboListPopup->PropertyDataFieldIndexSaved);
+      auto wComboPopupListFrame = wf->FindByName<WndListFrame>(TEXT("frmComboPopupList"));
+      if (wComboPopupListFrame) {
+        wComboPopupListFrame->SetBorderKind(BORDERLEFT | BORDERTOP | BORDERRIGHT|BORDERBOTTOM);
+        wComboPopupListFrame->SetEnterCallback(OnComboPopupListEnter);
+        wComboPopupListFrame->ResetList();
+        wComboPopupListFrame->SetItemIndex(ComboListPopup->PropertyDataFieldIndexSaved);
+      }
     }
 
     if (bInitialPage) { // save values for "Cancel" from first page only
       bInitialPage=false;
-      iSavedInitialDataIndex = ComboListPopup->ItemList[ComboListPopup->PropertyDataFieldIndexSaved].DataFieldIndex;
-      ComboPopupDataField->CopyString(sSavedInitialValue, false);
+      iSavedInitialDataIndex=ComboListPopup->ItemList[ComboListPopup->PropertyDataFieldIndexSaved].DataFieldIndex;
+      auto ptr = ComboPopupDataFieldWeakPtr.lock();
+      if (ptr) {
+        ptr->CopyString(sSavedInitialValue,false);
+      }
     }
 
     WindowControl* pBtHelp = wf->FindByName(TEXT("cmdHelp"));
@@ -166,53 +174,49 @@ int dlgComboPicker(WndProperty* pWnd){
 
     bOpenCombo=false;  //tell  combo to exit loop after close
 
-    if (ComboListPopup->ItemIndex >=0) // OK/Select
-    {
-      #if 0
-      ComboPopupDataField->GetCombo()->LastModalResult=1; // OK Hit Used then calling via SendMessage()
-      #endif
+    DataFieldPtr ComboPopupDataField = ComboPopupDataFieldWeakPtr.lock();
+    if (ComboPopupDataField) {
+      if (ComboListPopup->ItemIndex >= 0) { // OK/Select
 
-      if (ComboListPopup->ItemList[ComboListPopup->ItemIndex].DataFieldIndex == ComboList::ReopenMOREDataIndex) {
-        // we're last in list and the want more past end of list so select last
-        // real list item and reopen
-        ComboPopupDataField->SetDetachGUI(true);  // we'll reopen, so don't call xcsoar data changed routine yet
-        ComboListPopup->ItemIndex--;
-        bOpenCombo=true; // reopen combo with new selected index at center
-      } 
-      else if (ComboListPopup->ItemList[ComboListPopup->ItemIndex].DataFieldIndex == ComboList::ReopenLESSDataIndex) {
-        // same as above but lower items needed
-        ComboPopupDataField->SetDetachGUI(true);
-        ComboListPopup->ItemIndex++;
-        bOpenCombo=true;
+        const auto& item = ComboListPopup->ItemList[ComboListPopup->ItemIndex];
+
+        if (item.DataFieldIndex == ComboList::ReopenMOREDataIndex) {
+          // we're last in list and the want more past end of list so select last
+          // real list item and reopen
+          ComboPopupDataField->SetDetachGUI(true);  // we'll reopen, so don't call xcsoar data changed routine yet
+          ComboListPopup->ItemIndex--;
+          bOpenCombo = true;  // reopen combo with new selected index at center
+        } else if (item.DataFieldIndex == ComboList::ReopenLESSDataIndex) {
+          // same as above but lower items needed
+          ComboPopupDataField->SetDetachGUI(true);
+          ComboListPopup->ItemIndex++;
+          bOpenCombo = true;
+        }
+        ComboPopupDataField->SetFromCombo(item.DataFieldIndex, item.Value.c_str());
       }
-      int iDataIndex = ComboListPopup->ItemList[ComboListPopup->ItemIndex].DataFieldIndex;
-      ComboPopupDataField->SetFromCombo(iDataIndex, ComboListPopup->ItemList[ComboListPopup->ItemIndex].Value.c_str());
-    }
-    else // Cancel
-    { // if we've detached the GUI during the load, then there is nothing to do here
-      #if 0
-      ComboPopupDataField->GetCombo()->LastModalResult=0; // Cancel Hit.  Used then calling via SendMessage()
-      #endif
-      // NOTE 130206 : we are missing currently the Cancel return status .
-      // The list selection does not return the Cancel button status, because so far we have been setting an empty
-      // value on entry, and we check on exit if it is still empty. In such case, a no/action is performed, either
-      // because the user did not select anything with Select (click on empty field at the top) or because he really
-      // clicked on Cancel and we returned again the initial empty value.
-      // BUT, in some cases, like on TaskOverview, we set the initial item of the list to Default.task,
-      // and in this case a Cancel will return correctly Default.tsk!
-      // This is why we get the confirmation message for loading default task, instead of a quiet return.
-      // Solution: either use a WindowControl variable, or a more simple global for ComboCancel.
-      // This would be an hack, but quick and dirty solution with no disde effects.
-      // Set ComboCancel true if we are here, otherwise false, and check that after
-      // dfe = (DataFieldFileReader*) wp->GetDataField()
-      // If ever we want to manage this Cancel button correctly, we should use one of these approaches.
+      else {  // Cancel
+              // if we've detached the GUI during the load, then there is nothing to do here
 
-      LKASSERT(iSavedInitialDataIndex >=0);
-      if (iSavedInitialDataIndex >=0) {
-        ComboPopupDataField->SetFromCombo(iSavedInitialDataIndex, sSavedInitialValue);
+         // NOTE 130206 : we are missing currently the Cancel return status .
+        // The list selection does not return the Cancel button status, because so far we have been setting an empty
+        // value on entry, and we check on exit if it is still empty. In such case, a no/action is performed, either
+        // because the user did not select anything with Select (click on empty field at the top) or because he really
+        // clicked on Cancel and we returned again the initial empty value.
+        // BUT, in some cases, like on TaskOverview, we set the initial item of the list to Default.task,
+        // and in this case a Cancel will return correctly Default.tsk!
+        // This is why we get the confirmation message for loading default task, instead of a quiet return.
+        // Solution: either use a WindowControl variable, or a more simple global for ComboCancel.
+        // This would be an hack, but quick and dirty solution with no disde effects.
+        // Set ComboCancel true if we are here, otherwise false, and check that after
+        // dfe = (DataFieldFileReader*) wp->GetDataField()
+        // If ever we want to manage this Cancel button correctly, we should use one of these approaches.
+
+        LKASSERT(iSavedInitialDataIndex >= 0);
+        if (iSavedInitialDataIndex >= 0) {
+          ComboPopupDataField->SetFromCombo(iSavedInitialDataIndex, sSavedInitialValue);
+        }
       }
     }
-
 
     wComboPopupWndProperty->RefreshDisplay();
     ComboListPopup->clear();

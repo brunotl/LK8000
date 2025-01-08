@@ -46,7 +46,6 @@ WndProperty::WndProperty(WindowControl* Parent, TCHAR* Name, TCHAR* Caption, int
     SetCaption(Caption);
   }
 
-  mDataField = nullptr;
   mDialogStyle = false;  // this is set by ::SetDataField()
 
   mUseKeyboard = false;
@@ -78,14 +77,7 @@ WndProperty::~WndProperty() {
 }
 
 void WndProperty::Destroy() {
-  if (mDataField) {
-    if (!mDataField->Unuse()) {
-      delete mDataField;
-      mDataField = nullptr;
-    } else {
-      // ASSERT(0);
-    }
-  }
+  mDataField = nullptr;
   WindowControl::Destroy();
 }
 
@@ -275,7 +267,7 @@ bool WndProperty::OnLButtonUp(const POINT& Pos) {
 }
 
 int WndProperty::CallSpecial() {
-  if (mDataField != NULL) {
+  if (mDataField) {
     mDataField->Special();
     SetText(mDataField->GetAsString());
   }
@@ -283,7 +275,7 @@ int WndProperty::CallSpecial() {
 }
 
 int WndProperty::IncValue() {
-  if (mDataField != NULL) {
+  if (mDataField) {
     mDataField->Inc();
     SetText(mDataField->GetAsString());
   }
@@ -291,7 +283,7 @@ int WndProperty::IncValue() {
 }
 
 int WndProperty::DecValue() {
-  if (mDataField != NULL) {
+  if (mDataField) {
     mDataField->Dec();
     SetText(mDataField->GetAsString());
   }
@@ -389,28 +381,18 @@ void WndProperty::RefreshDisplay() {
   Redraw();
 }
 
-DataField* WndProperty::SetDataField(DataField* Value) {
-  DataField* res = mDataField;
-
-  if (mDataField != Value) {
-    if (mDataField && !mDataField->Unuse()) {
-      delete (mDataField);
-      res = NULL;
-    }
-
-    Value->Use();
-    mDataField = Value;
+void WndProperty::SetDataField(DataFieldPtr Value) {
+  mDataField = Value;
+  if(mDataField) {
     mDataField->GetData();
     mDialogStyle = mDataField->SupportCombo || mUseKeyboard;
 
     if (GetReadOnly() || mDialogStyle) {
       SetButtonSize(0);
       this->SetCanFocus(true);
-    } else if (mDataField && !mDialogStyle) {
+    } else if (!mDialogStyle) {
       SetButtonSize(DLGSCALE(32) / 2);
     }
-
-    RefreshDisplay();
   }
-  return res;
+  RefreshDisplay();
 }

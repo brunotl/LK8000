@@ -22,14 +22,14 @@ class DataFieldFloat : public DataField {
   int mSpeedup = 0;
 
  protected:
-  double mValue;
+  double mValue = 0.;
   TCHAR mOutBuf[OUTBUFFERSIZE + 1];
 
   double SpeedUp(bool keyup);
 
  public:
   DataFieldFloat(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat, double Min, double Max,
-                 double Default, double Step, int Fine, DataAccessCallback_t&& OnDataAccess);
+                 double Step, int Fine, DataAccessCallback_t&& OnDataAccess);
 
   void Inc() override;
   void Dec() override;

@@ -20,7 +20,8 @@
 
 DataFieldFileReader::DataFieldFileReader(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat,
                                          DataAccessCallback_t&& OnDataAccess)
-    : DataField(Owner, EditFormat, DisplayFormat, std::move(OnDataAccess)) {
+    : DataField(Owner, EditFormat, DisplayFormat, std::forward<DataAccessCallback_t>(OnDataAccess))
+{
   SupportCombo = true;
   mOnDataAccess(this, daGet);
 }

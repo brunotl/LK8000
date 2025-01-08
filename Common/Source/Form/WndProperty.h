@@ -12,8 +12,10 @@
 #include "WindowControls.h"
 #include "LKObjects.h"
 #include <functional>
+#include <memory>
 
 class DataField;
+using DataFieldPtr = std::shared_ptr<DataField>;
 
 #define STRINGVALUESIZE 128
 
@@ -40,7 +42,7 @@ class WndProperty : public WindowControl {
   int IncValue();
   int DecValue();
 
-  DataField* mDataField;
+  DataFieldPtr mDataField;
   tstring mValue;
 
   void UpdateButtonData();
@@ -48,6 +50,8 @@ class WndProperty : public WindowControl {
 
   OnHelpCallback_t mOnHelpCallback;
   TCHAR* mHelpText = nullptr;
+
+  void SetDataField(DataFieldPtr Value);
 
  public:
   WndProperty(WindowControl* Parent, TCHAR* Name, TCHAR* Caption, int X, int Y, int Width, int Height, int CaptionWidth,
@@ -76,13 +80,18 @@ class WndProperty : public WindowControl {
   bool OnLButtonUp(const POINT& Pos) override;
   bool OnLButtonDblClick(const POINT& Pos) override;
 
-  DataField* GetDataField() {
+  DataFieldPtr GetDataField() {
     return mDataField;
   }
 
-  DataField* SetDataField(DataField* Value);
   void SetText(const TCHAR* Value);
   int SetButtonSize(int Value);
+
+  template<typename DataFieldT, typename ...Args>
+  void CreateDataField(Args&&... args) {
+    SetDataField(std::make_shared<DataFieldT>(*this, std::forward<Args>(args)...));
+  }
+
 };
 
 int dlgComboPicker(WndProperty* pWnd);

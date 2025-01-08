@@ -365,169 +365,217 @@ BOOL DevLX_EOS_ERA::ShowData(WndForm* wf , DeviceDescriptor_t* d)
 
   wp = wf->FindByName<WndProperty>(TEXT("prpQNHDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>());  // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
-    dfe->addEnumText(MsgToken<2454>()); // LKTOKEN  _@M2454_ "IN & OUT"
-    dfe->Set((uint) PortIO.QNHDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>());  // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
+      dfe->addEnumText(MsgToken<2454>()); // LKTOKEN  _@M2454_ "IN & OUT"
+      dfe->Set((uint) PortIO.QNHDir);
+    }
     wp->RefreshDisplay();
   }
   
   wp = wf->FindByName<WndProperty>(TEXT("prpMCDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>());  // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
-    dfe->addEnumText(MsgToken<2454>()); // LKTOKEN  _@M2454_ "IN & OUT"
-    dfe->Set((uint) PortIO.MCDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>());  // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
+      dfe->addEnumText(MsgToken<2454>()); // LKTOKEN  _@M2454_ "IN & OUT"
+      dfe->Set((uint) PortIO.MCDir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpBUGDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>());  // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
-    dfe->addEnumText(MsgToken<2454>()); // LKTOKEN  _@M2454_ "IN & OUT"
-    dfe->Set((uint) PortIO.BUGDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>());  // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
+      dfe->addEnumText(MsgToken<2454>()); // LKTOKEN  _@M2454_ "IN & OUT"
+      dfe->Set((uint) PortIO.BUGDir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpBALDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>());  // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
-    dfe->addEnumText(MsgToken<2454>()); // LKTOKEN  _@M2454_ "IN & OUT"
-    dfe->Set((uint) PortIO.BALDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>());  // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
+      dfe->addEnumText(MsgToken<2454>()); // LKTOKEN  _@M2454_ "IN & OUT"
+      dfe->Set((uint) PortIO.BALDir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpSTFDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
-    dfe->addEnumText(MsgToken<2454>()); // LKTOKEN  _@M2454_ "IN & OUT"
-    dfe->Set((uint) PortIO.STFDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
+      dfe->addEnumText(MsgToken<2454>()); // LKTOKEN  _@M2454_ "IN & OUT"
+      dfe->Set((uint) PortIO.STFDir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpWINDDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
-    dfe->Set((uint) PortIO.WINDDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->addEnumText(MsgToken<2453>()); // LKTOKEN  _@M2453_ "OUT"
+      dfe->Set((uint) PortIO.WINDDir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpBARODir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->Set((uint) PortIO.BARODir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->Set((uint) PortIO.BARODir);
+    }
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpSPEEDDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->Set((uint) PortIO.SPEEDDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->Set((uint) PortIO.SPEEDDir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpVARIODir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-
-    dfe->Set((uint) PortIO.VARIODir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->Set((uint) PortIO.VARIODir);
+    }
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpR_TRGTDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(_T("$xxDT,GET,NAVIGATE")); // "IN" 
-    dfe->addEnumText(_T("$GPRMB")); //  "OUT" = $GPRMB
-    dfe->Set((uint) PortIO.R_TRGTDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(_T("$xxDT,GET,NAVIGATE")); // "IN" 
+      dfe->addEnumText(_T("$GPRMB")); //  "OUT" = $GPRMB
+      dfe->Set((uint) PortIO.R_TRGTDir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpT_TRGTDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(_T("$xxDT,SET,NAVIGATE")); // "IN"
-    dfe->addEnumText(_T("$GPRMB")); //  "OUT" = $GPRMB
-    dfe->Set((uint) PortIO.T_TRGTDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(_T("$xxDT,SET,NAVIGATE")); // "IN"
+      dfe->addEnumText(_T("$GPRMB")); //  "OUT" = $GPRMB
+      dfe->Set((uint) PortIO.T_TRGTDir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpGFORCEDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->Set((uint) PortIO.GFORCEDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->Set((uint) PortIO.GFORCEDir);
+    }
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpOATDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->Set((uint) PortIO.OATDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->Set((uint) PortIO.OATDir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpBAT1Dir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->Set((uint) PortIO.BAT1Dir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->Set((uint) PortIO.BAT1Dir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpBAT2Dir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->Set((uint) PortIO.BAT2Dir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->Set((uint) PortIO.BAT2Dir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpPOLARDir"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
-    dfe->Set((uint) PortIO.POLARDir);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<2452>()); // LKTOKEN  _@M2452_ "IN"
+      dfe->Set((uint) PortIO.POLARDir);
+    }
     wp->RefreshDisplay();
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpDirectLink"));
   if (wp) {
-    DataField* dfe = wp->GetDataField(); dfe->Clear();
-    dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
-    dfe->addEnumText(MsgToken<894>()); // LKTOKEN  _@M894_": "ON"
-    dfe->Set((uint) PortIO.DirLink);
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Clear();
+      dfe->addEnumText(MsgToken<491>()); // LKTOKEN  _@M491_ "OFF"
+      dfe->addEnumText(MsgToken<894>()); // LKTOKEN  _@M894_": "ON"
+      dfe->Set((uint) PortIO.DirLink);
+    }
     wp->RefreshDisplay();
   }
-  
-
   return true;
 }
 
@@ -782,89 +830,123 @@ void DevLX_EOS_ERA::GetDirections(WndButton* pWnd){
       
       wp = wf->FindByName<WndProperty>(TEXT("prpQNHDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.QNHDir = (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.QNHDir = (DataBiIoDir) dfe->GetAsInteger();
+        }
       }     
       wp = wf->FindByName<WndProperty>(TEXT("prpMCDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.MCDir = (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.MCDir = (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpBUGDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.BUGDir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.BUGDir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
 
       wp = wf->FindByName<WndProperty>(TEXT("prpBALDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.BALDir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.BALDir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpSTFDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.STFDir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.STFDir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpWINDDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.WINDDir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.WINDDir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpBARODir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.BARODir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.BARODir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpVARIODir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.VARIODir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.VARIODir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpSPEEDDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.SPEEDDir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.SPEEDDir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpR_TRGTDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.R_TRGTDir =  (DataTP_Type) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.R_TRGTDir =  (DataTP_Type) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpGFORCEDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.GFORCEDir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.GFORCEDir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpOATDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.OATDir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.OATDir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpBAT1Dir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.BAT1Dir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.BAT1Dir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpBAT2Dir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.BAT2Dir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.BAT2Dir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpPOLARDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.POLARDir =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.POLARDir =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpDirectLink"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.DirLink =  (DataBiIoDir) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.DirLink =  (DataBiIoDir) dfe->GetAsInteger();
+        }
       }
       wp = wf->FindByName<WndProperty>(TEXT("prpT_TRGTDir"));
       if (wp) {
-        DataField* dfe = wp->GetDataField();
-        PortIO.T_TRGTDir =  (DataTP_Type) dfe->GetAsInteger();
+        auto dfe = wp->GetDataField();
+        if (dfe) {
+          PortIO.T_TRGTDir =  (DataTP_Type) dfe->GetAsInteger();
+        }
       }
     }
   }

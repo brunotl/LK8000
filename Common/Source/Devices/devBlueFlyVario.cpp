@@ -345,9 +345,9 @@ namespace dlgBlueFlyConfig {
 
         WndProperty* pWnd = wfDlg->FindByName<WndProperty>(utf8_to_tstring(Param.Code()).c_str());
         if(pWnd) {
-            DataField* pData = pWnd->GetDataField();
+            auto pData = pWnd->GetDataField();
             if(pData) {
-                AssocFieldParam[pData] = Param.Code();
+                AssocFieldParam[pData.get()] = Param.Code();
                 switch(Param.Type()) {
                     case TYPE_BOOLEAN:
                         pData->Set(Param.ValueBool());
@@ -402,7 +402,7 @@ namespace dlgBlueFlyConfig {
             // Init Enum WndProperty
             WndProperty* pWnd = wfDlg->FindByName<WndProperty>(_T("BOM"));
             if(pWnd) {
-                DataField* pData = pWnd->GetDataField();
+                auto pData = pWnd->GetDataField();
                 if(pData) {
                     pData->addEnumText(_T("BlueFlyVario"));
                     pData->addEnumText(_T("LK8EX1"));

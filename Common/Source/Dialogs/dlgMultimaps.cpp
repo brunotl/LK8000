@@ -29,57 +29,53 @@ static void setVariables(void) {
 
   wp = wf->FindByName<WndProperty>(TEXT("prpMultimap1"));
   if (wp) {
-	DataField* dfe = wp->GetDataField();
-
-	dfe->addEnumText(MsgToken<959>()); //	_@M959_ "OFF"
-	dfe->addEnumText(MsgToken<958>()); //	_@M958_ "ON"
-
-
-	dfe->Set(Multimap1);
-	wp->RefreshDisplay();
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->addEnumText(MsgToken<959>()); //	_@M959_ "OFF"
+      dfe->addEnumText(MsgToken<958>()); //	_@M958_ "ON"
+      dfe->Set(Multimap1);
+    }
+    wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpMultimap2"));
   if (wp) {
-	DataField* dfe = wp->GetDataField();
-
-	dfe->addEnumText(MsgToken<959>()); //	_@M959_ "OFF"
-	dfe->addEnumText(MsgToken<958>()); //	_@M958_ "ON"
-
-
-	dfe->Set(Multimap2);
-	wp->RefreshDisplay();
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->addEnumText(MsgToken<959>()); //	_@M959_ "OFF"
+      dfe->addEnumText(MsgToken<958>()); //	_@M958_ "ON"
+      dfe->Set(Multimap2);
+    }
+    wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpMultimap3"));
   if (wp) {
-	DataField* dfe = wp->GetDataField();
-
-	dfe->addEnumText(MsgToken<959>()); //	_@M959_ "OFF"
-	dfe->addEnumText(MsgToken<958>()); //	_@M958_ "ON"
-
-
-	dfe->Set(Multimap3);
-	wp->RefreshDisplay();
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->addEnumText(MsgToken<959>()); //	_@M959_ "OFF"
+      dfe->addEnumText(MsgToken<958>()); //	_@M958_ "ON"
+    	dfe->Set(Multimap3);
+    }
+    wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpMultimap4"));
   if (wp) {
-	DataField* dfe = wp->GetDataField();
-
-	dfe->addEnumText(MsgToken<959>()); //	_@M959_ "OFF"
-	dfe->addEnumText(MsgToken<958>()); //	_@M958_ "ON"
-
-	dfe->Set(Multimap4);
-	wp->RefreshDisplay();
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->addEnumText(MsgToken<959>()); //	_@M959_ "OFF"
+      dfe->addEnumText(MsgToken<958>()); //	_@M958_ "ON"
+      dfe->Set(Multimap4);
+    }
+    wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpMultimap5"));
   if (wp) {
-	DataField* dfe = wp->GetDataField();
-
-	dfe->addEnumText(MsgToken<959>()); //	_@M959_ "OFF"
-	dfe->addEnumText(MsgToken<958>()); //	_@M958_ "ON"
-
-
-	dfe->Set(Multimap5);
-	wp->RefreshDisplay();
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->addEnumText(MsgToken<959>()); //	_@M959_ "OFF"
+      dfe->addEnumText(MsgToken<958>()); //	_@M958_ "ON"
+      dfe->Set(Multimap5);
+    }
+    wp->RefreshDisplay();
   }
 }
 
@@ -96,31 +92,35 @@ static void OnResetClicked(WndButton* pWnd){
 
   wp = wf->FindByName<WndProperty>(TEXT("prpMultimap1"));
   if (wp) {
-	DataField* dfe = wp->GetDataField();
-	dfe->Set(Multimap1);
-	wp->RefreshDisplay();
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Set(Multimap1);
+    }
+    wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpMultimap2"));
   if (wp) {
-	DataField* dfe = wp->GetDataField();
-	dfe->Set(Multimap2);
-	wp->RefreshDisplay();
+    auto dfe = wp->GetDataField();
+    if (dfe) {
+      dfe->Set(Multimap2);
+    }
+    wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpMultimap3"));
   if (wp) {
-	DataField* dfe = wp->GetDataField();
+	auto dfe = wp->GetDataField();
 	dfe->Set(Multimap3);
 	wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpMultimap4"));
   if (wp) {
-	DataField* dfe = wp->GetDataField();
+	auto dfe = wp->GetDataField();
 	dfe->Set(Multimap4);
 	wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpMultimap5"));
   if (wp) {
-	DataField* dfe = wp->GetDataField();
+	auto dfe = wp->GetDataField();
 	dfe->Set(Multimap5);
 	wp->RefreshDisplay();
   }

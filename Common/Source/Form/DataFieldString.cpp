@@ -10,9 +10,10 @@
 #include "Dialogs.h"
 
 DataFieldString::DataFieldString(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat,
-                                 const TCHAR* Default, DataAccessCallback_t&& OnDataAccess)
-    : DataField(Owner, EditFormat, DisplayFormat, std::move(OnDataAccess)) {
-  _tcscpy(mValue, Default);
+                                 DataAccessCallback_t&& OnDataAccess)
+    : DataField(Owner, EditFormat, DisplayFormat, std::forward<DataAccessCallback_t>(OnDataAccess))
+{
+  _tcscpy(mValue, _T(""));
   SupportCombo = false;
 }
 

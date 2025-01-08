@@ -80,7 +80,7 @@ void UpdateKeyLayout(WndForm* pForm) {
 
   auto wpUnit = pForm->FindByName<WndProperty>(TEXT("prpUnit"));
   if(wpUnit && wKeyboardPopupWndProperty) {
-    DataField* pField = wKeyboardPopupWndProperty->GetDataField();
+    auto pField = wKeyboardPopupWndProperty->GetDataField();
     if(pField) {
       wpUnit->SetCaption(pField->GetUnits());
       wpUnit->RefreshDisplay();
@@ -327,7 +327,7 @@ BOOL dlgKeyboard(WndProperty* theProperty) {
   BOOL Ret = FALSE;
 
   wKeyboardPopupWndProperty = theProperty;
-  DataField* pField = theProperty->GetDataField();
+  auto pField = theProperty->GetDataField();
   if(pField) {
     if(pField->CreateKeyboard()){
       theProperty->RefreshDisplay();

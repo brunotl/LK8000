@@ -16,7 +16,7 @@ class DataFieldString : public DataField {
   TCHAR mValue[64];
 
  public:
-  DataFieldString(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat, const TCHAR* Default,
+  DataFieldString(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat,
                   DataAccessCallback_t&& OnDataAccess);
 
   const TCHAR* SetAsString(const TCHAR* Value) override;

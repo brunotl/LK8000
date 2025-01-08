@@ -38,7 +38,7 @@ static void SetWaypointValues(bool first=false) {
 
   wp = wf->FindByName<WndProperty>(TEXT("prpAATType"));
   if (wp) {
-    DataField* dfe = wp->GetDataField();
+    auto dfe = wp->GetDataField();
     auto sectors = get_task_sectors(gTaskType);
     if (first) {
       dfe->Clear();
@@ -214,7 +214,7 @@ static void SetValues(bool first) {
 
   wp = wf->FindByName<WndProperty>(TEXT("prpTaskFinishLine"));
   if (wp) {
-    DataField* dfe = wp->GetDataField();
+    auto dfe = wp->GetDataField();
     auto sectors = get_finish_sectors(gTaskType);
     if (dfe && sectors) {
       dfe->Clear();
@@ -235,7 +235,7 @@ static void SetValues(bool first) {
 
   wp = wf->FindByName<WndProperty>(TEXT("prpTaskStartLine"));
   if (wp) {
-    DataField* dfe = wp->GetDataField();
+    auto dfe = wp->GetDataField();
     auto sectors = get_start_sectors(gTaskType);
     if (dfe && sectors) {
       dfe->Clear();
@@ -261,7 +261,7 @@ static void SetValues(bool first) {
     // 110223 CAN ANYONE PLEASE CHECK WHAT THE HACK IS A BOOL FOR BILL GATES? BECAUSE IF FALSE IS -1 THEN
     // WE HAVE MANY PROBLEMS! I THINK IT IS TIME TO GO BACK TO bool AND GET RID OF MS BOOLS!!
     wp->SetVisible(gTaskType==TSK_DEFAULT);
-    DataField* dfe = wp->GetDataField();
+    auto dfe = wp->GetDataField();
     auto sectors = get_task_sectors(TSK_DEFAULT);
     if (first) {
       dfe->Clear();
@@ -285,7 +285,7 @@ static void SetValues(bool first) {
 
   wp = wf->FindByName<WndProperty>(TEXT("prpAutoAdvance"));
   if (wp) {
-    DataField* dfe = wp->GetDataField();
+    auto dfe = wp->GetDataField();
     if (first) {
       dfe->Clear();
       // LKTOKEN  _@M418_ = "Manual" 
@@ -319,7 +319,7 @@ static void SetValues(bool first) {
 
   wp = wf->FindByName<WndProperty>(TEXT("prpTaskType"));
   if (wp) {
-    DataField* dfe = wp->GetDataField();
+    auto dfe = wp->GetDataField();
     if (first) {
         dfe->Clear();
         // LKTOKEN  _@M1916_ "Default" 
@@ -449,7 +449,7 @@ static void ReadValues(void) {
 
   wp = wf->FindByName<WndProperty>(TEXT("prpTaskFAISector"));
   if (wp) {
-    DataField* dfe = wp->GetDataField();
+    auto dfe = wp->GetDataField();
     auto sectors = get_task_sectors(TSK_DEFAULT);
     changed = CHECK_CHANGED(SectorType, sectors->type(dfe->GetAsInteger()));
   }

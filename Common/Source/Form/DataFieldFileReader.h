@@ -56,31 +56,37 @@ class DataFieldFileReader : public DataField {
 
   void Sort(int startindex = 0) override;
 
-  gcc_nonnull_all void ScanDirectoryTop(const TCHAR* subdir, const TCHAR** suffix_filters, size_t filter_count,
-                                        size_t sort_start_index);
+  gcc_nonnull_all
+  void ScanDirectoryTop(const TCHAR* subdir, const TCHAR** suffix_filters, size_t filter_count,
+                        size_t sort_start_index);
 
   template <size_t filter_count>
-  gcc_nonnull_all void ScanDirectoryTop(const TCHAR* subdir, const TCHAR* (&suffix_filters)[filter_count],
-                                        size_t sort_start_index = 0) {
+  gcc_nonnull_all
+  void ScanDirectoryTop(const TCHAR* subdir, const TCHAR* (&suffix_filters)[filter_count],
+                        size_t sort_start_index = 0) {
     ScanDirectoryTop(subdir, suffix_filters, filter_count, sort_start_index);
   }
 
-  gcc_nonnull_all void ScanDirectoryTop(const TCHAR* subdir, const TCHAR* suffix_filter, size_t sort_start_index = 0) {
+  gcc_nonnull_all
+  void ScanDirectoryTop(const TCHAR* subdir, const TCHAR* suffix_filter, size_t sort_start_index = 0) {
     const TCHAR* suffix_filters[] = {suffix_filter};
     ScanDirectoryTop(subdir, suffix_filters, sort_start_index);
   }
 
-  gcc_nonnull_all void ScanSystemDirectoryTop(const TCHAR* subdir, const TCHAR** suffix_filters, size_t filter_count,
-                                              size_t sort_start_index);
+  gcc_nonnull_all
+  void ScanSystemDirectoryTop(const TCHAR* subdir, const TCHAR** suffix_filters, size_t filter_count,
+                              size_t sort_start_index);
 
   template <size_t filter_count>
-  gcc_nonnull_all void ScanSystemDirectoryTop(const TCHAR* subdir, const TCHAR* (&suffix_filters)[filter_count],
-                                              size_t sort_start_index = 0) {
+  gcc_nonnull_all
+  void ScanSystemDirectoryTop(const TCHAR* subdir, const TCHAR* (&suffix_filters)[filter_count],
+                              size_t sort_start_index = 0) {
     ScanSystemDirectoryTop(subdir, suffix_filters, filter_count, sort_start_index);
   }
 
-  gcc_nonnull_all void ScanSystemDirectoryTop(const TCHAR* subdir, const TCHAR* suffix_filter,
-                                              size_t sort_start_index = 0) {
+  gcc_nonnull_all
+  void ScanSystemDirectoryTop(const TCHAR* subdir, const TCHAR* suffix_filter,
+                              size_t sort_start_index = 0) {
     const TCHAR* suffix_filters[] = {suffix_filter};
     ScanSystemDirectoryTop(subdir, suffix_filters, sort_start_index);
   }

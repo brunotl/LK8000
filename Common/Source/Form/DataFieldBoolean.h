@@ -13,13 +13,13 @@
 
 class DataFieldBoolean : public DataField {
  private:
-  bool mValue;
+  bool mValue = false;
   TCHAR mTextTrue[FORMATSIZE + 1];
   TCHAR mTextFalse[FORMATSIZE + 1];
 
  public:
-  DataFieldBoolean(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat, int Default,
-                   const TCHAR* TextTrue, const TCHAR* TextFalse, DataAccessCallback_t&& OnDataAccess);
+  DataFieldBoolean(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat,
+                   DataAccessCallback_t&& OnDataAccess);
 
   void Inc() override;
   void Dec() override;

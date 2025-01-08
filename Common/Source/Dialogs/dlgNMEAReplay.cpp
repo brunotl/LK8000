@@ -34,8 +34,7 @@ static void OnStartClicked(WndButton* pWnd) {
 
   WndProperty* wp = wf->FindByName<WndProperty>(TEXT("prpIGCFile"));
   if (wp) {
-    DataFieldFileReader* dfe;
-    dfe = (DataFieldFileReader*)wp->GetDataField();
+    auto dfe = (DataFieldFileReader*)wp->GetDataField().get();
     _tcscpy(Port.Replay_FileName,dfe->GetPathFile());
 
   }
@@ -62,19 +61,13 @@ static void OnCloseClicked(WndButton* pWnd) {
     WndProperty* wp;
     wp = wf->FindByName<WndProperty>(TEXT("prpIGCFile"));
     if (wp) {
-      DataFieldFileReader* dfe;
-      dfe = (DataFieldFileReader*)wp->GetDataField();
-
+      auto dfe = (DataFieldFileReader*)wp->GetDataField().get();
       _tcscpy(Port.Replay_FileName,dfe->GetPathFile());
-
     }
     wp = wf->FindByName<WndProperty>(TEXT("prpRate"));
     if (wp) {
-      DataFieldFileReader* dfe;
-      dfe = (DataFieldFileReader*)wp->GetDataField();
-
+      auto dfe = wp->GetDataField();
       Port.ReplaySpeed = dfe->GetAsFloat();
-
     }
     WndForm * pForm = pWnd->GetParentWndForm();
     if(pForm) {
@@ -162,7 +155,7 @@ void dlgNMEAReplayShowModal(){
 
     wp = wf->FindByName<WndProperty>(TEXT("prpIGCFile"));
     if (wp) {
-      DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(wp->GetDataField());
+      auto dfe = static_cast<DataFieldFileReader*>(wp->GetDataField().get());
       if(dfe) {
         dfe->ScanDirectoryTop(_T(LKD_LOGS),TEXT(LKS_TXT));
         dfe->Lookup(Port.Replay_FileName);

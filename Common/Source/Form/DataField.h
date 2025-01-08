@@ -142,13 +142,6 @@ class DataField {
     return -1;
   }
 
-  void Use() { mUsageCounter++; }
-
-  int Unuse() {
-    mUsageCounter--;
-    return mUsageCounter;
-  }
-
   void SetDisplayFormat(const TCHAR* Value);
   void SetEditFormat(const TCHAR* Value);
   void SetDisableSpeedUp(bool bDisable) { mDisableSpeedup = bDisable; }  // allows combolist to iterate all values
@@ -187,7 +180,6 @@ class DataField {
   bool DataFieldKeyUp = false;
 
  private:
-  int mUsageCounter = 0;
   bool mDisableSpeedup = false;
   bool mDetachGUI = false;
 };

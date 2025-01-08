@@ -23,7 +23,6 @@ static void OnSaveExistingClicked(WndButton* pWnd) {
 
   int file_index;
   WndProperty* wp;
-  DataFieldFileReader *dfe;
 
   if ( CheckClubVersion() ) {
 	ClubForbiddenMsg();
@@ -35,40 +34,38 @@ static void OnSaveExistingClicked(WndButton* pWnd) {
 
   wp->OnLButtonDown((POINT){0,0});
 
-  dfe = (DataFieldFileReader*) wp->GetDataField();
-
+  auto dfe = dynamic_cast<DataFieldFileReader*>(wp->GetDataField().get());
 
   file_index = dfe->GetAsInteger();
 
-  if (file_index>0) {
-	if(MessageBoxX(dfe->GetAsString(),
-		// LKTOKEN  _@M509_ = "Overwrite profile?"
-		MsgToken<509>(),
-		mbYesNo) == IdYes) {
+  if (file_index > 0) {
+    if (MessageBoxX(dfe->GetAsString(),
+                    // LKTOKEN  _@M509_ = "Overwrite profile?"
+                    MsgToken<509>(), mbYesNo) == IdYes) {
 
-                TCHAR file_name[MAX_PATH];
-                LocalPath(file_name,TEXT(LKD_CONF), dfe->GetPathFile());
-		switch (profilemode) {
-			case 0:
-				LKProfileSave(file_name);
-				break;
-			case 1:
-				LKPilotSave(file_name);
-				break;
-			case 2:
-				LKAircraftSave(file_name);
-				break;
-			case 3:
-				LKDeviceSave(file_name);
-				break;
-			default:
-				return;
-		}
-		// LKTOKEN  _@M535_ = "Profile saved!"
-		MessageBoxX(MsgToken<535>(),_T(""), mbOk);
-		return;
-	}
-	dfe->Set(0);
+      TCHAR file_name[MAX_PATH];
+      LocalPath(file_name, TEXT(LKD_CONF), dfe->GetPathFile());
+      switch (profilemode) {
+        case 0:
+          LKProfileSave(file_name);
+          break;
+        case 1:
+          LKPilotSave(file_name);
+          break;
+        case 2:
+          LKAircraftSave(file_name);
+          break;
+        case 3:
+          LKDeviceSave(file_name);
+          break;
+        default:
+          return;
+      }
+      // LKTOKEN  _@M535_ = "Profile saved!"
+      MessageBoxX(MsgToken<535>(), _T(""), mbOk);
+      return;
+    }
+    dfe->Set(0);
   }
 }
 
@@ -79,11 +76,10 @@ static void OnSaveNewClicked(WndButton* pWnd) {
   TCHAR profile_name[MAX_PATH];
   TCHAR tmptext[MAX_PATH];
   WndProperty* wp;
-  DataFieldFileReader *dfe;
 
   wp = wf->FindByName<WndProperty>(TEXT("prpFile"));
   if (!wp) return;
-  dfe = (DataFieldFileReader*) wp->GetDataField();
+  auto dfe = dynamic_cast<DataFieldFileReader*>(wp->GetDataField().get());
 
   _tcscpy(profile_name,_T(""));
   dlgTextEntryShowModal(profile_name, 13); // max length including termination 0
@@ -213,7 +209,7 @@ void dlgProfilesShowModal(short mode){
   wp = wf->FindByName<WndProperty>(TEXT("prpFile"));
   if (wp) {
     wp->SetVisible(false);
-    DataFieldFileReader* dfe = static_cast<DataFieldFileReader*>(wp->GetDataField());
+    DataFieldFileReader* dfe = dynamic_cast<DataFieldFileReader*>(wp->GetDataField().get());
     if(dfe) {
 	  switch (profilemode) {
 		case 0:

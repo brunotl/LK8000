@@ -28,7 +28,7 @@ static void OnCloseClicked(WndButton* pWnd) {
 static void setVariables(WndForm* pForm) {
   auto wp = pForm->FindByName<WndProperty>(_T("prpCustomKeyTime"));
   if (wp) {
-    DataField* dfe = wp->GetDataField();
+    auto dfe = wp->GetDataField();
 		if (dfe) {
       dfe->Set(CustomKeyTime);
     }
@@ -45,7 +45,7 @@ static void setVariables(WndForm* pForm) {
 static void getVariables(WndForm* pForm) {
   auto wp = pForm->FindByName<WndProperty>(_T("prpCustomKeyTime"));
   if (wp) {
-    DataField* dfe = wp->GetDataField();
+    auto dfe = wp->GetDataField();
 		if (dfe) {
       CustomKeyTime = dfe->GetAsInteger();
     }

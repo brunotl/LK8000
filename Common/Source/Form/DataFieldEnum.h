@@ -26,7 +26,7 @@ class DataFieldEnum : public DataField {
   std::vector<DataFieldEnumEntry> mEntries;
 
  public:
-  DataFieldEnum(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat, int Default,
+  DataFieldEnum(WndProperty& Owner, const char* EditFormat, const char* DisplayFormat,
                 DataAccessCallback_t&& OnDataAccess);
   ~DataFieldEnum();
 

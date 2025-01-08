@@ -571,7 +571,7 @@ void dlgTarget(int TaskPoint) {
   wf->SetKeyDownNotify(FormKeyDown);
 
   WndProperty *wp = wf->FindByName<WndProperty>(TEXT("prpTaskPoint"));
-  DataField* dfe = wp->GetDataField();
+  auto dfe = wp->GetDataField();
   TCHAR tp_label[80];
   TCHAR tp_short[21];
   LockTaskData();

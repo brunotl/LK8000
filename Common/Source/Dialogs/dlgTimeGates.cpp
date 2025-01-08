@@ -55,7 +55,7 @@ static void setVariables(void) {
 
   wp = wf->FindByName<WndProperty>(TEXT("prpPGOptimizeRoute"));
   if (wp) {
-    DataField* dfe = wp->GetDataField();
+    auto dfe = wp->GetDataField();
     dfe->Set(TskOptimizeRoute);
     wp->RefreshDisplay();
   }
