@@ -2,6 +2,7 @@
 #define AFX_LKAIRSPACE_H__695AAC30_F401_4CFF_9BD9_FE62A2A2D0D2__INCLUDED_
 
 
+#include <bitset>
 #include "Thread/Mutex.hpp"
 #include "Point2D.h"
 #include "Math/Point2D.hpp"
@@ -101,6 +102,47 @@ enum AirspaceWarningDrawStyle_t {
   awsAmber,
   awsRed
 };
+
+class AirspaceMode {
+ public:
+
+  bool warning() const {
+    return _value.test(_warning);
+  }
+
+  bool display() const {
+    return _value.test(_display);
+  }
+
+  void reset() {
+    _value.set();
+  }
+
+  void operator=(const char* v) {
+    _value = strtoul(v, nullptr, 10);
+  }
+
+  uint32_t to_unsigned() const {
+    return _value.to_ulong();
+  }
+
+  void rotate_set() {
+    if (_value.none()) { 
+      _value.set();
+    }
+    else {
+      _value >>= 1;
+    }
+  }
+
+ private:
+  std::bitset<2> _value;
+
+  constexpr static size_t _warning = 1U;
+  constexpr static size_t _display = 0U;
+};
+
+using AirspaceModeArray = std::array<AirspaceMode, AIRSPACECLASSCOUNT>;
 
 //
 // AIRSPACE BASE CLASS
@@ -288,7 +330,7 @@ public:
     // Dump this airspace to runtime.log
     virtual void Dump() const = 0;
     // Calculate drawing coordinates on screen
-    virtual void CalculateScreenPosition(const rectObj &screenbounds_latlon, const int iAirspaceMode[], const int iAirspaceBrush[], const RECT& rcDraw, const ScreenProjection& _Proj);
+    virtual void CalculateScreenPosition(const rectObj &screenbounds_latlon, const AirspaceModeArray& aAirspaceMode, const int iAirspaceBrush[], const RECT& rcDraw, const ScreenProjection& _Proj);
     // Draw airspace on map
     void DrawOutline(LKSurface& Surface, PenReference pen) const;
     void FillPolygon(LKSurface& Surface, const LKBrush& brush) const;
@@ -522,7 +564,7 @@ public:
 
   //Mapwindow drawing
   void SetFarVisible(const rectObj &bounds_active);
-  void CalculateScreenPositionsAirspace(const rectObj &screenbounds_latlon, const int iAirspaceMode[], const int iAirspaceBrush[], const RECT& rcDraw, const ScreenProjection& _Proj);
+  void CalculateScreenPositionsAirspace(const rectObj &screenbounds_latlon, const AirspaceModeArray& aAirspaceMode, const int iAirspaceBrush[], const RECT& rcDraw, const ScreenProjection& _Proj);
   const CAirspaceList& GetNearAirspacesRef() const;
 
   //Nearest page 2.4

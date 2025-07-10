@@ -31,6 +31,10 @@
 #ifndef ENABLE_OPENGL
 #include "Poco/Event.h"
 #endif
+
+class AirspaceMode;
+using AirspaceModeArray = std::array<AirspaceMode, AIRSPACECLASSCOUNT>;
+
 #define SCALELISTSIZE  24
 
 #define TARGETUP   6
@@ -426,7 +430,9 @@ class MapWindow {
 
 
   static bool IsDisplayRunning();
-  static int iAirspaceMode[AIRSPACECLASSCOUNT];
+
+  static AirspaceModeArray aAirspaceMode;
+
 #ifdef HAVE_HATCHED_BRUSH
   static int iAirspaceBrush[AIRSPACECLASSCOUNT];
 #endif
