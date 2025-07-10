@@ -2,6 +2,7 @@
 #define AFX_LKAIRSPACE_H__695AAC30_F401_4CFF_9BD9_FE62A2A2D0D2__INCLUDED_
 
 
+#include <bitset>
 #include "Thread/Mutex.hpp"
 #include "Point2D.h"
 #include "Math/Point2D.hpp"
@@ -19,6 +20,7 @@
 #include "../Topology/shapelib/mapprimitive.h"
 
 #include "Renderer/AirspaceRenderer.h"
+#include "airspace_mode.h"
 
 class ScreenProjection;
 class MD5;
@@ -101,7 +103,6 @@ enum AirspaceWarningDrawStyle_t {
   awsAmber,
   awsRed
 };
-
 //
 // AIRSPACE BASE CLASS
 //
@@ -288,7 +289,7 @@ public:
     // Dump this airspace to runtime.log
     virtual void Dump() const = 0;
     // Calculate drawing coordinates on screen
-    virtual void CalculateScreenPosition(const rectObj &screenbounds_latlon, const int iAirspaceMode[], const int iAirspaceBrush[], const RECT& rcDraw, const ScreenProjection& _Proj);
+    virtual void CalculateScreenPosition(const rectObj &screenbounds_latlon, const airspace_mode_array& aAirspaceMode, const int iAirspaceBrush[], const RECT& rcDraw, const ScreenProjection& _Proj);
     // Draw airspace on map
     void DrawOutline(LKSurface& Surface, PenReference pen) const;
     void FillPolygon(LKSurface& Surface, const LKBrush& brush) const;
@@ -522,7 +523,7 @@ public:
 
   //Mapwindow drawing
   void SetFarVisible(const rectObj &bounds_active);
-  void CalculateScreenPositionsAirspace(const rectObj &screenbounds_latlon, const int iAirspaceMode[], const int iAirspaceBrush[], const RECT& rcDraw, const ScreenProjection& _Proj);
+  void CalculateScreenPositionsAirspace(const rectObj &screenbounds_latlon, const airspace_mode_array& aAirspaceMode, const int iAirspaceBrush[], const RECT& rcDraw, const ScreenProjection& _Proj);
   const CAirspaceList& GetNearAirspacesRef() const;
 
   //Nearest page 2.4
