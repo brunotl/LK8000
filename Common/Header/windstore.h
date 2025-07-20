@@ -30,13 +30,13 @@ struct DERIVED_INFO;
   */
 
 
-class WindStore  {
+class WindStore final {
 
-public:
+ public:
   WindStore() = default;
   ~WindStore() {}
 
-public: // Public slots
+ public: // Public slots
   /**
     * Called with new measurements. The quality is a measure for how good the
     * measurement is. Higher quality measurements are more important in the
@@ -57,9 +57,9 @@ public: // Public slots
   void newWind(NMEA_INFO *basic, DERIVED_INFO *derived,
                Vector& wind);
 
-  Vector getWind(double Time, double h, bool *found);
+  Vector getWind(double Time, double h) const;
 
-private:
+ private:
 
   Vector _lastWind = {};
   double _lastAltitude = -10000.0; // invalide altitude for warantly first calculation done.

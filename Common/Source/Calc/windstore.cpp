@@ -19,6 +19,7 @@
 #include "NMEA/Info.h"
 #include "NMEA/Derived.h"
 #include "Defines.h"
+#include "MathFunctions.h"
 /**
   * Called with new measurements. The quality is a measure for how
   * good the measurement is. Higher quality measurements are more
@@ -42,9 +43,8 @@ void WindStore::slot_measurement(NMEA_INFO *nmeaInfo,
 
 void WindStore::slot_Altitude(NMEA_INFO *nmeaInfo,
                               DERIVED_INFO *derivedInfo){
-
-  if ((fabs(nmeaInfo->Altitude-_lastAltitude)>100.0)||(updated)) {
-    //only recalculate if there is a significant change
+  if ((fabs(nmeaInfo->Altitude - _lastAltitude) > 100.0) || (updated)) {
+    // only recalculate if there is a significant change
     recalculateWind(nmeaInfo, derivedInfo);
 
     updated = false;
@@ -53,8 +53,8 @@ void WindStore::slot_Altitude(NMEA_INFO *nmeaInfo,
 }
 
 
-Vector WindStore::getWind(double Time, double h, bool *found) {
-  return windlist.getWind(Time, h, found);
+Vector WindStore::getWind(double Time, double h) const {
+  return windlist.getWind(Time, h).value_or(Vector{0., 0.});
 }
 
 /** Recalculates the wind from the stored measurements.
@@ -62,48 +62,37 @@ Vector WindStore::getWind(double Time, double h, bool *found) {
 
 void WindStore::recalculateWind(NMEA_INFO *nmeaInfo,
                                 DERIVED_INFO *derivedInfo) {
-  bool found;
-  Vector CurWind = windlist.getWind(nmeaInfo->Time,
-                                    nmeaInfo->Altitude, &found);
 
-  if (found) {
-    if ((fabs(CurWind.x-_lastWind.x)>1.0) ||
-	(fabs(CurWind.y-_lastWind.y)>1.0) || updated) {
-      _lastWind=CurWind;
+  auto CurWind = windlist.getWind(nmeaInfo->Time, nmeaInfo->Altitude);
+  if (CurWind) {
+    Vector diff = (*CurWind) - _lastWind;
+    if ((fabs(diff.x) > 1.0) || (fabs(diff.y) > 1.0) || updated) {
+      _lastWind = *CurWind;
 
       updated = false;
-      _lastAltitude=nmeaInfo->Altitude;
+      _lastAltitude = nmeaInfo->Altitude;
 
-      newWind(nmeaInfo, derivedInfo, CurWind);
+      newWind(nmeaInfo, derivedInfo, CurWind.value());
     }
-  } // otherwise, don't change anything
-
+  }  // otherwise, don't change anything
 }
 
 
 void WindStore::newWind(NMEA_INFO *nmeaInfo, DERIVED_INFO *derivedInfo,
                         Vector &wind) {
-  //
-  double mag = sqrt(wind.x*wind.x+wind.y*wind.y);
-  double bearing;
 
-  if (wind.y == 0 && wind.x == 0)
-    bearing = 0;
-  else
-    bearing = atan2(wind.y, wind.x)*RAD_TO_DEG;
-
-  if (mag<30) { // limit to reasonable values
+  double mag = Length(wind);
+  if (mag < 30) {  // limit to reasonable values
     derivedInfo->WindSpeed = mag;
-    if (bearing<0) {
-      bearing += 360;
+
+    if (wind == Vector{0., 0.} ) {
+      derivedInfo->WindBearing = 0;
     }
-    derivedInfo->WindBearing = bearing;
-  } else {
+    else {
+      derivedInfo->WindBearing = AngleLimit360(atan2(wind.y, wind.x) * RAD_TO_DEG);
+    }
+  }
+  else {
     // TODO code: give warning, wind estimate bogus or very strong!
   }
-
-#ifdef DEBUG_WIND
-  DebugStore("%f %f 0 # wind estimate\n",wind.x,wind.y);
-#endif
-
 }

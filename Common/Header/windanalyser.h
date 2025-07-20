@@ -25,79 +25,49 @@
   */
 
 
-class WindSample {
- public:
+struct WindSample {
   Vector v;
   double t;
   double mag;
 };
 
+class WindAnalyser final {
+ public:
+  WindAnalyser() = default;
 
-class WindAnalyser  {
+  /**
+   * Called if the flightmode changes
+   */
+  void slot_newFlightMode(NMEA_INFO* nmeaInfo, DERIVED_INFO* derivedInfo, bool left, int);
+  /**
+   * Called if a new sample is available in the samplelist.
+   */
+  void slot_newSample(NMEA_INFO* nmeaInfo, DERIVED_INFO* derivedInfo);
 
-public:
-    WindAnalyser();
-    ~WindAnalyser();
+  // used to update output if altitude changes
+  void slot_Altitude(NMEA_INFO* nmeaInfo, DERIVED_INFO* derivedInfo);
 
-    WindStore windstore;
+  void slot_newEstimate(NMEA_INFO* nmeaInfo, DERIVED_INFO* derivedInfo, Vector v, int quality);
 
-// Signals
-    /**
-      * Send if a new windmeasurement has been made. The result is included in wind,
-      * the quality of the measurement (1-5; 1 is bad, 5 is excellent) in quality.
-      */
-    void newMeasurement(Vector wind, int quality);
+  Vector getWind(double Time, double h) const {
+    return windstore.getWind(Time, h);
+  }
 
-// Public slots
-    /**
-     * Called if the flightmode changes
-     */
-    void slot_newFlightMode(NMEA_INFO *nmeaInfo,
-                            DERIVED_INFO *derivedInfo,
-                            bool left, int);
-    /**
-     * Called if a new sample is available in the samplelist.
-     */
-    void slot_newSample(NMEA_INFO *nmeaInfo,
-                        DERIVED_INFO *derivedInfo);
+ private:               // Private attributes
+  int circleCount = 0;  // we are counting the number of circles, the first onces are probably not very round
+  bool active = false;  // active is set to true or false by the slot_newFlightMode slot
+  int circleDeg = 0;
+  int lastHeading = 0;
+  Vector minVector = {};
+  Vector maxVector = {};
+  bool curModeOK = false;
 
-    // used to update output if altitude changes
-    void slot_Altitude(NMEA_INFO *nmeaInfo,
-                       DERIVED_INFO *derivedInfo);
+  std::vector<WindSample> windsamples;
 
-    void slot_newEstimate(NMEA_INFO *nmeaInfo,
-                          DERIVED_INFO *derivedInfo,
-                          Vector v, int quality);
+  WindStore windstore;
 
-    //    void calcThermalDrift();
-private: // Private attributes
-    int circleCount; //we are counting the number of circles, the first onces are probably not very round
-    bool circleLeft; //true=left, false=right
-    bool active;     //active is set to true or false by the slot_newFlightMode slot
-    int startmarker;
-    int startheading;
-    int circleDeg;
-    int lastHeading;
-    bool pastHalfway;
-    Vector minVector;
-    Vector maxVector;
-    int satCnt;
-    int minSatCnt;
-    bool curModeOK;
-    bool first;
-    int startcircle;
-
-    Vector climbstartpos;
-    Vector climbendpos;
-    double climbstarttime;
-    double climbendtime;
-
-    std::vector<WindSample> windsamples;
-
-private: // Private memberfunctions
-    void _calcWind(NMEA_INFO *nmeaInfo,
-                   DERIVED_INFO *derivedInfo);
-
+ private:  // Private memberfunctions
+  void _calcWind(NMEA_INFO* nmeaInfo, DERIVED_INFO* derivedInfo);
 };
 
 #endif

@@ -21,7 +21,8 @@
 /**The WindMeasurementList is a list that can contain and process windmeasurements.
   *@author André Somers
   */
- #include <memory>
+#include <memory>
+#include <optional>
 #include "Math/Point2D.hpp"
 using Vector = Point2D<double>;
 
@@ -37,20 +38,20 @@ struct WindMeasurement {
 //maximum number of windmeasurements in the list. No idea what a sensible value would be...
 
 class WindMeasurementList final {
-public:
+ public:
   WindMeasurementList() = default;
-  ~WindMeasurementList() {}
 
   /**
    * Returns the weighted mean windvector over the stored values, or 0
    * if no valid vector could be calculated (for instance: too little or
    * too low quality data).
    */
-  Vector getWind(double Time, double alt, bool *found);
+  std::optional<Vector> getWind(double Time, double alt) const;
+
   /** Adds the windvector vector with quality quality to the list. */
   void addMeasurement(double Time, Vector vector, double alt, int quality);
 
-protected:
+ protected:
   std::unique_ptr<const WindMeasurement> measurementlist[MAX_MEASUREMENTS];
   unsigned int nummeasurementlist = 0;
 
@@ -59,8 +60,6 @@ protected:
    * removed if the list is too full. Reimplemented from LimitedList.
    */
   unsigned int getLeastImportantItem(double Time);
-
- private:
 };
 
 #endif

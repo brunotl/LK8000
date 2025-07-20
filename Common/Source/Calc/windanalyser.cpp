@@ -55,80 +55,48 @@
   a number of windmeasurements and calculates a weighted average based on quality.
 */
 
-#ifdef DEBUG
-#define DEBUG_WIND
-#endif
-
-
-WindAnalyser::WindAnalyser() : minVector(), maxVector()
-{
-  //initialisation
-  active=false;
-  circleLeft=false;
-  circleCount=0;
-  startmarker=0;
-  circleDeg = 0;
-  lastHeading = 0;
-  pastHalfway=false;
-
-  minSatCnt = 1; // JMW conf->getWindMinSatCount();
-  curModeOK=false;
-  
-}
-
-WindAnalyser::~WindAnalyser(){
-}
-
-
 /** Called if a new sample is available in the samplelist. */
 void WindAnalyser::slot_newSample(NMEA_INFO *nmeaInfo,
-                                  DERIVED_INFO *derivedInfo){
-
-  if (!active) return; //only work if we are in active mode
-
-
-  Vector curVector;
+                                  DERIVED_INFO *derivedInfo) {
+  if (!active) {
+    return;  // only work if we are in active mode
+  }
 
   bool fullCircle=false;
 
-  //circle detection
-  if( lastHeading )
-    {
-      int diff= (int)nmeaInfo->TrackBearing - lastHeading;
+  // circle detection
+  if (lastHeading != nmeaInfo->TrackBearing) {
+    circleDeg += abs(AngleLimit180(nmeaInfo->TrackBearing - lastHeading));
+    lastHeading = nmeaInfo->TrackBearing;
+  }
 
-      if( diff > 180 )
-        diff -= 360;
-      if( diff < -180 )
-        diff += 360;
+  if (circleDeg >= 360) {
+    // full circle made!
 
-      diff = abs(diff);
-      circleDeg += diff;
+    fullCircle = true;
+    circleDeg = 0;
+    circleCount++;  // increase the number of circles flown (used
+    // to determine the quality)
+  }
+
+  Vector curVector = {
+    nmeaInfo->Speed * cos(nmeaInfo->TrackBearing * 3.14159 / 180.0),
+    nmeaInfo->Speed * sin(nmeaInfo->TrackBearing * 3.14159 / 180.0)
+  };
+
+  if (windsamples.empty()) {
+    minVector = maxVector = curVector;
+  } 
+  else {
+    if (nmeaInfo->Speed < Length(minVector)) {
+      minVector = curVector;
     }
-  lastHeading = (int)nmeaInfo->TrackBearing;
-
-  if(circleDeg >= 360 )
-    {
-      //full circle made!
-
-      fullCircle=true;
-      circleDeg = 0;
-      circleCount++;  //increase the number of circles flown (used
-      //to determine the quality)
+    if (nmeaInfo->Speed > Length(maxVector)) {
+      maxVector = curVector;
     }
-
-  curVector.x= nmeaInfo->Speed*cos(nmeaInfo->TrackBearing*3.14159/180.0);
-  curVector.y= nmeaInfo->Speed*sin(nmeaInfo->TrackBearing*3.14159/180.0);
+  }
 
   windsamples.push_back({curVector, nmeaInfo->Time, Length(curVector)});
-
-  if ((nmeaInfo->Speed< Length(minVector))||first)
-    {
-      minVector.x = curVector.x; minVector.y = curVector.y;
-    }
-  if ((nmeaInfo->Speed> Length(maxVector))||first)
-    {
-      maxVector.x = curVector.x; maxVector.y = curVector.y;
-    }
 
   if (fullCircle) { //we have completed a full circle!
 
@@ -136,33 +104,15 @@ void WindAnalyser::slot_newSample(NMEA_INFO *nmeaInfo,
     fullCircle=false;
 
     // should set each vector to average
-    Vector v;
-    v.x = (maxVector.x-minVector.x)/2;
-    v.y = (maxVector.y-minVector.y)/2;
+    Vector v = (maxVector - minVector) / 2;
 
-    minVector.x = v.x; minVector.y = v.y;
-    maxVector.x = v.x; maxVector.y = v.y;
+    minVector = v;
+    maxVector = v;
 
-    first = true;
     windsamples.clear();
-    if (startcircle>1) {
-      startcircle--;
-    }
-
-    if (startcircle==1) {
-      climbstartpos.x = nmeaInfo->Longitude;
-      climbstartpos.y = nmeaInfo->Latitude;
-      climbstarttime = nmeaInfo->Time;
-      startcircle = 0;
-    }
-    climbendpos.x = nmeaInfo->Longitude;
-    climbendpos.y = nmeaInfo->Latitude;
-    climbendtime = nmeaInfo->Time;
 
     //no need to reset fullCircle, it will automaticly be reset in the next itteration.
   }
-
-  first = false;
   windstore.slot_Altitude(nmeaInfo, derivedInfo);
 }
 
@@ -172,95 +122,54 @@ void WindAnalyser::slot_Altitude(NMEA_INFO *nmeaInfo,
   windstore.slot_Altitude(nmeaInfo, derivedInfo);
 }
 
-
-
 /** Called if the flightmode changes */
 void WindAnalyser::slot_newFlightMode(NMEA_INFO *nmeaInfo,
                                       DERIVED_INFO *derivedInfo,
-                                      bool left, int marker){
-    active=false;  //we are inactive by default
-    circleCount=0; //reset the circlecounter for each flightmode
-		   //change. The important thing to measure is the
-		   //number of turns in this thermal only.
+                                      bool left, int marker) {
+  active = false;   // we are inactive by default
+  circleCount = 0;  // reset the circlecounter for each flightmode
+                    // change. The important thing to measure is the
+                    // number of turns in this thermal only.
+  circleDeg = 0;
 
-    startcircle = 3; // ignore first two circles in thermal drift calcs
+  if (derivedInfo->Circling) {
+    curModeOK = left;
+  }
+  else {
+    curModeOK = false;
+    return;  // ok, so we are not circling. Exit function.
+  }
 
-    circleDeg = 0;
-    if (derivedInfo->Circling) {
-      if (left) {
-        circleLeft=true;
-        curModeOK=true;
-      } else {
-        circleLeft=false;
-        curModeOK=true;
-      }
-    } else {
-
-      // end circling?
-      if (curModeOK) {
-        //        calcThermalDrift();
-      }
-      curModeOK=false;
-
-      return; //ok, so we are not circling. Exit function.
-    }
-
-    //
-
-    //do we have enough satelites in view?
-    //    if (satCnt<minSatCnt) return;
-
-    //initialize analyser-parameters
-    startmarker=marker;
-    startheading= (int)nmeaInfo->TrackBearing;
-    active=true;
-    first = true;
-    windsamples.clear();
+  // initialize analyser-parameters
+  active = true;
+  windsamples.clear();
 }
 
-
-double angleDiff(Vector a, Vector b) {
-  double a1;
-  double a2;
-  double c;
-  a1 = atan2(a.y,a.x)*180.0/3.141592;
-  a2 = atan2(b.y,b.x)*180.0/3.141592;
-  c = a1-a2;
-  while (c<-180) {
-    c+= 360;
+void WindAnalyser::_calcWind(NMEA_INFO* nmeaInfo, DERIVED_INFO* derivedInfo) {
+  if (windsamples.empty()) {
+    return;
   }
-  while (c>180) {
-    c-= 360;
-  }
-  return c;
-}
-
-
-void WindAnalyser::_calcWind(NMEA_INFO *nmeaInfo,
-                             DERIVED_INFO *derivedInfo) {
-
-  if (windsamples.empty()) return;
 
   const double circle_time = (windsamples.back().t - windsamples.front().t);
 
   // reject if circle time greater than 50 second
-  if(circle_time > 50.0) {
-      return;
+  if (circle_time > 50.0) {
+    return;
   }
 
   const int numwindsamples = windsamples.size();
-  
+
   // reject if average time step greater than 2.0 seconds
-  if ( (circle_time / (numwindsamples-1)) > 2.0) {
+  if ((circle_time / (numwindsamples - 1)) > 2.0) {
     return;
   }
 
   // find average magnitude
-  double av=0;
-  for (int i=0; i<numwindsamples; i++) {
+  double av = 0;
+  for (int i = 0; i < numwindsamples; i++) {
     av += windsamples[i].mag;
   }
-  av/= numwindsamples;
+  av /= numwindsamples;
 
   // find zero time for times above average
   double rthismax = 0;
@@ -268,26 +177,25 @@ void WindAnalyser::_calcWind(NMEA_INFO *nmeaInfo,
   int jmax= -1;
   int jmin= -1;
 
-  for (int j=0; j<numwindsamples; j++) {
+  for (int j = 0; j < numwindsamples; j++) {
+    double rthisp = 0;
 
-    double rthisp= 0;
-
-    for (int i=0; i<numwindsamples; i++) {
-      if (i== j) {
-          continue;
+    for (int i = 0; i < numwindsamples; i++) {
+      if (i == j) {
+        continue;
       }
-      const int ithis = (i+j)%numwindsamples;
+      const int ithis = (i + j) % numwindsamples;
       int idiff = i;
-      if (idiff>numwindsamples/2) {
-        idiff = numwindsamples-idiff;
+      if (idiff > numwindsamples / 2) {
+        idiff = numwindsamples - idiff;
       }
-      rthisp += (windsamples[ithis].mag)*idiff;
+      rthisp += (windsamples[ithis].mag) * idiff;
     }
-    if ((rthisp<rthismax)||(jmax==-1)) {
+    if ((rthisp < rthismax) || (jmax == -1)) {
       rthismax = rthisp;
       jmax = j;
     }
-    if ((rthisp>rthismin)||(jmin==-1)) {
+    if ((rthisp > rthismin) || (jmin == -1)) {
       rthismin = rthisp;
       jmin = j;
     }
@@ -303,75 +211,65 @@ void WindAnalyser::_calcWind(NMEA_INFO *nmeaInfo,
   minVector = windsamples[jmin].v;
 
   // attempt to fit cycloid
-
-  const double mag = 0.5*(windsamples[jmax].mag - windsamples[jmin].mag);
-  double rthis=0;
-  for (int i=0; i<numwindsamples; i++) {
-    const double phase = ((i+jmax)%numwindsamples)*3.141592*2.0/numwindsamples;
-    const double wx = cos(phase)*av+mag;
-    const double wy = sin(phase)*av;
-    const double cmag = sqrt(wx*wx+wy*wy)-windsamples[i].mag;
-    rthis += cmag*cmag;
+  const double mag = 0.5 * (windsamples[jmax].mag - windsamples[jmin].mag);
+  double rthis = 0;
+  for (int i = 0; i < numwindsamples; i++) {
+    const double phase = ((i + jmax) % numwindsamples) * 3.141592 * 2.0 / numwindsamples;
+    const double wx = cos(phase) * av + mag;
+    const double wy = sin(phase) * av;
+    const double cmag = sqrt(wx * wx + wy * wy) - windsamples[i].mag;
+    rthis += cmag * cmag;
   }
   rthis /= numwindsamples;
-  BUGSTOP_LKASSERT(rthis>=0);
-  if (rthis<0) {
-    return; // UNMANAGED
-  } 
+  BUGSTOP_LKASSERT(rthis >= 0);
+  if (rthis < 0) {
+    return;  // UNMANAGED
+  }
   rthis = sqrt(rthis);
 
   int quality;
 
-  if (mag>1) {
-    quality = 5- iround(rthis/mag*3);
-  } else {
-    quality = 5- iround(rthis);
+  if (mag > 1) {
+    quality = 5 - iround(rthis / mag * 3);
+  }
+  else {
+    quality = 5 - iround(rthis);
   }
 
-  if (circleCount<3) quality--;
-  if (circleCount<2) quality--;
-  if (circleCount<1) return;
-
-  if (quality<1) {
-    return;   //measurement quality too low
+  if (circleCount < 3) {
+    quality--;
+  }
+  if (circleCount < 2) {
+    quality--;
+  }
+  if (circleCount < 1) {
+    return;
   }
 
-  quality= min(quality,5);  //5 is maximum quality, make sure we honor that.
+  if (quality < 1) {
+    return;  // measurement quality too low
+  }
 
-  BUGSTOP_LKASSERT(windsamples[jmax].mag!=0);
-  if (windsamples[jmax].mag==0) {
+  quality = min(quality, 5);  // 5 is maximum quality, make sure we honor that.
+
+  BUGSTOP_LKASSERT(windsamples[jmax].mag != 0);
+  if (windsamples[jmax].mag == 0) {
     return;
   }
 
   const Vector a = {
-    -mag*maxVector.x/windsamples[jmax].mag,
-    -mag*maxVector.y/windsamples[jmax].mag
+    -mag * maxVector.x / windsamples[jmax].mag, 
+    -mag * maxVector.y / windsamples[jmax].mag
   };
 
-
-  if (a.x*a.x+a.y*a.y<30*30) {
+  if (a.x * a.x + a.y * a.y < 30 * 30) {
     // limit to reasonable values (60 knots), reject otherwise
     slot_newEstimate(nmeaInfo, derivedInfo, a, quality);
   }
-
 }
 
-
-void WindAnalyser::slot_newEstimate(NMEA_INFO *nmeaInfo,
-                                    DERIVED_INFO *derivedInfo,
-                                    Vector a, int quality)
-{
-
-#ifdef DEBUG_WIND
-  const char *type;
-
-  if (quality>=6) {
-    type = "external wind";
-  } else {
-    type = "wind circling";
-  }
-  DebugStore("%f %f %d # %s\n", a.x, a.y, quality, type);
-#endif
-
+void WindAnalyser::slot_newEstimate(NMEA_INFO* nmeaInfo,
+                                    DERIVED_INFO* derivedInfo,
+                                    Vector a, int quality) {
   windstore.slot_measurement(nmeaInfo, derivedInfo, a, quality);
 }

@@ -15,31 +15,24 @@ extern WindAnalyser *windanalyser;
 
 void Statistics::RenderWind(LKSurface& Surface, const RECT& rc)
 {
-  int numsteps=10;
-  int i;
-  double h;
-  Vector wind;
-  bool found=true;
-  double mag;
 
   LeastSquares windstats_mag;
 
-  if (flightstats.Altitude_Ceiling.y_max
-      -flightstats.Altitude_Ceiling.y_min<=10) {
+  if (flightstats.Altitude_Ceiling.y_max - flightstats.Altitude_Ceiling.y_min <= 10) {
     DrawNoData(Surface, rc);
     return;
   }
 
-  for (i=0; i<numsteps ; i++) {
+  // Collect wind magnitude statistics at evenly spaced altitudes
+  int numsteps = 10;
+  double min_alt = flightstats.Altitude_Base.y_min;
+  double max_alt = flightstats.Altitude_Ceiling.y_max;
+  double step = (max_alt - min_alt) / (numsteps - 1);
 
-    h = (flightstats.Altitude_Ceiling.y_max-flightstats.Altitude_Base.y_min)*
-      i/(double)(numsteps-1)+flightstats.Altitude_Base.y_min;
-
-    wind = windanalyser->windstore.getWind(GPS_INFO.Time, h, &found);
-    mag = sqrt(wind.x*wind.x+wind.y*wind.y);
-
+  for (int i = 0; i < numsteps; ++i) {
+    double h = min_alt + i * step;
+    double mag = Length(windanalyser->getWind(GPS_INFO.Time, h));
     windstats_mag.least_squares_update(mag, h);
-
   }
 
   //
@@ -55,33 +48,34 @@ void Statistics::RenderWind(LKSurface& Surface, const RECT& rc)
   DrawXGrid(Surface, rc, iround(Units::FromWindSpped(5)), 0, STYLE_THINDASHPAPER, 5.0, true);
   DrawYGrid(Surface, rc, iround(Units::FromAltitude(1000)), 0, STYLE_THINDASHPAPER, 1000.0, true);
 
-  DrawLineGraph(Surface, rc, &windstats_mag,
-                STYLE_MEDIUMBLACK);
+  DrawLineGraph(Surface, rc, &windstats_mag, STYLE_MEDIUMBLACK);
 
 #define WINDVECTORMAG 25
 
-  numsteps = (int)((rc.bottom-rc.top)/WINDVECTORMAG)-1;
+  numsteps = (int)((rc.bottom - rc.top) / WINDVECTORMAG) - 1;
 
   // draw direction vectors
 
   POINT wv[4];
   double dX, dY;
-  double angle;
-  double hfact;
-  for (i=0; i<numsteps ; i++) {
-    hfact = (i+1)/(double)(numsteps+1);
-    h = (flightstats.Altitude_Ceiling.y_max-flightstats.Altitude_Base.y_min)*
-      hfact+flightstats.Altitude_Base.y_min;
 
-    wind = windanalyser->windstore.getWind(GPS_INFO.Time, h, &found);
-    if (windstats_mag.x_max == 0)
-      windstats_mag.x_max=1;  // prevent /0 problems
+  for (int i = 0; i < numsteps; i++) {
+    double hfact = (i + 1) / (double)(numsteps + 1);
+    double h = (flightstats.Altitude_Ceiling.y_max - flightstats.Altitude_Base.y_min) * hfact +
+               flightstats.Altitude_Base.y_min;
+
+    Vector wind = windanalyser->getWind(GPS_INFO.Time, h);
+    if (windstats_mag.x_max == 0) {
+      windstats_mag.x_max = 1;  // prevent /0 problems
+    }
     wind.x /= windstats_mag.x_max;
     wind.y /= windstats_mag.x_max;
-    mag = sqrt(wind.x*wind.x+wind.y*wind.y);
-    if (mag<= 0.0) continue;
+    double mag = Length(wind);
+    if (mag <= 0.0) {
+      continue;
+    }
 
-    angle = atan2(wind.x,-wind.y)*RAD_TO_DEG;
+    double angle = atan2(wind.x,-wind.y)*RAD_TO_DEG;
 
     wv[0].y = (int)((1-hfact)*(rc.bottom-rc.top-BORDER_Y))+rc.top;
     wv[0].x = (rc.right+rc.left-BORDER_X)/2+BORDER_X;
@@ -107,7 +101,6 @@ void Statistics::RenderWind(LKSurface& Surface, const RECT& rc)
     wv[3].y = (int)(wv[0].y + dY);
 
     StyleLine(Surface, wv[1], wv[3], STYLE_MEDIUMBLACK, rc);
-
   }
 
   if(INVERTCOLORS || IsDithered())
@@ -122,8 +115,4 @@ void Statistics::RenderWind(LKSurface& Surface, const RECT& rc)
   DrawXLabel(Surface, rc, text);
   _stprintf(text,TEXT(" h/%s "),Units::GetAltitudeName());
   DrawYLabel(Surface, rc, text);
-
- // DrawXLabel(hdc, rc, TEXT("w"));
- // DrawYLabel(hdc, rc, TEXT("h"));
-
 }
