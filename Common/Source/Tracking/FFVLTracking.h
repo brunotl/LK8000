@@ -23,12 +23,12 @@
 struct NMEA_INFO;
 struct DERIVED_INFO;
 
-class FFVLTracking : public Thread {
+class FFVLTracking final : public Thread {
 public:
   FFVLTracking() = delete;
-  explicit FFVLTracking(const std::string& user_key);
+  explicit FFVLTracking(std::string user_key);
 
-  ~FFVLTracking();
+  ~FFVLTracking() override;
 
   void Update(const NMEA_INFO &basic, const DERIVED_INFO &calculated);
 
@@ -37,6 +37,8 @@ private:
   void Run() override;
 
   void Send(const AGeoPoint& position) const;
+
+  bool Wait();
 
   const std::string _user_key;
 

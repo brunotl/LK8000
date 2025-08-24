@@ -16,9 +16,8 @@
 #include "http_session.h"
 #include "../Thread/Thread.hpp"
 
-FFVLTracking::FFVLTracking(const std::string& user_key)
-            : Thread("ffvl_tracker"), _user_key(user_key) {
-  Start();
+FFVLTracking::FFVLTracking(std::string user_key)
+            : Thread("ffvl_tracker"), _user_key(std::move(user_key)) {
 }
 
 FFVLTracking::~FFVLTracking() {
@@ -43,9 +42,10 @@ void FFVLTracking::Update(const NMEA_INFO &basic, const DERIVED_INFO &calculated
   if (time_now > next_time) {
     next_time = time_now + 60s;
 
-    ScopeLock lock(queue_mtx);
-    queue = {{basic.Latitude, basic.Longitude}, basic.Altitude};
-    queue_cv.Signal();
+    WithLock(queue_mtx, [&]() {
+      queue = {{basic.Latitude, basic.Longitude}, basic.Altitude};
+    });
+    queue_cv.Broadcast();
   }
 }
 
@@ -62,7 +62,7 @@ void FFVLTracking::Send(const AGeoPoint& position) const {
 }
 
 void FFVLTracking::Run() {
-  while(true) {
+  do {
     // get copy of queue
     auto position = WithLock(queue_mtx, [&]() {
       return std::exchange(queue, std::nullopt);
@@ -70,14 +70,16 @@ void FFVLTracking::Run() {
 
     if (position) {
       Send(position.value());
-    } else {
-      ScopeLock lock(queue_mtx);
-      // no new position check for stop request
-      if (thread_stop) {
-        return;  // stop requested...
-      }
-      // wait for stop or new position
-      queue_cv.Wait(queue_mtx);
     }
   }
+  while(Wait());
+}
+
+bool FFVLTracking::Wait() {
+  ScopeLock lock(queue_mtx);
+  // if no new position wait for stop or new position
+  while (!thread_stop && !queue.has_value()) {
+    queue_cv.Wait(queue_mtx);
+  }
+  return !thread_stop;
 }
