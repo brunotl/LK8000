@@ -23,6 +23,7 @@ bool InternalPort::Initialize() {
     if (internal_sensors) {
         // TODO: Allow user to specify whether they want certain sensors.
         internal_sensors->subscribeToSensor(InternalSensors::TYPE_PRESSURE);
+        internal_sensors->subscribeToSensor(InternalSensors::TYPE_ACCELEROMETER);
 
         thread_status = std::thread(&InternalPort::thread_run, this);
 
