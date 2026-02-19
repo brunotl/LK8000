@@ -850,7 +850,6 @@ private:
   static atomic_shared_flag ThreadSuspended;
 
   static BOOL CLOSETHREAD;
-  static BOOL THREADEXIT;
 
   static double LimitMapScale(double value);
 
