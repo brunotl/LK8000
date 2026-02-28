@@ -216,7 +216,7 @@ void MapWindow::SetTargetPan(bool do_pan, int target_point, unsigned dlgSize /* 
   }
   
   if (do_pan) {
-    ScopeLock lock(CritSec_TaskData);
+    const std::lock_guard<Mutex> lock(CritSec_TaskData);
     if (ValidTaskPointFast(target_point)) {
       PanLongitude = WayPointList[Task[target_point].Index].Longitude;
       PanLatitude = WayPointList[Task[target_point].Index].Latitude;
