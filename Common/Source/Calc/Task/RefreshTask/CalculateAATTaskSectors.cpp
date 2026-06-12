@@ -13,6 +13,70 @@
 
 extern bool TargetDialogOpen;
 
+namespace {
+
+double GetAATMaxRadius(int taskwaypoint) {
+  if (Task[taskwaypoint].AATType == sector_type_t::SECTOR) {
+    return Task[taskwaypoint].AATSectorRadius;
+  }
+
+  return Task[taskwaypoint].AATCircleRadius;
+}
+
+bool FindAATEntryDistance(double latitude, double longitude, int taskwaypoint,
+                          double bearing, double* entry_distance) {
+  if (entry_distance == nullptr || !ValidTaskPointFast(taskwaypoint)) {
+    return false;
+  }
+
+  if (InTurnSector({{latitude, longitude}, 0}, taskwaypoint)) {
+    *entry_distance = 0.0;
+    return true;
+  }
+
+  double distance_to_center = 0.0;
+  DistanceBearing(latitude, longitude,
+                  WayPointList[Task[taskwaypoint].Index].Latitude,
+                  WayPointList[Task[taskwaypoint].Index].Longitude,
+                  &distance_to_center, nullptr);
+
+  const double max_radius = GetAATMaxRadius(taskwaypoint);
+  const double step = std::max(200.0, max_radius / 10.0);
+  const double search_limit = distance_to_center + (2.0 * max_radius) + 2000.0;
+
+  double lower = 0.0;
+  for (double upper = step; upper <= search_limit; upper += step) {
+    double t_lat = 0.0;
+    double t_lon = 0.0;
+    FindLatitudeLongitude(latitude, longitude, bearing, upper, &t_lat, &t_lon);
+
+    if (!InTurnSector({{t_lat, t_lon}, 0}, taskwaypoint)) {
+      lower = upper;
+      continue;
+    }
+
+    // Refine first boundary crossing between last outside and first inside sample.
+    double lo = lower;
+    double hi = upper;
+    for (int n = 0; n < 20; ++n) {
+      const double mid = (lo + hi) * 0.5;
+      FindLatitudeLongitude(latitude, longitude, bearing, mid, &t_lat, &t_lon);
+      if (InTurnSector({{t_lat, t_lon}, 0}, taskwaypoint)) {
+        hi = mid;
+      } else {
+        lo = mid;
+      }
+    }
+
+    *entry_distance = hi;
+    return true;
+  }
+
+  return false;
+}
+
+}  // namespace
+
 void CalculateAATTaskSectors() {
   const std::lock_guard lock(CritSec_TaskData);
 
@@ -81,47 +145,67 @@ void CalculateAATTaskSectors() {
         targetrange = Task[i].AATTargetOffsetRadius * Task[i].AATCircleRadius;
       }
 
-      // TODO accuracy: if i=awp and in sector, range parameter needs to
-      // go from current aircraft position to projection of target
-      // out to the edge of the sector
+      // For the active waypoint, use aircraft-relative projection so the target
+      // remains continuous before and after sector entry.
 
-      if ((awp == i) && !Task[i].AATTargetLocked && InTurnSector({{latitude, longitude}, altitude}, i)) {
-        // special case, currently in AAT sector/cylinder
+      bool target_updated = false;
 
-        double dist;
+      if ((awp == i) && !Task[i].AATTargetLocked) {
+        const bool in_sector = InTurnSector({{latitude, longitude}, altitude}, i);
+
         double qdist;
         double bearing;
-
-        // find bearing from last target through current aircraft position with offset
         DistanceBearing(Task[i-1].AATTargetLat,
                         Task[i-1].AATTargetLon,
                         latitude,
                         longitude,
                         &qdist, &bearing);
+        bearing = AngleLimit360(bearing + Task[i].AATTargetOffsetRadial);
 
-        bearing = AngleLimit360(bearing+Task[i].AATTargetOffsetRadial);
+        double dist = -1.0;
+        if (in_sector) {
+          dist = ((Task[i].AATTargetOffsetRadius + 1.0) / 2.0) *
+                 FindInsideAATSectorDistance(latitude, longitude, i, bearing);
+        } else {
+          double entry_distance = 0.0;
+          if (FindAATEntryDistance(latitude, longitude, i, bearing, &entry_distance)) {
+            double exit_distance =
+              FindInsideAATSectorDistance(latitude, longitude, i, bearing, entry_distance);
 
-        dist = ((Task[i].AATTargetOffsetRadius+1)/2.0)*
-          FindInsideAATSectorDistance(latitude, longitude, i, bearing);
+            if (DoOptimizeRoute()) {
+              // Outside the sector, optimized route should lead to the entry edge,
+              // not to a center-like point that causes a dogleg.
+              dist = entry_distance;
+            } else {
+              const double range = std::clamp((Task[i].AATTargetOffsetRadius + 1.0) / 2.0,
+                                              0.0, 1.0);
+              dist = entry_distance + ((exit_distance - entry_distance) * range);
+            }
+          }
+        }
 
-        // if (dist+qdist>aatdistance.LegDistanceAchieved(awp)) {
-        // JMW: don't prevent target from being closer to the aircraft
-        // than the best achieved, so can properly plan arrival time
+        if (dist >= 0.0) {
+          double candidate_lat = 0.0;
+          double candidate_lon = 0.0;
+          FindLatitudeLongitude(latitude, longitude, bearing, dist,
+                               &candidate_lat, &candidate_lon);
 
-        FindLatitudeLongitude (latitude,
-                               longitude,
-                               bearing,
-                               dist,
-                               &Task[i].AATTargetLat,
-                               &Task[i].AATTargetLon);
+          // Keep continuity if candidate becomes much worse on total path geometry.
+          const double current_score =
+            DoubleLegDistance(i, Task[i].AATTargetLon, Task[i].AATTargetLat);
+          const double candidate_score = DoubleLegDistance(i, candidate_lon, candidate_lat);
 
-        UpdateTargetAltitude(Task[i]);
+          if (candidate_score + 30.0 >= current_score) {
+            Task[i].AATTargetLat = candidate_lat;
+            Task[i].AATTargetLon = candidate_lon;
+            UpdateTargetAltitude(Task[i]);
+            TargetModified = true;
+            target_updated = true;
+          }
+        }
+      }
 
-        TargetModified = true;
-
-        // }
-
-      } else {
+      if (!target_updated) {
         FindLatitudeLongitude (WayPointList[Task[i].Index].Latitude,
                                WayPointList[Task[i].Index].Longitude,
                                targetbearing,
