@@ -12,6 +12,12 @@
 #ifndef _calc_task_h_
 #define _calc_task_h_
 
+namespace task {
+struct sector_data;
+struct circle_data;
+struct dae_data;
+struct line_data;
+}  // namespace task
 
 extern void AddAATPoint(NMEA_INFO *Basic, DERIVED_INFO *Calculated, int taskwaypoint);
 extern double AATCloseBearing(NMEA_INFO *Basic, DERIVED_INFO *Calculated);
@@ -20,6 +26,14 @@ extern void AnnounceWayPointSwitch(DERIVED_INFO *Calculated, bool do_advance);
 extern bool IsFinalWaypoint(void);
 extern bool InFinishSector(NMEA_INFO *Basic, DERIVED_INFO *Calculated, const int i);
 extern bool InStartSector(NMEA_INFO *Basic, DERIVED_INFO *Calculated, bool StartOut, int &index, BOOL *CrossedStart);
+
+
+bool InTurnSector(const AGeoPoint& position, const nullptr_t& data);
+
+bool InTurnSector(const AGeoPoint& position, const task::sector_data& data);
+bool InTurnSector(const AGeoPoint& position, const task::circle_data& data);
+bool InTurnSector(const AGeoPoint& position, const task::dae_data& data);
+bool InTurnSector(const AGeoPoint& position, const task::line_data& data);
 
 bool InTurnSector(const AGeoPoint& position, int tp_index);
 
