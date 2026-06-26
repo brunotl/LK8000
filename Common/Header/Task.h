@@ -112,6 +112,8 @@ void CalculateTaskSectors(void);
 void CalculateTaskSectors(int Idx);
 
 void CalculateAATTaskSectors(void);
+bool FindAATEntryDistance(const GeoPoint& location, int taskwaypoint,
+                          double bearing, double& entry_distance);
 
 void guiStartLogger(bool noAsk = false);
 void guiStopLogger(bool noAsk = false);
