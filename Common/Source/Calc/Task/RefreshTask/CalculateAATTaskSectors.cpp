@@ -9,9 +9,60 @@
 #include "externs.h"
 #include "Waypointparser.h"
 #include "NavFunctions.h"
-#include "CalcTask.h"
+#include "../task_zone.h"
 
 extern bool TargetDialogOpen;
+
+bool FindAATEntryDistance(const GeoPoint& location, int taskwaypoint,
+                          double bearing, double& entry_distance) {
+
+  task::zone_data_variant zone_data = task::get_zone_data(taskwaypoint);
+
+  // ensure that the task point is valid
+  if (std::holds_alternative<std::nullptr_t>(zone_data)) {
+    return false;  // invalid task point, no data available
+  }  
+
+  if (task::in_turn_sector(location, zone_data)) {
+    entry_distance = 0.0;
+    return true;
+  }
+
+  const auto& wp = WayPointList[Task[taskwaypoint].Index];
+
+  const double max_radius = task::get_max_radius(zone_data);
+  double distance_to_center = location.Distance({wp.Latitude, wp.Longitude});
+
+  const double step = std::max(200.0, max_radius / 10.0);
+  const double search_limit = distance_to_center + (2.0 * max_radius) + 2000.0;
+
+  double lower = 0.0;
+  for (double upper = step; upper <= search_limit; upper += step) {
+    GeoPoint p = location.Direct(bearing, upper);
+    if (!task::in_turn_sector(p, zone_data)) {
+      lower = upper;
+      continue;
+    }
+
+    // Refine first boundary crossing between last outside and first inside sample.
+    double lo = lower;
+    double hi = upper;
+    for (int n = 0; n < 20; ++n) {
+      const double mid = (lo + hi) * 0.5;
+      p = location.Direct(bearing, mid);
+      if (task::in_turn_sector(p, zone_data)) {
+        hi = mid;
+      } else {
+        lo = mid;
+      }
+    }
+
+    entry_distance = hi;
+    return true;
+  }
+
+  return false;
+}
 
 void CalculateAATTaskSectors() {
   const std::lock_guard lock(CritSec_TaskData);
@@ -92,47 +143,68 @@ void CalculateAATTaskSectors() {
         targetrange = Task[i].AATTargetOffsetRadius * Task[i].AATCircleRadius;
       }
 
-      // TODO accuracy: if i=awp and in sector, range parameter needs to
-      // go from current aircraft position to projection of target
-      // out to the edge of the sector
+      // For the active waypoint, use aircraft-relative projection so the target
+      // remains continuous before and after sector entry.
 
-      if ((awp == i) && !Task[i].AATTargetLocked && InTurnSector({latitude, longitude}, i)) {
-        // special case, currently in AAT sector/cylinder
+      bool target_updated = false;
 
-        double dist;
+      if ((awp == i) && !Task[i].AATTargetLocked) {
+        auto zone_data = task::get_zone_data(i);
+        const bool in_sector = task::in_turn_sector({latitude, longitude}, zone_data);
+
         double qdist;
         double bearing;
-
-        // find bearing from last target through current aircraft position with offset
         DistanceBearing(Task[i-1].AATTargetLat,
                         Task[i-1].AATTargetLon,
                         latitude,
                         longitude,
                         &qdist, &bearing);
+        bearing = AngleLimit360(bearing + Task[i].AATTargetOffsetRadial);
 
-        bearing = AngleLimit360(bearing+Task[i].AATTargetOffsetRadial);
+        double dist = -1.0;
+        if (in_sector) {
+          dist = ((Task[i].AATTargetOffsetRadius + 1.0) / 2.0) *
+                 FindInsideAATSectorDistance(latitude, longitude, i, bearing);
+        } else {
+          double entry_distance = 0.0;
+          if (FindAATEntryDistance({latitude, longitude}, i, bearing, entry_distance)) {
+            double exit_distance =
+              FindInsideAATSectorDistance(latitude, longitude, i, bearing, entry_distance);
 
-        dist = ((Task[i].AATTargetOffsetRadius+1)/2.0)*
-          FindInsideAATSectorDistance(latitude, longitude, i, bearing);
+            if (DoOptimizeRoute()) {
+              // Outside the sector, optimized route should lead to the entry edge,
+              // not to a center-like point that causes a dogleg.
+              dist = entry_distance;
+            } else {
+              const double range = std::clamp((Task[i].AATTargetOffsetRadius + 1.0) / 2.0,
+                                              0.0, 1.0);
+              dist = entry_distance + ((exit_distance - entry_distance) * range);
+            }
+          }
+        }
 
-        // if (dist+qdist>aatdistance.LegDistanceAchieved(awp)) {
-        // JMW: don't prevent target from being closer to the aircraft
-        // than the best achieved, so can properly plan arrival time
+        if (dist >= 0.0) {
+          double candidate_lat = 0.0;
+          double candidate_lon = 0.0;
+          FindLatitudeLongitude(latitude, longitude, bearing, dist,
+                               &candidate_lat, &candidate_lon);
 
-        FindLatitudeLongitude (latitude,
-                               longitude,
-                               bearing,
-                               dist,
-                               &Task[i].AATTargetLat,
-                               &Task[i].AATTargetLon);
+          // Keep continuity if candidate becomes much worse on total path geometry.
+          const double current_score =
+            DoubleLegDistance(i, Task[i].AATTargetLon, Task[i].AATTargetLat);
+          const double candidate_score = DoubleLegDistance(i, candidate_lon, candidate_lat);
 
-        UpdateTargetAltitude(Task[i]);
+          if (candidate_score + 30.0 >= current_score) {
+            Task[i].AATTargetLat = candidate_lat;
+            Task[i].AATTargetLon = candidate_lon;
+            UpdateTargetAltitude(Task[i]);
+            TargetModified = true;
+            target_updated = true;
+          }
+        }
+      }
 
-        TargetModified = true;
-
-        // }
-
-      } else {
+      if (!target_updated) {
         FindLatitudeLongitude (WayPointList[Task[i].Index].Latitude,
                                WayPointList[Task[i].Index].Longitude,
                                targetbearing,
