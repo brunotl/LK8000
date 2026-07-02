@@ -167,6 +167,30 @@ void MapWindow::DrawTaskPicto(LKSurface& Surface,int TaskIdx, const RECT& rc) {
   Surface.SelectObject(oldbrush);
 }
 
+void DrawIsoline(const TASKSTATS_POINT& StatPt, LKSurface& Surface, const RECT& rc) {
+
+  const auto first_point = std::begin(StatPt.IsoLine_Screen);
+
+  const auto& valid = StatPt.IsoLine_valid;
+  const auto first = std::begin(valid);
+  const auto last = std::end(valid);
+
+  // search for the first valid point -> start of polyline
+  auto p_start = std::find(first, last, true);
+  while (p_start != last) {
+    // search for the next invalid point -> end of polyline.
+    auto p_end = std::find(p_start, last, false);
+
+    const auto point = std::next(first_point, std::distance(first, p_start));
+    const auto count = std::distance(p_start, p_end);
+
+    Surface.Polyline(point, count, rc);
+
+    // search for the next valid point -> start of next polyline.
+    p_start = std::find(p_end, last, true);
+  }
+}
+
 void MapWindow::DrawTask(LKSurface& Surface, const RECT& rc, const ScreenProjection& _Proj,
                          const POINT& Orig_Aircraft) {
 #ifdef HAVE_GLES
@@ -260,23 +284,18 @@ void MapWindow::DrawTask(LKSurface& Surface, const RECT& rc, const ScreenProject
     }
 
     if (flip) {
-      constexpr LKColor color(0, 0, 255);
+      LKPen Pen(PEN_SOLID, IBLSCALE(2), RGB_BLUE);
+      auto old = Surface.SelectObject(Pen);
+
       if (ValidTaskPoint(ActiveTaskPoint)) {
-        const TASKSTATS_POINT& StatPt = TaskStats[ActiveTaskPoint];
-        for (int j = 0; j < MAXISOLINES - 1; j++) {
-          if (StatPt.IsoLine_valid[j] && StatPt.IsoLine_valid[j + 1]) {
-            Surface.DrawLine(PEN_SOLID, IBLSCALE(2), StatPt.IsoLine_Screen[j], StatPt.IsoLine_Screen[j + 1], color, rc);
-          }
-        }
+        DrawIsoline(TaskStats[ActiveTaskPoint], Surface, rc);
       }
+
       if ((mode.Is(Mode::MODE_TARGET_PAN) && ValidTaskPoint(TargetPanIndex))) {
-        const TASKSTATS_POINT& StatPt = TaskStats[TargetPanIndex];
-        for (int j = 0; j < MAXISOLINES - 1; j++) {
-          if (StatPt.IsoLine_valid[j] && StatPt.IsoLine_valid[j + 1]) {
-            Surface.DrawLine(PEN_SOLID, IBLSCALE(2), StatPt.IsoLine_Screen[j], StatPt.IsoLine_Screen[j + 1], color, rc);
-          }
-        }
+        DrawIsoline(TaskStats[TargetPanIndex], Surface, rc);
       }
+
+      Surface.SelectObject(old);
     }
   }
 

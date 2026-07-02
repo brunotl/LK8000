@@ -10,120 +10,96 @@
 #include "CalcTask.h"
 
 
-void CalculateAATIsoLines(void) {
-  int i;
-  int awp = ActiveTaskPoint;
-  double stepsize = 25.0;
+void CalculateAATIsoLines() {
+  const std::lock_guard lock(CritSec_TaskData);
+
+  constexpr double stepsize = 25.0;
 
   if(gTaskType != task_type_t::AAT) {
     return;
   }
 
-  LockTaskData();
+  if (!ValidTaskPointFast(ActiveTaskPoint)) {
+    return;
+  }
 
-  for(i=1;i<MAXTASKPOINTS;i++) {
+  for (int i = 0; i < ActiveTaskPoint; i++) {
+    std::ranges::fill(TaskStats[i].IsoLine_valid, false);
+  }
 
-    if(ValidTaskPoint(i)) {
-      if (!ValidTaskPoint(i+1)) {
-        // This must be the final waypoint, so it's not an AAT OZ
-        continue;
+  for (int i = ActiveTaskPoint; ValidTaskPointFast(i + 1); i++) {
+    std::ranges::fill(TaskStats[i].IsoLine_valid, false);
+
+    if (i == 0) {
+      continue;
+    }
+
+    auto target = GetTurnpointTarget(i);
+
+    double max_distance;
+    if (Task[i].AATType == sector_type_t::SECTOR) {
+      max_distance = Task[i].AATSectorRadius;
+    }
+    else {
+      max_distance = Task[i].AATCircleRadius;
+    }
+
+    double delta = max_distance*2.4 / (MAXISOLINES);
+    bool left = false;
+
+    // insert start point
+    TaskStats[i].IsoLine_Geo[0] = target;
+    TaskStats[i].IsoLine_valid[0] = true;
+    int j = 1;
+    while (j < MAXISOLINES) {
+
+      // Distance value at the current point.
+      double dist_0 =
+          DoubleLegDistance(i, target);
+
+      // Estimate the local gradient of DoubleLegDistance() by evaluating
+      // the function one step to the north and one step to the east.
+      auto north = target.Direct(0, stepsize);
+      double dist_north =
+          DoubleLegDistance(i, north);
+
+      auto east = target.Direct(90, stepsize);
+      double dist_east = 
+          DoubleLegDistance(i, east);
+
+      // Compute the gradient direction. Rotating it by 90° gives the
+      // tangent to the equal-distance contour (isoline).
+      const double dx = dist_east - dist_0;
+      const double dy = dist_north - dist_0;
+      double angle = AngleLimit360(RAD_TO_DEG * atan2(dx, dy) + 90);
+
+      // Walk the contour in the opposite direction when tracing
+      // the second half of the isoline.
+      if (left) {
+        angle += 180;
       }
-      // JMWAAT: if locked, don't move it
-      if (i<awp) {
-        // only update targets for current/later waypoints
-        continue;
-      }
 
-      int j;
-      for (j=0; j<MAXISOLINES; j++) {
-        TaskStats[i].IsoLine_valid[j] = false;
-      }
+      // Advance one step along the contour.
+      target = target.Direct(angle, delta);
 
-      double latitude = Task[i].AATTargetLat;
-      double longitude = Task[i].AATTargetLon;
-      double dist_0, dist_north, dist_east;
-      bool in_sector = true;
-
-      double max_distance, delta;
-      if(Task[i].AATType == sector_type_t::SECTOR) {
-        max_distance = Task[i].AATSectorRadius;
+      bool in_sector = InTurnSector({target, 0}, i);
+      if (in_sector) {
+        TaskStats[i].IsoLine_Geo[j] = target;
+        TaskStats[i].IsoLine_valid[j] = true;
       } else {
-        max_distance = Task[i].AATCircleRadius;
-      }
-      delta = max_distance*2.4 / (MAXISOLINES);
-      bool left = false;
+        if (!left && (j < MAXISOLINES - 2)) {
+          left = true;
+          target = GetTurnpointTarget(i);
 
-      /*
-      double distance_glider=0;
-      if ((i==ActiveTaskPoint) && (CALCULATED_INFO.IsInSector)) {
-        distance_glider = DoubleLegDistance(i, GPS_INFO.Longitude, GPS_INFO.Latitude);
-      }
-      */
+          j++;
 
-      // fill
-      j=0;
-      // insert start point
-      TaskStats[i].IsoLine_Latitude[j] = latitude;
-      TaskStats[i].IsoLine_Longitude[j] = longitude;
-      TaskStats[i].IsoLine_valid[j] = true;
-      j++;
-
-      do {
-        dist_0 = DoubleLegDistance(i, longitude, latitude);
-
-        double latitude_north, longitude_north;
-        FindLatitudeLongitude(latitude, longitude,
-                              0, stepsize,
-                              &latitude_north,
-                              &longitude_north);
-        dist_north = DoubleLegDistance(i, longitude_north, latitude_north);
-
-        double latitude_east, longitude_east;
-        FindLatitudeLongitude(latitude, longitude,
-                              90, stepsize,
-                              &latitude_east,
-                              &longitude_east);
-        dist_east = DoubleLegDistance(i, longitude_east, latitude_east);
-
-        double angle = AngleLimit360(RAD_TO_DEG*atan2(dist_east-dist_0, dist_north-dist_0)+90);
-        if (left) {
-          angle += 180;
-        }
-
-        FindLatitudeLongitude(latitude, longitude,
-                              angle, delta,
-                              &latitude,
-                              &longitude);
-
-        in_sector = InTurnSector({{latitude, longitude}, 0}, i);
-        /*
-        if (dist_0 < distance_glider) {
-          in_sector = false;
-        }
-        */
-        if (in_sector) {
-          TaskStats[i].IsoLine_Latitude[j] = latitude;
-          TaskStats[i].IsoLine_Longitude[j] = longitude;
+          // insert start point (again)
+          TaskStats[i].IsoLine_Geo[j] = target;
           TaskStats[i].IsoLine_valid[j] = true;
-          j++;
-        } else {
-          j++;
-          if (!left && (j<MAXISOLINES-2))  {
-            left = true;
-            latitude = Task[i].AATTargetLat;
-            longitude = Task[i].AATTargetLon;
-            in_sector = true; // cheat to prevent early exit
-
-            // insert start point (again)
-            TaskStats[i].IsoLine_Latitude[j] = latitude;
-            TaskStats[i].IsoLine_Longitude[j] = longitude;
-            TaskStats[i].IsoLine_valid[j] = true;
-            j++;
-          }
         }
-      } while (in_sector && (j<MAXISOLINES));
+      }
 
+      j++;
     }
   }
-  UnlockTaskData();
 }

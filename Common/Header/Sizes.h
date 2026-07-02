@@ -78,6 +78,6 @@
 
 #define MAXNEARESTTOPONAME 50
 
-#define MAXISOLINES 32
+#define MAXISOLINES 64
 
 #endif // SIZES_H
