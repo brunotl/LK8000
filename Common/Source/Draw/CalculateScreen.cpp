@@ -162,8 +162,11 @@ ScreenProjection MapWindow::CalculateScreenPositions(const POINT& Orig, const RE
     }
   }
 
+  // PanLongitude and PanLatitude are now set, we can calculate the projection
   const ScreenProjection _Proj = GetProjection();
-  *Orig_Aircraft = _Proj.ToRasterPoint(DrawInfo.Latitude, DrawInfo.Longitude);
+  GeoToScreen<RasterPoint> ToScreen(_Proj);
+
+  *Orig_Aircraft = ToScreen(DrawInfo.Latitude, DrawInfo.Longitude);
 
   // very important
   screenbounds_latlon = CalculateScreenBounds(0.0, rc, _Proj);
@@ -178,7 +181,7 @@ ScreenProjection MapWindow::CalculateScreenPositions(const POINT& Orig, const RE
 
   // get screen coordinates for all task waypoints
 
-  LockTaskData();
+  const std::lock_guard lock(CritSec_TaskData);
 
   if (!WayPointList.empty()) {
     /* Is needed ? */
@@ -203,7 +206,7 @@ ScreenProjection MapWindow::CalculateScreenPositions(const POINT& Orig, const RE
 			TASKSTATS_POINT& StatPt =  TaskStats[ActiveTaskPoint];
 			for (int j=0; j<MAXISOLINES; j++) {
 				if (StatPt.IsoLine_valid[j]) {
-					StatPt.IsoLine_Screen[j] = _Proj.ToRasterPoint(StatPt.IsoLine_Latitude[j], StatPt.IsoLine_Longitude[j]);
+					StatPt.IsoLine_Screen[j] = ToScreen(StatPt.IsoLine_Geo[j]);
 				}
 			}
 		}
@@ -212,12 +215,11 @@ ScreenProjection MapWindow::CalculateScreenPositions(const POINT& Orig, const RE
 			TASKSTATS_POINT& StatPt =  TaskStats[TargetPanIndex];
 			for (int j=0; j<MAXISOLINES; j++) {
 				if (StatPt.IsoLine_valid[j]) {
-					StatPt.IsoLine_Screen[j] = _Proj.ToRasterPoint(StatPt.IsoLine_Latitude[j], StatPt.IsoLine_Longitude[j]);
+					StatPt.IsoLine_Screen[j] = ToScreen(StatPt.IsoLine_Geo[j]);
 				}
 			}
 		}
 	}
-  UnlockTaskData();
 
   return _Proj;
 }

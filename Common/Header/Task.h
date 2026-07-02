@@ -81,14 +81,12 @@ struct TASK_POINT
 typedef TASK_POINT Task_t[MAXTASKPOINTS +1];
 typedef START_POINT Start_t[MAXSTARTPOINTS +1];
 
-typedef struct _TASKSTATS_POINT
-{
+struct TASKSTATS_POINT {
   double LengthPercent;
-  double IsoLine_Latitude[MAXISOLINES];
-  double IsoLine_Longitude[MAXISOLINES];
+  GeoPoint IsoLine_Geo[MAXISOLINES];
   bool IsoLine_valid[MAXISOLINES];
-  POINT IsoLine_Screen[MAXISOLINES];
-}TASKSTATS_POINT;
+  RasterPoint IsoLine_Screen[MAXISOLINES];
+};
 
 typedef TASKSTATS_POINT TaskStats_t[MAXTASKPOINTS +1];
 
@@ -160,7 +158,12 @@ double DoubleLegDistance(int taskwaypoint,
                          double longitude,
                          double latitude);
 
-void CalculateAATIsoLines(void);
+
+inline double DoubleLegDistance(int taskwaypoint, const GeoPoint& point) {
+  return DoubleLegDistance(taskwaypoint, point.longitude, point.latitude);
+}
+
+void CalculateAATIsoLines();
 
 void SaveDefaultTask(void);
 
