@@ -9,31 +9,41 @@
 #include "externs.h"
 #include "Logger.h"
 
+double GetAATTargetsRange() {
+  const std::lock_guard lock(CritSec_TaskData);
 
-
-double AdjustAATTargets(double desired) {
-  int i, istart, inum;
-  double av=0;
-  istart = max(1,ActiveTaskPoint);
-  inum=0;
-
-  LockTaskData();
-  for(i=istart;i<MAXTASKPOINTS-1;i++)
-    {
-      if(ValidTaskPoint(i)&&ValidTaskPoint(i+1) && !Task[i].AATTargetLocked)
-	{
-          Task[i].AATTargetOffsetRadius = max(-1.0,min(1.0,
-                                          Task[i].AATTargetOffsetRadius));
-	  av += Task[i].AATTargetOffsetRadius;
-	  inum++;
-	}
-    }
-  if (inum>0) {
-    av/= inum;
+  int istart = std::max(1, ActiveTaskPoint);
+  if (!ValidTaskPointFast(istart)) {
+    return 0;
   }
-  if (fabs(desired)>1.0) {
-    // don't adjust, just retrieve.
-    goto OnExit;
+
+  double av = 0;
+  int inum = 0;
+
+  // note : no need to check ValidTaskPointFast(i) here, until "istart" is valid
+  // and CritSec_TaskData is locked, because we are not changing the number of
+  // task points, just their AATTargetOffsetRadius values. and no other thread
+  // can change the number of task points while we are in this function.
+  for (int i = istart; ValidTaskPointFast(i + 1); i++) {
+
+    assert(Task[i].AATTargetOffsetRadius >= -1.0 &&
+           Task[i].AATTargetOffsetRadius <= 1.0);
+
+    av += Task[i].AATTargetOffsetRadius;
+    inum++;
+  }
+  if (inum > 0) {
+    av /= inum;
+  }
+  return av;
+}
+
+void AdjustAATTargetsRange(double desired) {
+  const std::lock_guard lock(CritSec_TaskData);
+
+  int istart = std::max(1, ActiveTaskPoint);
+  if (!ValidTaskPointFast(istart)) {
+    return;
   }
 
   // TODO accuracy: Check here for true minimum distance between
@@ -41,29 +51,12 @@ double AdjustAATTargets(double desired) {
 
   // Do this with intersection tests
 
-  desired = (desired+1.0)/2.0; // scale to 0,1
-  av = (av+1.0)/2.0; // scale to 0,1
+  desired = std::clamp(desired, -1.0, 1.0);
 
-  for(i=istart;i<MAXTASKPOINTS-1;i++)
-    {
-      if((Task[i].Index >=0)&&(Task[i+1].Index >=0) && !Task[i].AATTargetLocked)
-	{
-	  double d = (Task[i].AATTargetOffsetRadius+1.0)/2.0;
-          // scale to 0,1
-
-          if (av>0.01) {
-            d = desired;
-	    // 20080615 JMW
-	    // was (desired/av)*d;
-	    // now, we don't want it to be proportional
-          } else {
-            d = desired;
-          }
-          d = min(1.0, max(d, 0.0))*2.0-1.0;
-          Task[i].AATTargetOffsetRadius = d;
-	}
+  for (int i = istart; ValidTaskPointFast(i + 1); i++) {
+    auto& task_point = Task[i];
+    if (!task_point.AATTargetLocked) {
+      task_point.AATTargetOffsetRadius = desired;
     }
- OnExit:
-  UnlockTaskData();
-  return av;
+  }
 }
