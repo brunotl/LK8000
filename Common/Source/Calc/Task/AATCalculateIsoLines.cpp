@@ -8,6 +8,7 @@
 
 #include "externs.h"
 #include "CalcTask.h"
+#include "Calc/Task/task_zone.h"
 
 
 void CalculateAATIsoLines() {
@@ -35,16 +36,10 @@ void CalculateAATIsoLines() {
     }
 
     auto target = GetTurnpointTarget(i);
+    const auto zone_data = task::get_zone_data(i);
+    const double max_radius = task::get_max_radius(zone_data);
 
-    double max_distance;
-    if (Task[i].AATType == sector_type_t::SECTOR) {
-      max_distance = Task[i].AATSectorRadius;
-    }
-    else {
-      max_distance = Task[i].AATCircleRadius;
-    }
-
-    double delta = max_distance*2.4 / (MAXISOLINES);
+    const double delta = max_radius * 2.4 / (MAXISOLINES);
     bool left = false;
 
     // insert start point
@@ -82,7 +77,7 @@ void CalculateAATIsoLines() {
       // Advance one step along the contour.
       target = target.Direct(angle, delta);
 
-      bool in_sector = InTurnSector(target, i);
+      bool in_sector = task::in_turn_sector(target, zone_data);
       if (in_sector) {
         TaskStats[i].IsoLine_Geo[j] = target;
         TaskStats[i].IsoLine_valid[j] = true;
