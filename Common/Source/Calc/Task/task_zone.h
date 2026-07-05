@@ -12,6 +12,7 @@
 #define _CALC_TASK_TASK_ZONE_H_
 
 #include "externs.h"
+#include <variant>
 
 namespace task {
 
@@ -259,6 +260,28 @@ _Return invoke_for_task_point(int tp_index, _Args&& ...args) {
   /* invalid zone type, if this happens, there is an unchecked 
    cast to `sector_type_t` somewhere => bug ... */
   return dispatch_t::invalid_tp_type(get_zone_type(tp_index));
+}
+
+using zone_data_variant = std::variant<
+            std::nullptr_t, // for invalid task point
+            circle_data,
+            dae_data,
+            line_data,
+            sector_data,
+            ess_circle,
+            sgp_start_data>;
+
+struct get_zone_data_variant_t {
+  using result_type = zone_data_variant;
+
+  template <sector_type_t type, task_type_t task_type>
+  static result_type invoke(int tp_index) {
+    return zone_data<type, task_type>::get(tp_index);
+  }
+};
+
+inline zone_data_variant get_zone_data(int tp_index) {
+  return invoke_for_task_point<get_zone_data_variant_t>(tp_index);
 }
 
 } // task
