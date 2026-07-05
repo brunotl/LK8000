@@ -287,6 +287,8 @@ inline zone_data_variant get_zone_data(int tp_index) {
 bool in_turn_sector(const GeoPoint& position,
                     const zone_data_variant& zone_data);
 
+double get_max_radius(const zone_data_variant& zone_data);
+
 } // task
 
 #endif // _CALC_TASK_TASK_ZONE_H_
