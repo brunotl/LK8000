@@ -148,37 +148,45 @@ static void RefreshCalculator(void) {
 
 extern bool TargetDialogOpen;
 
-static void DoOptimise(void) {
-  double myrange= Range;
-  double RangeLast= Range;
+static void DoOptimise() {
+  const std::lock_guard lock_flight(CritSec_FlightData);
+  const std::lock_guard lock_task(CritSec_TaskData);
+
+  if (gTaskType != task_type_t::AAT) {
+    return;
+  }
+
+  double RangeLast = Range;
   double deltaTlast = 0;
   int steps = 0;
-  if (gTaskType != task_type_t::AAT) return;
 
-  LockFlightData();
-  LockTaskData();
   TargetDialogOpen = true;
   do {
-    myrange = Range;
-    AdjustAATTargets(Range);
+    AdjustAATTargetsRange(Range);
     RefreshTask();
     RefreshTaskStatistics();
+
     double deltaT = CALCULATED_INFO.TaskTimeToGo;
-    if ((CALCULATED_INFO.TaskStartTime>0.0)&&(CALCULATED_INFO.Flying)) {
-      deltaT += GPS_INFO.Time-CALCULATED_INFO.TaskStartTime;
+    if ((CALCULATED_INFO.TaskStartTime > 0.0) && (CALCULATED_INFO.Flying)) {
+      deltaT += GPS_INFO.Time - CALCULATED_INFO.TaskStartTime;
     }
-    deltaT= min(24.0*60.0,deltaT/60.0)-AATTaskLength-5;
+    // convert to minutes, limit to 24 hours, subtract AAT task length and 5
+    // minutes buffer
+    deltaT = std::min(24.0 * 60.0, deltaT / 60.0) - AATTaskLength - 5;
 
     double dRdT = 0.001;
-    if (steps>0) {
-      if (fabs(deltaT-deltaTlast)>0.01) {
-        dRdT = min(0.5,(Range-RangeLast)/(deltaT-deltaTlast));
-        if (dRdT<=0.0) {
+    if (steps > 0) {
+      // check if time has changed significantly since last step
+      if (std::abs(deltaT - deltaTlast) > 0.01) {
+        // calculate slope of range vs time
+        dRdT = std::min(0.5, (Range - RangeLast) / (deltaT - deltaTlast));
+        if (dRdT <= 0.0) {
           // error, time decreases with increasing range!
           // or, no effect on time possible
           break;
         }
-      } else {
+      }
+      else {
         // minimal change for whatever reason
         // or, no effect on time possible, e.g. targets locked
         break;
@@ -187,31 +195,28 @@ static void DoOptimise(void) {
     RangeLast = Range;
     deltaTlast = deltaT;
 
-    if (fabs(deltaT)>0.25) {
+    if (std::abs(deltaT) > 0.25) {
       // more than 15 seconds error
-      Range -= dRdT*deltaT;
-      Range = max(-1.0, min(Range,1.0));
-    } else {
+      // adjust range to reduce time to go to zero
+      Range = std::clamp(Range - dRdT * deltaT, -1.0, 1.0);
+    }
+    else {
       break;
     }
 
-  } while (steps++<25);
+  } while (steps++ < 25);
 
-  Range = myrange;
-  AdjustAATTargets(Range);
+  AdjustAATTargetsRange(Range);
   RefreshCalculator();
 
   TargetDialogOpen = false;
-  UnlockTaskData();
-  UnlockFlightData();
 }
-
 
 static void OnTargetClicked(WndButton* pWnd){
   wf->SetVisible(false);
   dlgTarget();
   // find start value for range (it may have changed)
-  Range = AdjustAATTargets(2.0);
+  Range = GetAATTargetsRange();
   RefreshCalculator();
   wf->SetVisible(true);
 }
@@ -255,7 +260,7 @@ static void OnRangeData(DataField *Sender, DataField::DataAccessKind_t Mode){
     rthis = Sender->GetAsFloat()/100.0;
     if (fabs(Range-rthis)>0.01) {
       Range = rthis;
-      AdjustAATTargets(Range);
+      AdjustAATTargetsRange(Range);
       RefreshCalculator();
     }
     break;
@@ -321,7 +326,7 @@ void dlgTaskCalculatorShowModal(void){
   cruise_efficiency = CRUISE_EFFICIENCY;
 
   // find start value for range
-  Range = AdjustAATTargets(2.0);
+  Range = GetAATTargetsRange();
 
   RefreshCalculator();
 

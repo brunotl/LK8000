@@ -6,6 +6,7 @@
    $Id$
 */
 
+#include "Calc/Task/task_zone.h"
 #include "externs.h"
 #include <iterator>
 #include "NavFunctions.h"
@@ -298,21 +299,26 @@ void RefreshTaskWaypoint(int i) {
 }
 
 
+// Find the furthest distance along the current course bearing that still lies
+// inside the active AAT sector for the given task waypoint.
+//
+// This is effectively a bounded search for the sector boundary: we project
+// test points ahead of the current position, keep extending the search while
+// each point remains inside the task sector, and back up once the boundary is
+// crossed. The result is the last valid radial distance before leaving the AAT
+// sector.
 double FindInsideAATSectorDistance(double latitude,
                                    double longitude,
                                    int taskwaypoint,
                                    double course_bearing,
                                    double p_found) {
 
-  double max_distance;
-  if(Task[taskwaypoint].AATType == sector_type_t::SECTOR) {
-    max_distance = Task[taskwaypoint].AATSectorRadius;
-  } else {
-    max_distance = Task[taskwaypoint].AATCircleRadius;
-  }
 
-  // Do binary bounds search for longest distance within sector
+  auto zone_data = task::get_zone_data(taskwaypoint);
+  auto max_distance = task::get_max_radius(zone_data);
 
+  // Search for the boundary with a decreasing step size: start wide and
+  // converge toward the last in-sector point.
   double delta = max_distance;
   double t_distance_lower = p_found;
   double t_distance = p_found+delta*2;
@@ -326,9 +332,10 @@ double FindInsideAATSectorDistance(double latitude,
 
     if (InTurnSector({{t_lat, t_lon}, 0 }, taskwaypoint)) {
       t_distance_lower = t_distance;
-      // ok, can go further
+      // Still inside the sector: continue farther out.
       t_distance += delta;
     } else {
+      // Outside the sector: move back toward the boundary.
       t_distance -= delta;
     }
     delta /= 2.0;

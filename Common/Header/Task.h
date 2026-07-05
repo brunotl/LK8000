@@ -100,7 +100,10 @@ void SwapWaypoint(int index);
 void RemoveWaypoint(int index);
 void RemoveTaskPoint(int index);
 void FlyDirectTo(int index);
-double AdjustAATTargets(double desired);
+
+void AdjustAATTargetsRange(double desired);
+double GetAATTargetsRange();
+
 void RefreshTaskWaypoint(int i);
 void RefreshTask(void);
 BOOL CheckFAILeg(double leg, double total);
