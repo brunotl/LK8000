@@ -67,7 +67,7 @@ static void MoveTarget(double adjust_angle) {
                          &target_latitude,
                          &target_longitude);
 
-  if (InTurnSector({{target_latitude, target_longitude}, 0}, target_point)) {
+  if (InTurnSector({target_latitude, target_longitude}, target_point)) {
     if (CALCULATED_INFO.IsInSector && (target_point == ActiveTaskPoint)) {
       // set range/radial for inside sector
       double course_bearing, target_bearing;
@@ -142,7 +142,7 @@ static void MoveTarget(double target_longitude, double target_latitude) {
 
   double distance, bearing;
 
-  if (InTurnSector({{target_latitude, target_longitude}, 0.}, target_point)) {
+  if (InTurnSector({target_latitude, target_longitude}, target_point)) {
     if (CALCULATED_INFO.IsInSector && (target_point == ActiveTaskPoint)) {
       // set range/radial for inside sector
       double course_bearing, target_bearing;

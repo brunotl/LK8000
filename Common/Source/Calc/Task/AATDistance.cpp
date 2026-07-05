@@ -220,7 +220,7 @@ void AATDistance::ShiftTargetFromBehind(const GeoPoint& position, int taskwaypoi
 
     GeoPoint t_position = position.Direct(course_bearing, t_distance);
 
-    if (InTurnSector({t_position, 0}, taskwaypoint)) {
+    if (InTurnSector(t_position, taskwaypoint)) {
       d_total_this = DoubleLegDistance(taskwaypoint, t_position.longitude, t_position.latitude);
       if (d_total_orig - d_total_this > 0.0) {
         t_distance_lower = t_distance;

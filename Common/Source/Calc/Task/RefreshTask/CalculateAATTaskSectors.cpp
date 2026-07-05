@@ -23,7 +23,6 @@ void CalculateAATTaskSectors() {
 
   double latitude = GPS_INFO.Latitude;
   double longitude = GPS_INFO.Longitude;
-  double altitude = GPS_INFO.Altitude;
 
   Task[0].AATTargetOffsetRadius = 0.0;
   Task[0].AATTargetOffsetRadial = 0.0;
@@ -85,7 +84,7 @@ void CalculateAATTaskSectors() {
       // go from current aircraft position to projection of target
       // out to the edge of the sector
 
-      if ((awp == i) && !Task[i].AATTargetLocked && InTurnSector({{latitude, longitude}, altitude}, i)) {
+      if ((awp == i) && !Task[i].AATTargetLocked && InTurnSector({latitude, longitude}, i)) {
         // special case, currently in AAT sector/cylinder
 
         double dist;

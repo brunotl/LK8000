@@ -324,7 +324,7 @@ double FindInsideAATSectorDistance(double latitude,
                           course_bearing, t_distance,
                           &t_lat, &t_lon);
 
-    if (InTurnSector({{t_lat, t_lon}, 0 }, taskwaypoint)) {
+    if (InTurnSector({t_lat, t_lon}, taskwaypoint)) {
       t_distance_lower = t_distance;
       // ok, can go further
       t_distance += delta;
