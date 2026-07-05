@@ -9,27 +9,14 @@
 #include "task_zone.h"
 #include "NavFunctions.h"
 
-namespace {
-
-struct InTurnSector_t {
-  using result_type = bool;
-
-  template <sector_type_t type, task_type_t task_type>
-  static bool invoke(int tp_index, const AGeoPoint& position) {
-    return InTurnSector(position, task::zone_data<type, task_type>::get(tp_index));
-  }
-};
-
-} // namespace
-
 /*
  * function to check if current position is inside Turnpoint.
  */
-bool InTurnSector(const AGeoPoint& position, const nullptr_t& data) {
+bool InTurnSector(const GeoPoint& position, const std::nullptr_t& data) {
   return false; // invalid task point, no data available
 }
 
-bool InTurnSector(const AGeoPoint& position, const task::sector_data& data) {
+bool InTurnSector(const GeoPoint& position, const task::sector_data& data) {
   double distance;
   double bearing;
 
@@ -41,11 +28,11 @@ bool InTurnSector(const AGeoPoint& position, const task::sector_data& data) {
   return false;
 }
 
-bool InTurnSector(const AGeoPoint& position, const task::circle_data& data) {
+bool InTurnSector(const GeoPoint& position, const task::circle_data& data) {
   return (position.Distance(data.center) < data.radius);
 }
 
-bool InTurnSector(const AGeoPoint& position, const task::dae_data& data) {
+bool InTurnSector(const GeoPoint& position, const task::dae_data& data) {
   double distance;
   double bearing;
 
@@ -63,7 +50,7 @@ bool InTurnSector(const AGeoPoint& position, const task::dae_data& data) {
   return false;
 }
 
-bool InTurnSector(const AGeoPoint& position, const task::line_data& data) {
+bool InTurnSector(const GeoPoint& position, const task::line_data& data) {
   double bearing = position.Bearing(data.center);
 
   // TODO : check for radius ?
@@ -77,6 +64,6 @@ bool InTurnSector(const AGeoPoint& position, const task::line_data& data) {
   }
 }
 
-bool InTurnSector(const AGeoPoint& position, int tp_index) {
-  return task::invoke_for_task_point<InTurnSector_t, const AGeoPoint&>(tp_index, position);
+bool InTurnSector(const GeoPoint& position, int tp_index) {
+  return task::in_turn_sector(position, task::get_zone_data(tp_index));
 }

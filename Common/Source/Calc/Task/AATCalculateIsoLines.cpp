@@ -82,7 +82,7 @@ void CalculateAATIsoLines() {
       // Advance one step along the contour.
       target = target.Direct(angle, delta);
 
-      bool in_sector = InTurnSector({target, 0}, i);
+      bool in_sector = InTurnSector(target, i);
       if (in_sector) {
         TaskStats[i].IsoLine_Geo[j] = target;
         TaskStats[i].IsoLine_valid[j] = true;

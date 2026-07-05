@@ -28,14 +28,14 @@ extern bool InFinishSector(NMEA_INFO *Basic, DERIVED_INFO *Calculated, const int
 extern bool InStartSector(NMEA_INFO *Basic, DERIVED_INFO *Calculated, bool StartOut, int &index, BOOL *CrossedStart);
 
 
-bool InTurnSector(const AGeoPoint& position, const nullptr_t& data);
+bool InTurnSector(const GeoPoint& position, const std::nullptr_t& data);
 
-bool InTurnSector(const AGeoPoint& position, const task::sector_data& data);
-bool InTurnSector(const AGeoPoint& position, const task::circle_data& data);
-bool InTurnSector(const AGeoPoint& position, const task::dae_data& data);
-bool InTurnSector(const AGeoPoint& position, const task::line_data& data);
+bool InTurnSector(const GeoPoint& position, const task::sector_data& data);
+bool InTurnSector(const GeoPoint& position, const task::circle_data& data);
+bool InTurnSector(const GeoPoint& position, const task::dae_data& data);
+bool InTurnSector(const GeoPoint& position, const task::line_data& data);
 
-bool InTurnSector(const AGeoPoint& position, int tp_index);
+bool InTurnSector(const GeoPoint& position, int tp_index);
 
 inline bool InTurnSector(NMEA_INFO* Basic, int tp_index) {
   return InTurnSector(GetCurrentPosition(*Basic), tp_index);

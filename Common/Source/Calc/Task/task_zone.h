@@ -284,6 +284,9 @@ inline zone_data_variant get_zone_data(int tp_index) {
   return invoke_for_task_point<get_zone_data_variant_t>(tp_index);
 }
 
+bool in_turn_sector(const GeoPoint& position,
+                    const zone_data_variant& zone_data);
+
 } // task
 
 #endif // _CALC_TASK_TASK_ZONE_H_
