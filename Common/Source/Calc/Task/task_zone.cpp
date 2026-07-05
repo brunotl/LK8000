@@ -10,6 +10,7 @@
  */
 
 #include "task_zone.h"
+#include "CalcTask.h"
 
 sector_type_t task::get_zone_type(int tp_index) {
   if (tp_index == 0) {
@@ -29,3 +30,11 @@ sector_type_t task::get_zone_type(int tp_index) {
   return SectorType;
 }
 
+bool task::in_turn_sector(const GeoPoint& position,
+                          const task::zone_data_variant& zone_data) {
+  return std::visit(
+      [&](const auto& data) {
+        return InTurnSector(position, data);
+      },
+      zone_data);
+}
