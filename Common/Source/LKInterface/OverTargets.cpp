@@ -19,10 +19,10 @@ int GetOvertargetIndex() {
 	int index = -1;
 	switch (OvertargetMode) {
 	case OVT_TASK: // task
-		if (ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute()) {
+		if (UseAATTarget() || DoOptimizeRoute()) {
 			index = RESWP_OPTIMIZED;
-
-		} else if ( ValidTaskPoint(ActiveTaskPoint)) {
+		}
+		else if ( ValidTaskPoint(ActiveTaskPoint)) {
 			index = Task[ActiveTaskPoint].Index;
 		}
 		break;
@@ -146,7 +146,7 @@ _tryagain:
 
   // OVT_TASKCENTER multitarget only exist if PG optimized task is defined
   // Skip it in all other case
-  if (OvertargetMode == OVT_TASKCENTER && (!ACTIVE_WP_IS_AAT_AREA && !DoOptimizeRoute())) {
+  if (OvertargetMode == OVT_TASKCENTER && (!UseAATTarget() && !DoOptimizeRoute())) {
     goto _tryagain;
   }
 

@@ -927,9 +927,6 @@ static const double PI = (4*atan(1));
 #define INVERTCOLORS  (Appearance.InverseInfoBox)
 #define TASKINDEX       Task[ActiveTaskPoint].Index
 
-#define ACTIVE_WP_IS_AAT_AREA (UseAATTarget() && (ActiveTaskPoint > 0) \
-                              && ValidTaskPoint(ActiveTaskPoint + 1))
-
 #define DONTDRAWTHEMAP  (!MapWindow::mode.AnyPan()&&MapSpaceMode!=MSM_MAP)
 #define MAPMODE8000     (!MapWindow::mode.AnyPan()&&MapSpaceMode==MSM_MAP)
 #define QUICKDRAW	(FastZoom || MapWindow::zoom.BigZoom())
