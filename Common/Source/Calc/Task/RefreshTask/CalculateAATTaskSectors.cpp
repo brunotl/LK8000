@@ -34,9 +34,22 @@ void CalculateAATTaskSectors() {
   for(int i=1;i<MAXTASKPOINTS;i++) {
     if(ValidTaskPointFast(i)) {
       if (!ValidTaskPointFast(i+1)) {
-        // This must be the final waypoint, so it's not an AAT OZ
-        Task[i].AATTargetLat = WayPointList[Task[i].Index].Latitude;
-        Task[i].AATTargetLon = WayPointList[Task[i].Index].Longitude;
+        // special handling for the last task point (finish point)
+        if (Task[i].AATType == sector_type_t::CIRCLE) {
+          // For a circle, the target is the intersection of the path from the previous task point to the final waypoint center and the circle radius
+          GeoPoint prev = GetTurnpointTarget(i - 1);
+          GeoPoint curr = GetTurnpointPosition(i);
+          double prev_bearing = curr.Bearing(prev);
+
+          FindLatitudeLongitude(curr.latitude, curr.longitude, prev_bearing,
+                                Task[i].AATCircleRadius, &Task[i].AATTargetLat,
+                                &Task[i].AATTargetLon);
+        }
+        else {
+          // otherwise, the target is the waypoint itself
+          Task[i].AATTargetLat = WayPointList[Task[i].Index].Latitude;
+          Task[i].AATTargetLon = WayPointList[Task[i].Index].Longitude;
+        }
         continue;
       }
 
