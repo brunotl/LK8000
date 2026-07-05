@@ -92,7 +92,7 @@ bool DoCalculations(NMEA_INFO *Basic, DERIVED_INFO *Calculated)
       DoAlternates(Basic, Calculated, RESWP_FAIOPTIMIZED);    // In Contest mode the Triangle closing point is our Goal.
     }
 
-    if (DoOptimizeRoute() || ACTIVE_WP_IS_AAT_AREA) {
+    if (DoOptimizeRoute() || UseAATTarget()) {
       DoAlternates(Basic, Calculated, RESWP_OPTIMIZED);
     }
 
@@ -104,7 +104,7 @@ bool DoCalculations(NMEA_INFO *Basic, DERIVED_INFO *Calculated)
     // The following is needed only for the next-WP glide terrain line,
     // not for the main/primary glide terrain line.
 
-    if ((FinalGlideTerrain > 2) && (DoOptimizeRoute() || ACTIVE_WP_IS_AAT_AREA))
+    if ((FinalGlideTerrain > 2) && (DoOptimizeRoute() || UseAATTarget()))
       DoAlternates(Basic, Calculated, RESWP_OPTIMIZED);
   }
 

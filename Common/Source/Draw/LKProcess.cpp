@@ -46,7 +46,7 @@ double GetGlNextETE(const DERIVED_INFO& info) {
     if(ISPARAGLIDER) {
         LockTaskData();
         if (ValidTaskPointFast(ActiveTaskPoint)) {
-            int index = (ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute()) ? RESWP_OPTIMIZED: Task[ActiveTaskPoint].Index;
+            int index = (UseAATTarget() || DoOptimizeRoute()) ? RESWP_OPTIMIZED: Task[ActiveTaskPoint].Index;
             value = WayPointCalc[index].NextETE;
         }
         UnlockTaskData();
@@ -71,7 +71,7 @@ double GetAvgNextETE(const DERIVED_INFO &info) {
     if(ISPARAGLIDER) {
         LockTaskData();
         if (ValidTaskPointFast(ActiveTaskPoint)) {
-            int index = (ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute()) ? RESWP_OPTIMIZED: Task[ActiveTaskPoint].Index;
+            int index = (UseAATTarget() || DoOptimizeRoute()) ? RESWP_OPTIMIZED: Task[ActiveTaskPoint].Index;
             value = WayPointCalc[index].NextAvrETE;
         }
         UnlockTaskData();
@@ -409,7 +409,7 @@ bool MapWindow::LKFormatValue(const short lkindex, const bool lktitle,
 		// B11
 		case LK_NEXT_DIST:
 			if ( ValidTaskPoint(ActiveTaskPoint) != false ) {
-			   if (ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute()) {
+			   if (UseAATTarget() || DoOptimizeRoute()) {
 				value=Units::ToDistance(WayPointCalc[RESWP_OPTIMIZED].Distance);
 				valid=true;
 				if (value>99)
@@ -466,7 +466,7 @@ bool MapWindow::LKFormatValue(const short lkindex, const bool lktitle,
 
 			WithLock(CritSec_TaskData, [&]() {
 				if (ValidTaskPointFast(ActiveTaskPoint)) {
-					if (ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute()) {
+					if (UseAATTarget() || DoOptimizeRoute()) {
 						index = RESWP_OPTIMIZED;
 					}
 					else {
@@ -495,7 +495,7 @@ bool MapWindow::LKFormatValue(const short lkindex, const bool lktitle,
 				lk::strcpy(BufferTitle, DataOptionsTitle(lkindex));;
             LockTaskData();
 			if ( ValidTaskPoint(ActiveTaskPoint) != false ) {
-				if (ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute()) index=RESWP_OPTIMIZED;
+				if (UseAATTarget() || DoOptimizeRoute()) index=RESWP_OPTIMIZED;
 				else index = Task[ActiveTaskPoint].Index;
 				if (index>=0) {
 					value=Units::ToAltitude(WayPointCalc[index].AltReqd[AltArrivMode]);
@@ -524,7 +524,7 @@ bool MapWindow::LKFormatValue(const short lkindex, const bool lktitle,
 				lk::strcpy(BufferTitle, DataOptionsTitle(lkindex));;
             LockTaskData();
 			if (ValidTaskPointFast(ActiveTaskPoint)) {
-				if (ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute()) index=RESWP_OPTIMIZED;
+				if (UseAATTarget() || DoOptimizeRoute()) index=RESWP_OPTIMIZED;
 				else index = Task[ActiveTaskPoint].Index;
 				if (index>=0) {
                     if(ISPARAGLIDER && DerivedDrawInfo.TaskAltitudeDifference > 0.0) {
@@ -1063,7 +1063,7 @@ bool MapWindow::LKFormatValue(const short lkindex, const bool lktitle,
                   // LKTOKEN  _@M1095_ = "Bearing Difference", _@M1096_ = "To"
                     lk::strcpy(BufferTitle, MsgToken<1096>());
 
-					if (ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute()) index=RESWP_OPTIMIZED;
+					if (UseAATTarget() || DoOptimizeRoute()) index=RESWP_OPTIMIZED;
 					else index = Task[ActiveTaskPoint].Index;
               } 
 
@@ -1610,7 +1610,7 @@ bool MapWindow::LKFormatValue(const short lkindex, const bool lktitle,
             
             LockTaskData();
 			if ( ValidTaskPoint(ActiveTaskPoint) != false ) {
-				if (ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute()) index=RESWP_OPTIMIZED;
+				if (UseAATTarget() || DoOptimizeRoute()) index=RESWP_OPTIMIZED;
 				else index = Task[ActiveTaskPoint].Index;
 				if (index>=0) {
 					value=WayPointCalc[index].GR;
@@ -2854,7 +2854,7 @@ lkfin_ete:
 			lk::strcpy(BufferTitle, MsgToken<1190>());
 
 			if ( ValidTaskPoint(ActiveTaskPoint) != false ) {
-				if (ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute()) index=RESWP_OPTIMIZED;
+				if (UseAATTarget() || DoOptimizeRoute()) index=RESWP_OPTIMIZED;
 				else index = Task[ActiveTaskPoint].Index;
 				if (index>=0) {
 					value=Units::ToAltitude(DerivedDrawInfo.NextAltitudeDifference0);
@@ -3114,7 +3114,7 @@ lkfin_ete:
 		// B249 Distance from the start sector, always available also after start
 		case LK_START_DIST:
 			if ( ValidTaskPoint(0) && ValidTaskPoint(1) ) { // if real task
-				if((ACTIVE_WP_IS_AAT_AREA || DoOptimizeRoute())&& ActiveTaskPoint == 0) {
+				if((UseAATTarget() || DoOptimizeRoute())&& ActiveTaskPoint == 0) {
 					value=Units::ToDistance(WayPointCalc[RESWP_OPTIMIZED].Distance);
 					if (value>99 || value==0)
 						lk::snprintf(BufferValue, TEXT("%.0f"),value);

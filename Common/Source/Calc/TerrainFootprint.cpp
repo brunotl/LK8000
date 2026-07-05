@@ -70,7 +70,7 @@ void TerrainFootprint(NMEA_INFO *Basic, DERIVED_INFO *Calculated) {
     // we can reach the next waypoint.
     
     double lat_wp, lon_wp; // location of footprint "center"
-    bool AATandMTP  = ACTIVE_WP_IS_AAT_AREA; // MTP: mid-task point
+    bool AATandMTP  = UseAATTarget(); // MTP: mid-task point
     bool DoOptRoute = DoOptimizeRoute();
     int  wp_index = 0; // index for WayPointCalc and WayPointList
     
