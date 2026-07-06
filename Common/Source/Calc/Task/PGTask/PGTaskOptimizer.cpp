@@ -182,6 +182,4 @@ void PGTaskOptimizer::UpdateTaskPoint(size_t i, TASK_POINT& TskPt ) const {
     TskPt.AATTargetLon = position.longitude;
 
     UpdateTargetAltitude(TskPt);
-
-    m_Task[i]->UpdateTaskPoint(i, TskPt);
 }
