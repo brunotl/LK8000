@@ -21,14 +21,15 @@ public:
     OptimizedDistance(const ProjPt& prev, const ProjPt& cur, const ProjPt& next, const double radius) 
             : m_prev(prev), m_cur(cur), m_next(next), m_radius(radius) { }
 
-    double operator()(int n, double *theta) const {
-        ProjPt optPoint(m_cur.x + m_radius * cos(*theta), m_cur.y + m_radius * sin(*theta));
+    double operator()(int n, double* theta) const {
+      ProjPt optPoint = {
+        m_cur.x + m_radius * cos(*theta),
+        m_cur.y + m_radius * sin(*theta)
+      };
 
-        ProjPt a = m_prev - optPoint;
-        ProjPt b = m_next - optPoint;
-
-        return Length(a) + Length(b);
+      return Distance(m_prev, optPoint) + Distance(optPoint, m_next);
     }
+
 private:
     const ProjPt& m_prev;
     const ProjPt& m_cur;
@@ -54,20 +55,33 @@ void PGCircleTaskPt::Optimize(const ProjPt& prev, const ProjPt& next) {
     const auto& b = IsNull(next) ? m_Center : next;
 
     if (!CrossPoint(a, b, m_Optimized)) {
+        // If the line segment from prev to next does not cross the circle, we
+        // need to optimize the point on the circle that minimizes the distance to
+        // prev and next.
+
         OptimizedDistance Fmin(a, m_Center, b, m_Radius);
-        double x0 = 0;
-        double d1 = min_newuoa(1, &x0, Fmin, PI, 0.01 / m_Radius);
-        if (Distance(prev, m_Center) < m_Radius) {
-            double x1 = x0 + PI;
-            double d2 = min_newuoa(1, &x1, Fmin, PI, 0.01 / m_Radius);
-            if (d2 < d1) {
-                x0 = x1;
+
+        double best_x = 0;
+        double best_distance = std::numeric_limits<double>::max();
+
+        // to avoid local minima, we choose a starting point for the optimization
+        // using a simple grid search over 16 points around the circle
+        for (int i = 0; i < 16; ++i) {
+            double x0 = (M_PI / 8.0) * i;
+            double distance = Fmin(1, &x0);
+            if (distance < best_distance) {
+                best_distance = distance;
+                best_x = x0;
             }
         }
 
+        // Use the best starting point for the final optimization
+        const double rb = M_PI / 4.0;
+        best_distance = min_newuoa(1, &best_x, Fmin, rb, 0.01 / m_Radius);
+
         m_Optimized = {
-            m_Center.x + m_Radius * cos(x0), 
-            m_Center.y + m_Radius * sin(x0)
+            m_Center.x + m_Radius * cos(best_x), 
+            m_Center.y + m_Radius * sin(best_x)
         };
     }
 }
@@ -75,61 +89,69 @@ void PGCircleTaskPt::Optimize(const ProjPt& prev, const ProjPt& next) {
 bool PGCircleTaskPt::CrossPoint(const ProjPt& prev, const ProjPt& next, ProjPt& optimized) {
     ProjPt A = prev - m_Center;
     ProjPt B = next - m_Center;
-    if(A == B) {
+    if (A == B) {
         // Next and prev is same point -> ignore next...
-        B = ProjPt(0, 0);
-    }
-    ProjPt A2(A.x * A.x, A.y * A.y);
-    ProjPt B2(B.x * B.x, B.y * B.y);
-    ProjPt::scalar_type R2 = (m_Radius * m_Radius);
-
-    bool PrevOutside = (A2.x + A2.y) > R2;
-    bool NextOutside = (B2.x + B2.y) > R2;
-
-    if (!PrevOutside && !NextOutside) {
-        return false; // no cross point
+        B = {0, 0};
     }
 
     ProjPt AB = B - A;
-
     ProjPt::scalar_type a = (AB.x * AB.x) + (AB.y * AB.y);
+    if (a == 0) {
+        return false;  // no cross point
+    }
+
+    ProjPt A2(A.x * A.x, A.y * A.y);
+    ProjPt::scalar_type R2 = (m_Radius * m_Radius);
+
     ProjPt::scalar_type b = 2 * ((AB.x * A.x) + (AB.y * A.y));
     ProjPt::scalar_type c = A2.x + A2.y - R2;
 
-    double bb4ac = (b * b) -(4 * a * c);
+    double bb4ac = (b * b) - (4 * a * c);
     if (bb4ac < 0) {
+        // no cross point
         return false;
     }
 
-    bool bCrossPoint = false;
+    auto valid = [](double k) {
+        return k >= 0.0 && k <= 1.0;
+    };
+
     double k = 0;
     if (bb4ac == 0) {
-        LKASSERT(a);
         // one point
         k = -b / (2 * a);
-        bCrossPoint = true;
+        if (!valid(k)) {
+            return false; // tangent point outside segment
+        }
     }
+    else if (bb4ac > 0) {
+        // Two point
+        double s = sqrt(bb4ac);
 
-    if (bb4ac > 0) {
-        LKASSERT(a);
-        bCrossPoint = true;
-        // Two point, 
-        if (PrevOutside || (!PrevOutside && NextOutside)) {
-            k = (-b + sqrt(bb4ac)) / (2 * a); // output : prev outside && Exit TP || prev inside && next outside
-        } else {
-            k = (-b - sqrt(bb4ac)) / (2 * a); // input : prev outside && Enter TP 
+        double k1 = (-b - s) / (2 * a);
+        double k2 = (-b + s) / (2 * a);
+
+        bool valid1 = valid(k1);
+        bool valid2 = valid(k2);
+
+        if (!valid1 && !valid2) {
+            return false; // both points outside segment
+        }
+
+        if (valid1 && valid2) {
+            // both points inside segment, choose the one closer to prev
+            k = std::min(k1, k2);
+        }
+        else if (valid1) {
+            // only k1 is valid, prev point is outside, next point is inside
+            k = k1;
+        }
+        else {
+            // only k2 is valid, prev point is inside, next point is outside
+            k = k2;
         }
     }
 
-    if (bCrossPoint) {
-        ProjPt O = prev + ((next - prev) * k);
-        if (DotProduct((next - prev), O - prev) > 0 &&
-                DotProduct((prev - next), O - next) > 0) {
-            optimized = O;
-            return true;
-        }
-    }
-
-    // no point
-    return false;
+    optimized = prev + ((next - prev) * k);
+    return true;
 }
