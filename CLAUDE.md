@@ -1,6 +1,9 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Communication
+- Always respond in English, even if the prompt is written in French.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What this is
 
@@ -191,6 +194,59 @@ Separately, `kobo/` (repo root) holds *device-side* rootfs files (`inittab`, `rc
 what runs on the Kobo itself — as opposed to `Scripts/kobo-build-rootfs/`, which is *host-side* tooling to produce
 the cross-compilation sysroot. Don't confuse the two when the task is about "the Kobo rootfs."
 
+### On-device debugging: USB gadget networking (telnet/ftp)
+
+For iterating on a real device without pulling the SD card or reinstalling `KoboRoot.tgz` each time, `kobo/rcS`
+already sources `/mnt/onboard/LK8000/kobo/init.sh` on every boot if that file exists — a safe, fully reversible
+extension point (delete the file to revert) that needs no rebuild/reflash otherwise. `kobo/debug-network-init.sh`
+is such a script: it brings up a USB Ethernet gadget (always `192.168.2.1` on the device side) with `telnetd`
+(root shell, no login), `ftpd -A` (full filesystem access, no login), and a `dnsmasq` DHCP server so the PC side
+gets an address automatically — no manual `ip addr add` needed, it just shows up once you assign the interface an
+address via DHCP (NetworkManager does this on its own for most new wired-style interfaces). `telnetd`/`ftpd`
+mirror the existing `KoboExportSerial()`/`KoboUnexportSerial()` pattern in `Common/Source/xcs/Kobo/System.cpp`,
+just for `g_ether` instead of `g_serial`. `dnsmasq` is bundled from the Buildroot SDK (stock Kobo busybox has
+neither `udhcpd` nor `zcip`) and, since it wasn't linked with a custom `--dynamic-linker`, is launched via our own
+bundled `ld.so` + `LD_LIBRARY_PATH` the same way `LK8000-KOBO` uses `--dynamic-linker`/`--rpath` for the same
+reason — see the script for the exact invocation.
+
+**Never ship this to end users** — it's an unauthenticated root backdoor over USB. It's opt-in, off by default:
+
+```sh
+make TARGET=KOBO KOBO_SDK=y KOBO_DEBUG_NET=y     # bakes it into KoboRoot.tgz as .../LK8000/kobo/init.sh
+```
+
+(`build/kobo.mk`'s `build_distrib_kobo` installs it conditionally — a *shell-level* `if`, not a Make `ifeq`, since
+the macro is expanded via `$(call ...)` inside a recipe, where literal `ifeq`/`endif` text would just get passed
+to the shell verbatim and fail; `KOBO_DEBUG_NET=y` currently requires `KOBO_SDK=y`, since `dnsmasq` only exists via
+the Buildroot SDK's `output/target` — see `KOBO_DNSMASQ_BIN` in `build/kobo.mk`, which is *not* under
+`$(STAGING_DIR)` since that's the cross-compilation sysroot for libraries, not where Buildroot installs
+applications.) For a device that's already installed, without rebuilding, just copy `kobo/debug-network-init.sh`
+onto the FAT32 partition (visible as a normal USB drive) as `LK8000/kobo/init.sh` directly (plus `dnsmasq` itself
+to `/opt/LK8000/bin/` if it isn't already there) — same effect, no `KOBO_DEBUG_NET` needed. (`arcotg_udc`/
+`g_ether` module paths and the platform driver directory — `/drivers/<platform>/usb/gadget/`, symlinked to
+`/drivers/current` by `rcS` — vary by Kobo model; adjust if `insmod` fails, check `LK8000/kobo/init.log`.)
+
+After rebooting with that in place, on the host PC — just wait for the new interface (`ip link show`, e.g.
+`enx<mac>`) to pick up a DHCP lease (usually automatic), then:
+
+```sh
+telnet 192.168.2.1                        # root shell -- always this address, regardless of the PC's own DHCP IP
+curl -T LK8000-KOBO ftp://192.168.2.1/opt/LK8000/bin/LK8000-KOBO   # push a file
+```
+
+The fast iterate loop this enables, without ever touching `rcS`/`inittab`/`KoboRoot.tgz`:
+
+```sh
+make TARGET=KOBO KOBO_SDK=y LK8000-KOBO                              # build just the binary
+telnet 192.168.2.1  # kill -9 $(pidof LK8000-KOBO)                   # stop it (file must not be busy to overwrite)
+curl -T LK8000-KOBO ftp://192.168.2.1/opt/LK8000/bin/LK8000-KOBO     # push it
+telnet 192.168.2.1  # /opt/LK8000/bin/LK8000-KOBO                    # relaunch in the foreground, watch output live
+```
+
+`ftpd` needs the file it's overwriting to not be currently running (`ETXTBSY` → curl error 25/553), hence killing
+first. This same push mechanism is also how to get updated `.so` files onto the device (e.g. after a `KOBO_SDK`
+library rebuild) without a full `KoboRoot.tgz` reinstall — push each one to `/opt/LK8000/lib/`.
+
 ## Tests
 
 There is no separate test runner/binary for the main app. Unit tests are written with **doctest**
@@ -242,3 +298,9 @@ C++17, 120-column limit, left-aligned pointers). Run `clang-format` on touched f
   `TARGET=KOBO` app build itself, which is handled by `Makefile` + `Scripts/kobo-build-rootfs/`.
 - **`lib/doctest`, `lib/glm`, `lib/json`, `lib/fifo_map`** are git submodules (`.gitmodules`); if they appear
   empty, run `git submodule update --init --recursive`.
+
+## Git
+- Do not mention Claude as author or co-author in commit messages (no
+  "Co-Authored-By: Claude" trailer, no "Generated with Claude Code" line).
+- Stage only files you changed. Commit/push only when asked.
+- ASCII, no embedded double-quotes

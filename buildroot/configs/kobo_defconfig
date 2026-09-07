@@ -45,6 +45,13 @@ BR2_TOOLCHAIN_EXTERNAL=y
 BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y
 BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_ARMV7_EABIHF_GLIBC_BLEEDING_EDGE=y
 BR2_PACKAGE_HOST_ENVIRONMENT_SETUP=y
+# dnsmasq: a standalone DHCP server binary, statically-ish linked against
+# just glibc, bundled to /opt/LK8000/bin and used by
+# kobo/debug-network-init.sh (KOBO_DEBUG_NET=y builds only) so the USB
+# gadget's IP gets assigned automatically on the PC side instead of a
+# manual `ip addr add`. Not an LK8000 runtime dependency.
+BR2_PACKAGE_DNSMASQ=y
+
 # LK8000 dependencies (see LK8000/Scripts/kobo-build-rootfs for the
 # equivalent shell-script-based build of these same libraries)
 BR2_PACKAGE_BOOST=y

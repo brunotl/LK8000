@@ -42,6 +42,14 @@ else
  KOBO_EXTRA_LIB_DIR = $(KOBO)/lib
 endif
 
+# dnsmasq (KOBO_DEBUG_NET's DHCP server, see kobo/debug-network-init.sh) is an
+# application, not a library, so Buildroot installs it under output/target/
+# (the device rootfs staging area) rather than $(STAGING_DIR) (the
+# cross-compilation sysroot for headers/libs) -- reached here by going up
+# from $(STAGING_DIR) past arm-buildroot-linux-gnueabihf/ and host/ to
+# output/, then into target/. Only exists when KOBO_SDK=y.
+KOBO_DNSMASQ_BIN = $(STAGING_DIR)/../../../target/usr/sbin/dnsmasq
+
 KOBO_LIB_PATHS = \
 	$(KOBO_EXTRA_LIB_DIR)/libz.so.1 \
 	$(KOBO_EXTRA_LIB_DIR)/libpng16.so.16 \
@@ -135,6 +143,12 @@ $(Q)install -m 0644 $(SYSTEM_FILES) $(BIN)/$(1)/KoboRoot/opt/LK8000/share/_Syste
 $(Q)install -m 0644 $(BITMAP_FILES) $(BIN)/$(1)/KoboRoot/opt/LK8000/share/_System/_Bitmaps
 
 $(call build_distrib_common, $(BIN)/$(1)/KoboRoot/mnt/onboard)
+
+$(Q)if [ "$(KOBO_DEBUG_NET)" = "y" ]; then \
+	install -m 0755 -d  $(BIN)/$(1)/KoboRoot/mnt/onboard/LK8000/kobo; \
+	install -m 0644 kobo/debug-network-init.sh $(BIN)/$(1)/KoboRoot/mnt/onboard/LK8000/kobo/init.sh; \
+	install --strip --strip-program=$(STRIP) -m 0755 $(KOBO_DNSMASQ_BIN) $(BIN)/$(1)/KoboRoot/opt/LK8000/bin/dnsmasq; \
+fi
 
 endef
 
