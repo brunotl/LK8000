@@ -1,0 +1,17 @@
+config BR2_PACKAGE_GEOGRAPHICLIB
+	bool "geographiclib"
+	depends on BR2_INSTALL_LIBSTDCPP
+	help
+	  GeographicLib is a small C++ library for geographic
+	  projections, geodesic calculations, and other operations
+	  on an ellipsoid of revolution.
+
+	  Not packaged in mainline Buildroot; added here for LK8000,
+	  which links against it (geographiclib::geographiclib /
+	  pkg-config geographiclib) for WGS84 geodesic distance and
+	  bearing calculations.
+
+	  https://geographiclib.sourceforge.io/
+
+comment "geographiclib needs a toolchain w/ C++"
+	depends on !BR2_INSTALL_LIBSTDCPP

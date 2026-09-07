@@ -114,6 +114,12 @@ ifeq ($(TARGET),KOBO)
   CONFIG_LINUX   :=y
   CONFIG_ANDROID :=n
   MINIMAL        :=n
+  # KOBO_SDK=y: use a Buildroot-generated SDK instead of the crosstool-NG
+  # arm-kobo-linux-gnueabihf- toolchain. Source the SDK's environment-setup
+  # script (which exports CC/CXX/AR/STRIP/... and puts its bin/ on PATH)
+  # before invoking make. $(KOBO) still supplies libraries the SDK's own
+  # sysroot doesn't include (e.g. boost, zzip, geographiclib).
+  KOBO_SDK ?= n
 endif
 
 ifeq ($(TARGET),PI)
@@ -165,6 +171,11 @@ else ifeq ($(CONFIG_WINE),y)
  TCPATH	:=wine
  CPU    :=i586
  MCPU   := -mcpu=$(CPU)
+else ifeq ($(TARGET_IS_KOBO)$(KOBO_SDK),yy)
+ # toolchain provided by a sourced Buildroot SDK environment-setup script
+ # (CC/CXX/AR/STRIP/... already exported, its bin/ already on PATH)
+ TCPATH :=
+ MCPU   := -mtune=cortex-a7 -march=armv7-a -mfpu=neon -mfloat-abi=hard -ftree-vectorize -mvectorize-with-neon-quad
 else ifeq ($(TARGET_IS_KOBO),y)
  TCPATH := arm-kobo-linux-gnueabihf-
  MCPU   := -mtune=cortex-a7 -march=armv7-a -mfpu=neon -mfloat-abi=hard -ftree-vectorize -mvectorize-with-neon-quad
@@ -203,7 +214,17 @@ endif
 
 EXE		:=$(findstring .exe,$(MAKE))
 
-ifneq ($(TARGET),OPENVARIO)
+# OPENVARIO and a Buildroot-based KOBO build both rely on CC/CXX/AR/STRIP/...
+# already being set in the environment by an external SDK, rather than being
+# derived here from TCPATH.
+ifeq ($(TARGET_IS_KOBO)$(KOBO_SDK),yy)
+ USE_ENV_TOOLCHAIN :=y
+endif
+ifeq ($(TARGET),OPENVARIO)
+ USE_ENV_TOOLCHAIN :=y
+endif
+
+ifneq ($(USE_ENV_TOOLCHAIN),y)
  ifeq ($(CLANG),y)
   CXX		:=$(TCPATH)clang++$(EXE)
   CC		:=$(TCPATH)clang$(EXE)
@@ -220,6 +241,11 @@ ifneq ($(TARGET),OPENVARIO)
  SIZE		:=$(TCPATH)size$(EXE)
  WINDRES	:=$(TCPATH)windres$(EXE)
 endif
+
+# Buildroot-generated environment-setup scripts never export SIZE (it's not
+# an autotools variable), so fall back to the host's own `size`: it just
+# parses ELF section headers, so it works fine even on a foreign-arch binary.
+SIZE ?= size
 	
 CE_VERSION	:=0x0$(CE_MAJOR)$(CE_MINOR)
 ARFLAGS		:=rcs
@@ -615,6 +641,11 @@ ifeq ($(TARGET_IS_KOBO),y)
  LDFLAGS += -Wl,--dynamic-linker=/opt/LK8000/lib/ld-linux-armhf.so.3
  LDFLAGS += -Wl,--rpath=/opt/LK8000/lib
  LDFLAGS  += -Wl,--rpath-link=$(KOBO)/lib
+ ifeq ($(KOBO_SDK),y)
+  # $(STAGING_DIR) is exported by the Buildroot SDK's environment-setup
+  # script; its glibc/libs also need deploying to /opt/LK8000/lib on-device.
+  LDFLAGS += -Wl,--rpath-link=$(STAGING_DIR)/usr/lib
+ endif
 endif
 
 ifeq ($(HOST_IS_PI)$(TARGET_IS_PI),ny)

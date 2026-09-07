@@ -14,7 +14,12 @@ else ifeq ($(TARGET)$(HOST_IS_WIN32),PCX64n)
   PKG_CONFIG := PKG_CONFIG_LIBDIR=/usr/x86_64-w64-mingw32/lib/pkgconfig $(PKG_CONFIG)
 endif
 
-ifeq ($(TARGET_IS_KOBO),y)
+ifeq ($(TARGET_IS_KOBO)$(KOBO_SDK),yy)
+  # $(STAGING_DIR) is exported by the Buildroot SDK's environment-setup
+  # script; $(KOBO) still holds libraries not included in that SDK sysroot
+  # (e.g. boost, zzip, geographiclib).
+  PKG_CONFIG := PKG_CONFIG_LIBDIR=$(KOBO)/lib/pkgconfig:$(STAGING_DIR)/usr/lib/pkgconfig $(PKG_CONFIG)
+else ifeq ($(TARGET_IS_KOBO),y)
   PKG_CONFIG := PKG_CONFIG_LIBDIR=$(KOBO)/lib/pkgconfig $(PKG_CONFIG)
 endif
 

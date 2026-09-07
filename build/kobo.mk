@@ -28,38 +28,55 @@ KOBO_SYS_LIB_NAMES = \
 	libdl.so.2 \
 	libatomic.so.1 \
 
-KOBO_SYS_LIB_PATHS = $(addprefix $(SYSROOT)/lib/,$(KOBO_SYS_LIB_NAMES))
+# Some toolchains (e.g. Kobo's original vendor one) put all of these
+# directly under $(SYSROOT)/lib; others (e.g. Bootlin's) keep libstdc++
+# under $(SYSROOT)/usr/lib, with only glibc itself in $(SYSROOT)/lib.
+# Search both and keep whichever actually exists.
+KOBO_SYS_LIB_PATHS = $(filter $(addprefix %/,$(KOBO_SYS_LIB_NAMES)), $(wildcard $(SYSROOT)/lib/* $(SYSROOT)/usr/lib/*))
+
+# $(KOBO) holds these for the crosstool-NG toolchain (Scripts/kobo-build-rootfs);
+# a Buildroot SDK (KOBO_SDK=y) installs them into $(STAGING_DIR)/usr/lib instead.
+ifeq ($(KOBO_SDK),y)
+ KOBO_EXTRA_LIB_DIR = $(STAGING_DIR)/usr/lib
+else
+ KOBO_EXTRA_LIB_DIR = $(KOBO)/lib
+endif
 
 KOBO_LIB_PATHS = \
-	$(KOBO)/lib/libz.so.1 \
-	$(KOBO)/lib/libpng16.so.16 \
-	$(KOBO)/lib/libfreetype.so.6 \
+	$(KOBO_EXTRA_LIB_DIR)/libz.so.1 \
+	$(KOBO_EXTRA_LIB_DIR)/libpng16.so.16 \
+	$(KOBO_EXTRA_LIB_DIR)/libfreetype.so.6 \
+	$(KOBO_EXTRA_LIB_DIR)/libjpeg.so.8 \
+	$(KOBO_EXTRA_LIB_DIR)/libjpeg.so.62 \
 
-# depending of version libGeographic have different name.
-#  we push all in the list and remove the non-existent files later
+# depending of version/build-system, libGeographic and libzzip have
+# different names (e.g. Buildroot's zziplib names it libzzip-0.so.N).
+# we push all variants in the list and remove the non-existent files later
 KOBO_LIB_PATHS += \
-	$(KOBO)/lib/libGeographic.so.19 \
-	$(KOBO)/lib/libGeographicLib.so.26 \
-	$(KOBO)/lib/libzzip.so.13 \
-	$(KOBO)/lib/libzzipmmapped.so.13 \
+	$(KOBO_EXTRA_LIB_DIR)/libGeographic.so.19 \
+	$(KOBO_EXTRA_LIB_DIR)/libGeographicLib.so.26 \
+	$(KOBO_EXTRA_LIB_DIR)/libzzip.so.13 \
+	$(KOBO_EXTRA_LIB_DIR)/libzzip-0.so.13 \
+	$(KOBO_EXTRA_LIB_DIR)/libzzipmmapped.so.13 \
+	$(KOBO_EXTRA_LIB_DIR)/libzzipmmapped-0.so.13 \
 
 ifeq ($(SNDFILE)$(ALSA),yy)
  KOBO_LIB_PATHS += \
-	$(KOBO)/lib/libasound.so.2 \
-	$(KOBO)/lib/libsndfile.so.1 \
+	$(KOBO_EXTRA_LIB_DIR)/libasound.so.2 \
+	$(KOBO_EXTRA_LIB_DIR)/libsndfile.so.1 \
 
 endif
 
 ifeq ($(USE_CURL),y)
  KOBO_LIB_PATHS += \
-	$(KOBO)/lib/libssl.so.3 \
-	$(KOBO)/lib/libcrypto.so.3 \
-	$(KOBO)/lib/libcurl.so.4 \
+	$(KOBO_EXTRA_LIB_DIR)/libssl.so.3 \
+	$(KOBO_EXTRA_LIB_DIR)/libcrypto.so.3 \
+	$(KOBO_EXTRA_LIB_DIR)/libcurl.so.4 \
 
 endif
 
 # let only the existing file in the list
-KOBO_SYS_LIB_PATHS += $(filter $(KOBO_LIB_PATHS), $(wildcard $(KOBO)/lib/*))
+KOBO_SYS_LIB_PATHS += $(filter $(KOBO_LIB_PATHS), $(wildcard $(KOBO_EXTRA_LIB_DIR)/*))
 
 KOBO_POWER_OFF_BIN = PowerOff
 

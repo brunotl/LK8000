@@ -1,0 +1,59 @@
+# Not a bootable-image defconfig: this only produces a cross-toolchain SDK
+# (via BR2_PACKAGE_HOST_ENVIRONMENT_SETUP) and the target libraries LK8000
+# needs on Kobo, for use with `make TARGET=KOBO KOBO_SDK=y` in the main
+# LK8000 repo. For a full alternate bootable Kobo Linux system (kernel,
+# rootfs, secure boot, wifi, ...) see the separate buildroot-kobo project.
+# Cortex-A9 -- NOT Cortex-A53. This is the LOWEST common denominator across
+# every Kobo model LK8000 actually supports/detects (see Model.cpp and
+# kobo/kernel/install.readme's "officially tested" list): Touch/Mini/Glo
+# are Cortex-A8 (i.MX507), Aura/Glo HD/Touch 2.0/Aura 2 are Cortex-A9
+# (i.MX6SL/SLL), and Clara HD/Nia/Libra H2O/Libra 2/Clara 2E are Cortex-A7
+# (i.MX7) -- a genuinely mixed fleet. Neither Cortex-A8 nor Cortex-A9 have
+# hardware integer divide (sdiv/udiv); Cortex-A7 does, but code built for
+# the no-idiv baseline still runs correctly there (forward-compatible,
+# just not maximally optimized) -- so ONE defconfig targeting Cortex-A9
+# safely covers this whole device range, exactly like the main Makefile's
+# own single hardcoded `-mtune=cortex-a7 -march=armv7-a` KOBO flags
+# already do. Per-model defconfigs are not needed unless/until LK8000
+# grows support for a genuinely different SoC vendor -- e.g. the newer
+# MediaTek-based Clara Colour/Clara B&W/Libra Colour/Elipsa 2E (the
+# separate buildroot-kobo project's territory) or Allwinner-based
+# Elipsa/Sage.
+#
+# Buildroot derives its packages' own -mcpu/-march flags from this choice
+# independently of the external toolchain below (via its toolchain-wrapper,
+# which must be rebuilt after changing this -- `make toolchain-external-
+# bootlin-dirclean toolchain-external-bootlin`, not just the packages).
+# Getting this wrong is silent at build time and fails at runtime: it SIGILLs
+# on real hardware the first time code hits an idiv (confirmed on-device:
+# libGeographicLib/libcurl/libfreetype/libpng/libjpeg/libz all contained
+# sdiv/udiv when BR2_cortex_a53 was selected here by mistake, copied
+# uncritically from the separate buildroot-kobo project's Kobo Clara
+# Colour -- a different, Cortex-A53 device).
+BR2_arm=y
+BR2_cortex_a9=y
+BR2_ARM_ENABLE_NEON=y
+BR2_ARM_ENABLE_VFP=y
+# Bootlin prebuilt toolchain (glibc, GCC >= 14) instead of Kobo's original
+# vendor Linaro 4.9.4 toolchain -- the old one can't compile LK8000, which
+# requires -std=c++20. LK8000 ships its own glibc/libstdc++/ld.so to the
+# device (see the KOBO block in the main Makefile's LDFLAGS) rather than
+# relying on the stock Kobo firmware's runtime, so a newer glibc here is
+# fine: only the app's own bundled runtime needs to match this toolchain,
+# not the device's stock userspace.
+BR2_TOOLCHAIN_EXTERNAL=y
+BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y
+BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_ARMV7_EABIHF_GLIBC_BLEEDING_EDGE=y
+BR2_PACKAGE_HOST_ENVIRONMENT_SETUP=y
+# LK8000 dependencies (see LK8000/Scripts/kobo-build-rootfs for the
+# equivalent shell-script-based build of these same libraries)
+BR2_PACKAGE_BOOST=y
+BR2_PACKAGE_FREETYPE=y
+BR2_PACKAGE_GEOGRAPHICLIB=y
+BR2_PACKAGE_JPEG=y
+BR2_PACKAGE_JPEG_TURBO=y
+BR2_PACKAGE_LIBCURL=y
+BR2_PACKAGE_OPENSSL=y
+BR2_PACKAGE_LIBCURL_OPENSSL=y
+BR2_PACKAGE_LIBPNG=y
+BR2_PACKAGE_ZZIPLIB=y
