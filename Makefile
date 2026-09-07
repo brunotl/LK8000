@@ -120,6 +120,11 @@ ifeq ($(TARGET),KOBO)
   # before invoking make. $(KOBO) still supplies libraries the SDK's own
   # sysroot doesn't include (e.g. boost, zzip, geographiclib).
   KOBO_SDK ?= n
+  # KOBO_DEBUG_NET=y: bundle kobo/debug-network-init.sh into the package as
+  # /mnt/onboard/LK8000/kobo/init.sh, giving unauthenticated root telnet+ftp
+  # over a USB Ethernet gadget on every boot. Dev/debug builds only -- NEVER
+  # set this for a build given to end users (see that script's header).
+  KOBO_DEBUG_NET ?= n
 endif
 
 ifeq ($(TARGET),PI)
