@@ -87,3 +87,4 @@ output.map
 /compile_commands.json
 /AGENTS.md
 .github/prompts/
+/buildroot/buildroot/

@@ -1,0 +1,2 @@
+name: LK8000
+desc: Buildroot external tree providing the Kobo cross-toolchain SDK and the extra libraries LK8000 needs (boost, geographiclib, ...)
