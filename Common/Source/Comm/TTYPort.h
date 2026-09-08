@@ -39,6 +39,13 @@ public:
 protected:
     unsigned RxThread() override;
 
+    // Overridable hook for the device node path to open() -- lets a
+    // subclass (Comm/Bluetooth/BlueZSppPort, for BT_SPP: classic Bluetooth
+    // ports) establish the underlying connection (RFCOMM connect + bind to
+    // /dev/rfcommN) lazily, right before opening it, rather than needing a
+    // fixed path known at construction time like a real tty.
+    virtual tstring GetDevicePath() { return GetPortName(); }
+
 private:
 
     unsigned _dwPortSpeed;

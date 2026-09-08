@@ -523,6 +523,31 @@ ifeq ($(CONFIG_LINUX),y)
   CE_DEFS += -DUSE_CURL $(patsubst -I%,-isystem %,$(CURL_CPPFLAGS))
  endif
 
+ # Bluetooth LE GATT sensor support (BLE: ports), via gattlib/BlueZ D-Bus.
+ # Off by default: gattlib isn't a system package on most distros and isn't
+ # (yet) part of the Kobo rootfs/Buildroot SDK either -- see CLAUDE.md.
+ USE_BLE ?= $(shell $(PKG_CONFIG) --exists gattlib && echo y)
+ ifeq ($(USE_BLE),y)
+  $(eval $(call pkg-config-library,GATTLIB,gattlib))
+  CE_DEFS += -DUSE_BLE $(patsubst -I%,-isystem %,$(GATTLIB_CPPFLAGS))
+  # GattlibBackend.cpp also calls GDBus (gio) directly (to read BlueZ
+  # Device1 properties gattlib itself doesn't expose, e.g. for BT_SPP:
+  # detection during a scan) -- gio/glib/gobject are otherwise only pulled
+  # in transitively via libgattlib.so, which isn't enough to link our own
+  # direct calls against.
+  $(eval $(call pkg-config-library,GIO,gio-2.0))
+  CE_DEFS += $(patsubst -I%,-isystem %,$(GIO_CPPFLAGS))
+ endif
+
+ # Classic Bluetooth (BT_SPP: ports), via raw AF_BLUETOOTH/RFCOMM sockets --
+ # needs only libbluetooth (for bdaddr_t/str2ba(), no D-Bus/bluetoothd
+ # interaction at all), unlike USE_BLE above.
+ USE_BT_SPP ?= $(shell $(PKG_CONFIG) --exists bluez && echo y)
+ ifeq ($(USE_BT_SPP),y)
+  $(eval $(call pkg-config-library,BLUEZ,bluez))
+  CE_DEFS += -DUSE_BT_SPP $(patsubst -I%,-isystem %,$(BLUEZ_CPPFLAGS))
+ endif
+
 endif
 
 ifeq ($(CONFIG_WIN32),y)
@@ -698,6 +723,9 @@ ifeq ($(CONFIG_LINUX),y)
  LDLIBS += $(LIBINPUT_LDLIBS)
  LDLIBS += $(LIBUDEV_LDLIBS)
  LDLIBS += $(CURL_LDLIBS)
+ LDLIBS += $(GATTLIB_LDLIBS)
+ LDLIBS += $(GIO_LDLIBS)
+ LDLIBS += $(BLUEZ_LDLIBS)
 
  ifneq ($(GCC_GTEQ_910),1) 
   LDLIBS += -lstdc++fs
@@ -1147,6 +1175,7 @@ COMMS	:=\
 	$(CMM)/DeviceDescriptor.cpp \
 	$(CMM)/GpsWeekNumberFix.cpp \
 	$(CMM)/Bluetooth/characteristic_value.cpp \
+	$(CMM)/Bluetooth/GattSensor.cpp \
 	$(CMM)/FilePort.cpp\
 	$(CMM)/wait_ack.cpp\
 
@@ -1535,13 +1564,25 @@ DISTRIB_OUTPUT := \
 	Kobo-install-otg.zip \
 	Kobo-install.zip
 
-# temporary still we don't have kobo menu.	
+# temporary still we don't have kobo menu.
 SRC_FILES += \
 	$(SRC)/xcs/Kobo/System.cpp \
 	$(SRC)/xcs/Kobo/Kernel.cpp \
 	$(SRC)/xcs/Kobo/Model.cpp
-	
 
+
+endif
+
+ifeq ($(USE_BLE),y)
+SRC_FILES += \
+	$(CMM)/Bluetooth/GattlibBackend.cpp \
+	$(CMM)/Bluetooth/BlueZGattSensor.cpp \
+	$(CMM)/Bluetooth/BlueZLeScanner.cpp
+endif
+
+ifeq ($(USE_BT_SPP),y)
+SRC_FILES += \
+	$(CMM)/Bluetooth/BlueZSppPort.cpp
 endif
 
 src_to_obj = $(patsubst $(SRC)%.c,$(BIN)%.o,\

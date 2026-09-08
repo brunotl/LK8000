@@ -64,3 +64,16 @@ BR2_PACKAGE_OPENSSL=y
 BR2_PACKAGE_LIBCURL_OPENSSL=y
 BR2_PACKAGE_LIBPNG=y
 BR2_PACKAGE_ZZIPLIB=y
+
+# Optional: LK8000's BLE: GATT sensor support (make TARGET=KOBO KOBO_SDK=y
+# USE_BLE=y). Not built by the plain `make ... boost zziplib ... geographiclib`
+# sequence above -- build explicitly with `make ... gattlib` when wanted.
+# Verified on this machine: `make BR2_EXTERNAL=$BR2_EXTERNAL gattlib` (which
+# pulls in bluez5_utils/dbus/libglib2 below) builds cleanly with this
+# toolchain, and `make TARGET=KOBO KOBO_SDK=y USE_BLE=y LK8000-KOBO` compiles
+# and links against it -- see buildroot/package/gattlib/gattlib.mk's patch
+# for the one upstream build fix that was needed.
+BR2_PACKAGE_GATTLIB=y
+BR2_PACKAGE_BLUEZ5_UTILS=y
+BR2_PACKAGE_DBUS=y
+BR2_PACKAGE_LIBGLIB2=y

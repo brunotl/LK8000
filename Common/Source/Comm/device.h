@@ -47,7 +47,7 @@ uint8_t nmea_crc(const char *text);
 
 void devWriteNMEAString(DeviceDescriptor_t* d, const TCHAR *Text);
 
-#ifdef ANDROID
+#if defined(ANDROID) || defined(USE_BLE)
 extern Mutex COMMPort_mutex; // needed for Bluetooth LE scan
 #endif
 extern COMMPort_t COMMPort;

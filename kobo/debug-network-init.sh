@@ -1,7 +1,9 @@
 #!/bin/sh
 # USB Ethernet gadget for debug access (telnet + ftp, no login), with a
 # DHCP server so the PC side gets its IP automatically -- no manual
-# `ip addr add` needed.
+# `ip addr add` needed. Also brings up the onboard Bluetooth radio, for
+# testing LK8000's BLE: GATT sensor support (USE_BLE=y) -- see the
+# BLUETOOTH section below.
 # Installed as /mnt/onboard/LK8000/kobo/init.sh -- which kobo/rcS sources
 # automatically on every boot -- only when built with KOBO_DEBUG_NET=y.
 # NEVER enable this for a build given to end users: it opens an
@@ -46,4 +48,53 @@
 
 	telnetd -l /bin/sh
 	tcpsvd -E 0.0.0.0 21 ftpd -w -A / &
+
+	# --- BLUETOOTH: bring up the onboard BLE radio, for testing LK8000's
+	# BLE: GATT sensor support. Not needed for USE_BLE=y itself (that just
+	# needs a working hci0 + bluetoothd already present, however they got
+	# there) -- this is what actually makes that true on a stock Kobo,
+	# which doesn't power on or attach its Bluetooth chip on its own.
+	# Adapted from
+	# https://github.com/F5OEO/LK8000/commit/b710899db44ee9fdf196db105df5819815b4ca1c
+	# (kobo/ble.sh), minus its bluealsa/bluetoothctl-connect audio-pairing
+	# bits, which are for BT audio and unrelated to BLE GATT sensors.
+	#
+	# Confirmed on a real Kobo Clara BW (model string "SN-N506", which
+	# this Netronix platform code treats identically to the Clara 2E):
+	# the chip is a Marvell/NXP one despite a leftover, unused
+	# /etc/firmware/BCM4345C0.hcd on the device -- hciattach's plain "any"
+	# type (no vendor firmware upload step) is what actually works, not
+	# "bcm43xx". Add further `elif [ ... ]` branches here for other
+	# models/chips as they get confirmed working; unmatched models fall
+	# through with no Bluetooth support, same as today.
+	#
+	# gattlib's underlying GDBus defaults to a socket path
+	# ("/run/dbus/...") that doesn't match where this stock dbus-daemon
+	# actually listens ("/var/run/dbus/...") -- LK8000 itself works
+	# around that (see DBUS_SYSTEM_BUS_ADDRESS in
+	# Comm/Bluetooth/GattlibBackend.cpp), so it's not needed here too;
+	# dbus-daemon is only started here because bluetoothd needs it
+	# running and nothing else on a stock Kobo starts it.
+	for i in /var/run/dbus /var/lib/dbus; do
+		mkdir -p $i
+	done
+	/bin/dbus-uuidgen > /var/lib/dbus/machine-id
+	/bin/dbus-daemon --system &
+
+	insmod /drivers/mx6sll-ntx/wifi/sdio_bt_pwr.ko
+
+	model=`dd if=/dev/mmcblk0 bs=8 count=1 skip=64 2>/dev/null`
+	if [ "`expr substr "$model" 1 7`" = SN-N418 ] ; then # Libra 2
+		/sbin/rtk_hciattach -n -s 115200 ttymxc1 rtk_h5 &
+	elif [ "`expr substr "$model" 1 7`" = SN-N506 ] ; then # Clara 2E / Clara BW
+		insmod /drivers/mx6sll-ntx/wifi/mlan.ko
+		insmod /drivers/mx6sll-ntx/wifi/moal.ko mod_para=nxp/wifi_mod_para_sd8987.conf
+		insmod /drivers/mx6sll-ntx/wifi/sdio_wifi_pwr.ko
+		/sbin/hciattach -n ttymxc1 any 1500000 flow -t 20 &
+	fi
+
+	sleep 5
+	hciconfig hci0 up
+
+	/libexec/bluetooth/bluetoothd -n -d > /mnt/onboard/LK8000/kobo/bluetoothd.log 2>&1 &
 } >> /mnt/onboard/LK8000/kobo/init.log 2>&1

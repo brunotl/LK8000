@@ -83,6 +83,29 @@ ifeq ($(USE_CURL),y)
 
 endif
 
+# gattlib and its runtime dependencies (D-Bus itself is not needed here:
+# gattlib's D-Bus backend talks to bluetoothd via GDBus/GIO, glib's own
+# D-Bus client, not libdbus-1 -- confirmed by a real device's ldd closure).
+# bluetoothd + a working hci adapter are assumed already present on the
+# device; this only ships what LK8000-KOBO itself dynamically links.
+ifeq ($(USE_BLE),y)
+ KOBO_LIB_PATHS += \
+	$(KOBO_EXTRA_LIB_DIR)/libgattlib.so \
+	$(KOBO_EXTRA_LIB_DIR)/libglib-2.0.so.0 \
+	$(KOBO_EXTRA_LIB_DIR)/libgio-2.0.so.0 \
+	$(KOBO_EXTRA_LIB_DIR)/libgobject-2.0.so.0 \
+	$(KOBO_EXTRA_LIB_DIR)/libgmodule-2.0.so.0 \
+	$(KOBO_EXTRA_LIB_DIR)/libffi.so.8 \
+	$(KOBO_EXTRA_LIB_DIR)/libpcre2-8.so.0 \
+
+endif
+
+ifeq ($(USE_BT_SPP),y)
+ KOBO_LIB_PATHS += \
+	$(KOBO_EXTRA_LIB_DIR)/libbluetooth.so.3 \
+
+endif
+
 # let only the existing file in the list
 KOBO_SYS_LIB_PATHS += $(filter $(KOBO_LIB_PATHS), $(wildcard $(KOBO_EXTRA_LIB_DIR)/*))
 

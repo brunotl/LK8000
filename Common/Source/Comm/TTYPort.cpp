@@ -70,7 +70,7 @@ bool TTYPort::Initialize() {
     }
 #endif
 
-    tstring szPath = GetPortName();
+    tstring szPath = GetDevicePath();
     if(szPath.compare(0, 3, _T("id:")) == 0) {
         szPath.replace(szPath.begin(), std::next(szPath.begin(), 3), _T("/dev/serial/by-id/"));
     }

@@ -16,7 +16,7 @@ class WndForm;
 
 class BluetoothLeScanner : public LeScanCallback {
 
-  using callback_t = std::function<void(WndForm *, const char *, const char *)>;
+  using callback_t = std::function<void(WndForm *, const char *, const char *, bool)>;
 
  public:
   static void Initialise(JNIEnv* env);
@@ -30,7 +30,9 @@ class BluetoothLeScanner : public LeScanCallback {
  private:
 
   void OnLeScan(const char *address, const char *name) override {
-    _callback(_pWndForm, address, name);
+    // Android's LE scan API never surfaces classic-only devices (unlike
+    // BlueZ's combined discovery on Linux/Kobo), so this is always false.
+    _callback(_pWndForm, address, name, false);
   }
 
   WndForm *_pWndForm;

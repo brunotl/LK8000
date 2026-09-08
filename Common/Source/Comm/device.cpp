@@ -36,6 +36,10 @@
   #include "Kobo/Kernel.hpp"
 #endif // KOBO
 
+#if !defined(ANDROID) && defined(USE_BLE)
+  #include "Comm/Bluetooth/BlueZGattSensor.h"
+#endif // !ANDROID && USE_BLE
+
 #endif // __linux__
 
 #ifdef  ANDROID
@@ -69,7 +73,7 @@ bool devDriverActivated(const TCHAR *DeviceName) ;
 // this lock is used for protect DeviceList array.
 Mutex CritSec_Comm;
 
-#ifdef ANDROID
+#if defined(ANDROID) || defined(USE_BLE)
 Mutex COMMPort_mutex; // needed for Bluetooth LE scan
 #endif
 COMMPort_t COMMPort;
@@ -417,6 +421,8 @@ namespace {
     else if (check_prefix(Port, bt_sensor)) {
 #ifdef ANDROID
       return new BluetoothSensor(idx, &Port[bt_sensor.size()]);
+#elif defined(USE_BLE)
+      return new BlueZGattSensor(idx, &Port[bt_sensor.size()]);
 #endif
     }
     else if (check_prefix(Port, DEV_INTERNAL_NAME)) {

@@ -52,6 +52,9 @@
 #include "Android/BluetoothLeScanner.h"
 #include "Util/ScopeExit.hxx"
 #include <sstream>
+#elif defined(USE_BLE)
+#include "Comm/Bluetooth/BlueZLeScanner.h"
+#include <sstream>
 #endif
 using namespace std::placeholders;
 
@@ -1492,7 +1495,7 @@ static void GetInfoBoxSelector(WndForm* pForm, int item, int mode)
 static  TCHAR temptext[MAX_PATH];
 
 void UpdateComPortList(WndProperty* wp, LPCTSTR szPort) {
-#ifdef ANDROID
+#if defined(ANDROID) || defined(USE_BLE)
     const std::lock_guard lock(COMMPort_mutex);
 #endif
 
@@ -3141,13 +3144,18 @@ wp->RefreshDisplay();
   }
 }
 
-#ifdef ANDROID
+#if defined(ANDROID) || defined(USE_BLE)
 
 #define UPDATE_COM_PORT 1
 
-static void OnLeScan(WndForm* pWndForm, const char *address, const char *name) {
+static void OnLeScan(WndForm* pWndForm, const char *address, const char *name, bool is_classic_spp) {
 
-  constexpr std::string_view prefix = "BLE:";
+  // BlueZ's discovery isn't LE-only, so on Linux/Kobo a scan commonly also
+  // surfaces classic-only devices (e.g. a "SkyDrop SPP"); those need
+  // BT_SPP: (RFCOMM), not BLE: (GATT), which they don't support at all.
+  // Android's LE scan API never sets is_classic_spp (always false there),
+  // so this is unchanged from before on that platform.
+  const std::string_view prefix = is_classic_spp ? std::string_view("BT_SPP:") : std::string_view("BLE:");
 
   std::stringstream prefixed_address_stream;
   prefixed_address_stream << prefix << address;
@@ -3274,7 +3282,7 @@ void dlgConfigurationShowModal(short mode){
     return;
   }
 
-#ifdef ANDROID
+#if defined(ANDROID) || defined(USE_BLE)
   pForm->SetOnUser(OnUser);
 
   std::unique_ptr<BluetoothLeScanner> BluetoothLeScanPtr;
@@ -3355,7 +3363,7 @@ void dlgConfigurationShowModal(short mode){
   bool notify_units_change = false;
   bool notify_reset_zoom = false;
 
-#ifdef ANDROID
+#if defined(ANDROID) || defined(USE_BLE)
     // stop LE Scanner first dialog close
     BluetoothLeScanPtr = nullptr;
 #endif
