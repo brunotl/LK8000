@@ -210,6 +210,22 @@ fi
 # that allow to restart on Nickel in case of crash.
 echo " " > /mnt/onboard/LK8000/kobo/start_nickel
 
+# LK8000WebSrv: HTTP file server for browsing/downloading/uploading/
+# deleting Logger trace and Task files (buildroot/package/lk8000websrv,
+# Scripts/externals/LK8000WebSrv). Only present when built with
+# KOBO_SDK=y. Launched via our own bundled ld.so + LD_LIBRARY_PATH, like
+# dnsmasq/avahi-daemon in kobo/debug-network-init.sh -- it's a plain
+# Buildroot target package, not relinked with a custom
+# --dynamic-linker/--rpath the way LK8000-KOBO itself is. Run with its
+# CWD in a narrow, empty directory: embedded_c.c sets civetweb's
+# document_root to "." with no auth, so unmatched HTTP paths would
+# otherwise serve arbitrary files starting from wherever the CWD is (/,
+# by default here) -- this keeps those requests 404ing instead of
+# exposing the whole filesystem.
+if [ -x /opt/LK8000/bin/websrv ]; then
+	(cd /opt/LK8000/share/websrv-root && LD_LIBRARY_PATH=/opt/LK8000/lib /opt/LK8000/lib/ld-linux-armhf.so.3 /opt/LK8000/bin/websrv) >> /mnt/onboard/LK8000/kobo/websrv.log 2>&1 &
+fi
+
 # finally, launch LK8000-KOBO
 /opt/LK8000/bin/LK8000-KOBO >> /mnt/onboard/LK8000/kobo/error.log 2>&1
 

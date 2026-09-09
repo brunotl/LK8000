@@ -1,0 +1,20 @@
+config BR2_PACKAGE_LK8000WEBSRV
+	bool "lk8000websrv"
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	depends on BR2_USE_MMU # civetweb needs fork()
+	select BR2_PACKAGE_CIVETWEB
+	select BR2_PACKAGE_CIVETWEB_LIB
+	help
+	  LK8000WebSrv is a small HTTP server built on civetweb (embedded,
+	  not the standalone civetweb server app) that lets a Kobo device
+	  serve its Logger trace files and Task files for browsing,
+	  download, upload, and deletion over the network.
+
+	  LK8000-specific: not a standalone upstream project. Built from
+	  source shipped in-tree at Scripts/externals/LK8000WebSrv (this
+	  package's SITE points there via the "local" site method) rather
+	  than fetched from a URL.
+
+comment "lk8000websrv needs a toolchain w/ threads"
+	depends on BR2_USE_MMU
+	depends on !BR2_TOOLCHAIN_HAS_THREADS

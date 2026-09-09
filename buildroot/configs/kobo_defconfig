@@ -78,3 +78,14 @@ BR2_PACKAGE_OPENSSL=y
 BR2_PACKAGE_LIBCURL_OPENSSL=y
 BR2_PACKAGE_LIBPNG=y
 BR2_PACKAGE_ZZIPLIB=y
+
+# LK8000WebSrv: HTTP file server for browsing/downloading/uploading/
+# deleting Logger trace and Task files on the Kobo (Scripts/externals/
+# LK8000WebSrv, buildroot/package/lk8000websrv), embedding civetweb.
+# Always bundled into KoboRoot.tgz for KOBO_SDK=y builds -- see
+# build/kobo.mk's KOBO_WEBSRV_* variables -- unlike KOBO_DEBUG_NET's
+# dnsmasq/avahi-daemon, which are opt-in since those are a debug-only
+# unauthenticated backdoor; this is a real user-facing feature.
+BR2_PACKAGE_LK8000WEBSRV=y
+BR2_PACKAGE_CIVETWEB=y
+BR2_PACKAGE_CIVETWEB_LIB=y

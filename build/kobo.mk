@@ -67,6 +67,29 @@ KOBO_AVAHI_LIB_PATHS = \
 
 KOBO_AVAHI_LIB_PATHS := $(filter $(KOBO_AVAHI_LIB_PATHS), $(wildcard $(STAGING_DIR)/usr/lib/*))
 
+# LK8000WebSrv (Scripts/externals/LK8000WebSrv, buildroot/package/
+# lk8000websrv): HTTP server for browsing/downloading/uploading/deleting
+# Logger trace and Task files on the Kobo, embedding civetweb. Like
+# dnsmasq/avahi-daemon above, Buildroot installs it under output/target/
+# (the device rootfs staging area), not $(STAGING_DIR) (the
+# cross-compilation sysroot). civetweb's shared lib carries the SONAME
+# libcivetweb.so.1 (confirmed via readelf -d on a real build -- NOT
+# unversioned "libcivetweb.so" as its own install rule's filename might
+# suggest). civetweb.mk also links libcivetweb.so against OpenSSL
+# whenever BR2_PACKAGE_OPENSSL=y (true here, for libcurl), so websrv
+# needs libssl/libcrypto too -- unconditionally, not gated on USE_CURL
+# like KOBO_LIB_PATHS below, since websrv depends on them regardless of
+# whether LK8000-KOBO itself was built with curl. Only exists when
+# KOBO_SDK=y -- always bundled for such builds, since this is a real user
+# feature rather than a debug-only one like KOBO_DEBUG_NET.
+KOBO_WEBSRV_BIN = $(STAGING_DIR)/../../../target/usr/bin/websrv
+KOBO_WEBSRV_LIB_PATHS = \
+	$(STAGING_DIR)/usr/lib/libcivetweb.so.1 \
+	$(STAGING_DIR)/usr/lib/libssl.so.3 \
+	$(STAGING_DIR)/usr/lib/libcrypto.so.3 \
+
+KOBO_WEBSRV_LIB_PATHS := $(filter $(KOBO_WEBSRV_LIB_PATHS), $(wildcard $(STAGING_DIR)/usr/lib/*))
+
 KOBO_LIB_PATHS = \
 	$(KOBO_EXTRA_LIB_DIR)/libz.so.1 \
 	$(KOBO_EXTRA_LIB_DIR)/libpng16.so.16 \
@@ -160,6 +183,14 @@ $(Q)install -m 0644 $(SYSTEM_FILES) $(BIN)/$(1)/KoboRoot/opt/LK8000/share/_Syste
 $(Q)install -m 0644 $(BITMAP_FILES) $(BIN)/$(1)/KoboRoot/opt/LK8000/share/_System/_Bitmaps
 
 $(call build_distrib_common, $(BIN)/$(1)/KoboRoot/mnt/onboard)
+
+$(Q)if [ "$(KOBO_SDK)" = "y" ]; then \
+	install --strip --strip-program=$(STRIP) -m 0755 $(KOBO_WEBSRV_BIN) $(BIN)/$(1)/KoboRoot/opt/LK8000/bin/websrv; \
+	install --strip --strip-program=$(STRIP) -m 0755 $(KOBO_WEBSRV_LIB_PATHS) $(BIN)/$(1)/KoboRoot/opt/LK8000/lib; \
+	install -m 0755 -d  $(BIN)/$(1)/KoboRoot/mnt/onboard/LK8000/kobo/html; \
+	install -m 0644 Scripts/externals/LK8000WebSrv/html/home.html $(BIN)/$(1)/KoboRoot/mnt/onboard/LK8000/kobo/html/home.html; \
+	install -m 0755 -d  $(BIN)/$(1)/KoboRoot/opt/LK8000/share/websrv-root; \
+fi
 
 $(Q)if [ "$(KOBO_DEBUG_NET)" = "y" ]; then \
 	install -m 0755 -d  $(BIN)/$(1)/KoboRoot/mnt/onboard/LK8000/kobo; \
