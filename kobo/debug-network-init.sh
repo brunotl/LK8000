@@ -11,10 +11,13 @@
 #
 # On the PC: the new USB network interface (e.g. `enx...` from `ip link`)
 # should get a DHCP lease automatically (NetworkManager does this by
-# default for a new wired-style interface). Then:
-#   telnet 192.168.2.1          -- root shell (busybox telnetd, no login)
-#   ftp 192.168.2.1             -- file transfer, rooted at / (no login,
-#                                   full access -- trusted direct USB link only)
+# default for a new wired-style interface). Then, using either the fixed
+# IP or, once the PC's mDNS resolver (avahi/systemd-resolved on Linux,
+# Bonjour on Windows, built-in on macOS) has seen the device's
+# announcement, lk8000.local:
+#   telnet lk8000.local          -- root shell (busybox telnetd, no login)
+#   ftp lk8000.local             -- file transfer, rooted at / (no login,
+#                                    full access -- trusted direct USB link only)
 # Output of this script goes to LK8000/kobo/init.log for debugging.
 #
 # arcotg_udc is built into some kernels (e.g. mx6sll-ntx) rather than
@@ -22,13 +25,13 @@
 # .ko file doesn't exist. Adjust the module path/name to match your
 # platform's /drivers/current/usb/gadget/ if needed.
 #
-# dnsmasq is bundled to /opt/LK8000/bin (built with the Buildroot SDK,
-# see buildroot/configs/kobo_defconfig) rather than being part of the
-# stock Kobo firmware's busybox, which has no udhcpd/zcip applet. It's
-# built against the bleeding-edge glibc under /opt/LK8000/lib, same as
-# LK8000-KOBO itself, so it's launched the same way: via our own bundled
-# ld.so directly (it wasn't linked with a custom --dynamic-linker/--rpath,
-# so LD_LIBRARY_PATH stands in for that).
+# dnsmasq and avahi-daemon are bundled to /opt/LK8000/bin (built with the
+# Buildroot SDK, see buildroot/configs/kobo_defconfig) rather than being
+# part of the stock Kobo firmware's busybox, which has no udhcpd/zcip/mDNS
+# applet. Both are built against the bleeding-edge glibc under
+# /opt/LK8000/lib, same as LK8000-KOBO itself, so they're launched the
+# same way: via our own bundled ld.so directly (neither was linked with a
+# custom --dynamic-linker/--rpath, so LD_LIBRARY_PATH stands in for that).
 
 {
 	insmod /drivers/current/usb/gadget/arcotg_udc.ko 2>/dev/null
@@ -43,6 +46,30 @@
 		--interface=usb0 --bind-interfaces --port=0 \
 		--dhcp-range=192.168.2.10,192.168.2.50,255.255.255.0,12h \
 		--dhcp-leasefile=/tmp/dnsmasq.leases --pid-file=/tmp/dnsmasq.pid
+
+	# avahi-daemon: announces the device as lk8000.local over mDNS on
+	# usb0 (config: kobo/avahi-daemon.conf, installed to
+	# /opt/LK8000/etc/avahi-daemon.conf). --no-drop-root is needed
+	# because there's no 'avahi' user in the stock Kobo's /etc/passwd for
+	# it to setuid to (this whole environment is already running as root
+	# anyway, being a single-user busybox system) -- but even with
+	# --no-drop-root, avahi-daemon's make_runtime_dir() still does an
+	# unconditional getpwnam()/getgrnam() lookup (just to chown its
+	# runtime dir), so the 'avahi' user/group must still exist in
+	# /etc/passwd/group or startup fails outright; a nominal, unused
+	# entry is enough since we never actually setuid to it. Confirmed on
+	# real hardware: its compiled-in runtime dir is /run/avahi-daemon,
+	# not /var/run/avahi-daemon (this device's busybox has /var/run but
+	# no /run at all -- `mkdir -p` creates the missing parent too).
+	# No -D/-s here (daemonize+syslog): there's no syslogd on this
+	# device, which would silently swallow startup errors -- run it the
+	# same way dbus-daemon/bluetoothd below do, backgrounded with `&` so
+	# stderr keeps going to this script's own init.log redirection.
+	grep -q "^avahi:" /etc/passwd || echo "avahi:x:150:150:avahi:/run/avahi-daemon:/bin/false" >> /etc/passwd
+	grep -q "^avahi:" /etc/group || echo "avahi:x:150:" >> /etc/group
+	mkdir -p /run/avahi-daemon
+	LD_LIBRARY_PATH=/opt/LK8000/lib /opt/LK8000/lib/ld-linux-armhf.so.3 /opt/LK8000/bin/avahi-daemon \
+		--file=/opt/LK8000/etc/avahi-daemon.conf --no-drop-root &
 
 	telnetd -l /bin/sh
 	tcpsvd -E 0.0.0.0 21 ftpd -w -A / &

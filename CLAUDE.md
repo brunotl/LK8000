@@ -204,10 +204,15 @@ is such a script: it brings up a USB Ethernet gadget (always `192.168.2.1` on th
 gets an address automatically — no manual `ip addr add` needed, it just shows up once you assign the interface an
 address via DHCP (NetworkManager does this on its own for most new wired-style interfaces). `telnetd`/`ftpd`
 mirror the existing `KoboExportSerial()`/`KoboUnexportSerial()` pattern in `Common/Source/xcs/Kobo/System.cpp`,
-just for `g_ether` instead of `g_serial`. `dnsmasq` is bundled from the Buildroot SDK (stock Kobo busybox has
-neither `udhcpd` nor `zcip`) and, since it wasn't linked with a custom `--dynamic-linker`, is launched via our own
-bundled `ld.so` + `LD_LIBRARY_PATH` the same way `LK8000-KOBO` uses `--dynamic-linker`/`--rpath` for the same
-reason — see the script for the exact invocation.
+just for `g_ether` instead of `g_serial`. It also runs `avahi-daemon` (config: `kobo/avahi-daemon.conf`), so the
+device is reachable as `lk8000.local` via mDNS instead of having to remember/type `192.168.2.1` — any PC with an
+mDNS resolver (avahi/systemd-resolved on Linux, built into macOS, Bonjour on Windows) picks this up automatically
+once the interface is up; the fixed IP still always works too as a fallback. `dnsmasq`/`avahi-daemon` are bundled
+from the Buildroot SDK (stock Kobo busybox has neither `udhcpd`/`zcip` nor an mDNS responder) and, since neither
+was linked with a custom `--dynamic-linker`, are launched via our own bundled `ld.so` + `LD_LIBRARY_PATH` the same
+way `LK8000-KOBO` uses `--dynamic-linker`/`--rpath` for the same reason — see the script for the exact invocation.
+`avahi-daemon` runs with `--no-drop-root` since there's no `avahi` user in the stock Kobo's `/etc/passwd` for it
+to setuid to.
 
 **Never ship this to end users** — it's an unauthenticated root backdoor over USB. It's opt-in, off by default:
 
@@ -217,30 +222,33 @@ make TARGET=KOBO KOBO_SDK=y KOBO_DEBUG_NET=y     # bakes it into KoboRoot.tgz as
 
 (`build/kobo.mk`'s `build_distrib_kobo` installs it conditionally — a *shell-level* `if`, not a Make `ifeq`, since
 the macro is expanded via `$(call ...)` inside a recipe, where literal `ifeq`/`endif` text would just get passed
-to the shell verbatim and fail; `KOBO_DEBUG_NET=y` currently requires `KOBO_SDK=y`, since `dnsmasq` only exists via
-the Buildroot SDK's `output/target` — see `KOBO_DNSMASQ_BIN` in `build/kobo.mk`, which is *not* under
-`$(STAGING_DIR)` since that's the cross-compilation sysroot for libraries, not where Buildroot installs
-applications.) For a device that's already installed, without rebuilding, just copy `kobo/debug-network-init.sh`
-onto the FAT32 partition (visible as a normal USB drive) as `LK8000/kobo/init.sh` directly (plus `dnsmasq` itself
-to `/opt/LK8000/bin/` if it isn't already there) — same effect, no `KOBO_DEBUG_NET` needed. (`arcotg_udc`/
-`g_ether` module paths and the platform driver directory — `/drivers/<platform>/usb/gadget/`, symlinked to
-`/drivers/current` by `rcS` — vary by Kobo model; adjust if `insmod` fails, check `LK8000/kobo/init.log`.)
+to the shell verbatim and fail; `KOBO_DEBUG_NET=y` currently requires `KOBO_SDK=y`, since `dnsmasq`/`avahi-daemon`
+only exist via the Buildroot SDK's `output/target` — see `KOBO_DNSMASQ_BIN`/`KOBO_AVAHI_DAEMON_BIN` in
+`build/kobo.mk`, which are *not* under `$(STAGING_DIR)` since that's the cross-compilation sysroot for libraries,
+not where Buildroot installs applications; `KOBO_AVAHI_LIB_PATHS`, by contrast, *are* under `$(STAGING_DIR)/usr/lib`
+since those are libraries.) For a device that's already installed, without rebuilding, just copy
+`kobo/debug-network-init.sh` onto the FAT32 partition (visible as a normal USB drive) as `LK8000/kobo/init.sh`
+directly (plus `dnsmasq`/`avahi-daemon` themselves and `kobo/avahi-daemon.conf` if not already there) — same
+effect, no `KOBO_DEBUG_NET` needed. (`arcotg_udc`/`g_ether` module paths and the platform driver directory —
+`/drivers/<platform>/usb/gadget/`, symlinked to `/drivers/current` by `rcS` — vary by Kobo model; adjust if
+`insmod` fails, check `LK8000/kobo/init.log`.)
 
 After rebooting with that in place, on the host PC — just wait for the new interface (`ip link show`, e.g.
-`enx<mac>`) to pick up a DHCP lease (usually automatic), then:
+`enx<mac>`) to pick up a DHCP lease (usually automatic; give mDNS a few seconds after that to resolve
+`lk8000.local`, or use `192.168.2.1` directly if it hasn't yet), then:
 
 ```sh
-telnet 192.168.2.1                        # root shell -- always this address, regardless of the PC's own DHCP IP
-curl -T LK8000-KOBO ftp://192.168.2.1/opt/LK8000/bin/LK8000-KOBO   # push a file
+telnet lk8000.local                        # root shell -- 192.168.2.1 always also works as a fallback
+curl -T LK8000-KOBO ftp://lk8000.local/opt/LK8000/bin/LK8000-KOBO   # push a file
 ```
 
 The fast iterate loop this enables, without ever touching `rcS`/`inittab`/`KoboRoot.tgz`:
 
 ```sh
-make TARGET=KOBO KOBO_SDK=y LK8000-KOBO                              # build just the binary
-telnet 192.168.2.1  # kill -9 $(pidof LK8000-KOBO)                   # stop it (file must not be busy to overwrite)
-curl -T LK8000-KOBO ftp://192.168.2.1/opt/LK8000/bin/LK8000-KOBO     # push it
-telnet 192.168.2.1  # /opt/LK8000/bin/LK8000-KOBO                    # relaunch in the foreground, watch output live
+make TARGET=KOBO KOBO_SDK=y LK8000-KOBO                                # build just the binary
+telnet lk8000.local  # kill -9 $(pidof LK8000-KOBO)                   # stop it (file must not be busy to overwrite)
+curl -T LK8000-KOBO ftp://lk8000.local/opt/LK8000/bin/LK8000-KOBO     # push it
+telnet lk8000.local  # /opt/LK8000/bin/LK8000-KOBO                    # relaunch in the foreground, watch output live
 ```
 
 `ftpd` needs the file it's overwriting to not be currently running (`ETXTBSY` → curl error 25/553), hence killing

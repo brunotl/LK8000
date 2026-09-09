@@ -50,6 +50,23 @@ endif
 # output/, then into target/. Only exists when KOBO_SDK=y.
 KOBO_DNSMASQ_BIN = $(STAGING_DIR)/../../../target/usr/sbin/dnsmasq
 
+# avahi-daemon (KOBO_DEBUG_NET's mDNS responder, publishing lk8000.local --
+# see kobo/debug-network-init.sh and kobo/avahi-daemon.conf) is likewise an
+# application under output/target/, not output/host/.../sysroot/. Its
+# shared libs (libavahi-core/-common, libdaemon, libexpat, and libdbus-1
+# since BR2_PACKAGE_DBUS is on for gattlib, which avahi's ./configure
+# picks up automatically) are installed to $(STAGING_DIR)/usr/lib like any
+# other bundled library. Only exists when KOBO_SDK=y.
+KOBO_AVAHI_DAEMON_BIN = $(STAGING_DIR)/../../../target/usr/sbin/avahi-daemon
+KOBO_AVAHI_LIB_PATHS = \
+	$(STAGING_DIR)/usr/lib/libavahi-common.so.3 \
+	$(STAGING_DIR)/usr/lib/libavahi-core.so.7 \
+	$(STAGING_DIR)/usr/lib/libdaemon.so.0 \
+	$(STAGING_DIR)/usr/lib/libexpat.so.1 \
+	$(STAGING_DIR)/usr/lib/libdbus-1.so.3 \
+
+KOBO_AVAHI_LIB_PATHS := $(filter $(KOBO_AVAHI_LIB_PATHS), $(wildcard $(STAGING_DIR)/usr/lib/*))
+
 KOBO_LIB_PATHS = \
 	$(KOBO_EXTRA_LIB_DIR)/libz.so.1 \
 	$(KOBO_EXTRA_LIB_DIR)/libpng16.so.16 \
@@ -148,6 +165,10 @@ $(Q)if [ "$(KOBO_DEBUG_NET)" = "y" ]; then \
 	install -m 0755 -d  $(BIN)/$(1)/KoboRoot/mnt/onboard/LK8000/kobo; \
 	install -m 0644 kobo/debug-network-init.sh $(BIN)/$(1)/KoboRoot/mnt/onboard/LK8000/kobo/init.sh; \
 	install --strip --strip-program=$(STRIP) -m 0755 $(KOBO_DNSMASQ_BIN) $(BIN)/$(1)/KoboRoot/opt/LK8000/bin/dnsmasq; \
+	install --strip --strip-program=$(STRIP) -m 0755 $(KOBO_AVAHI_DAEMON_BIN) $(BIN)/$(1)/KoboRoot/opt/LK8000/bin/avahi-daemon; \
+	install --strip --strip-program=$(STRIP) -m 0755 $(KOBO_AVAHI_LIB_PATHS) $(BIN)/$(1)/KoboRoot/opt/LK8000/lib; \
+	install -m 0755 -d  $(BIN)/$(1)/KoboRoot/opt/LK8000/etc; \
+	install -m 0644 kobo/avahi-daemon.conf $(BIN)/$(1)/KoboRoot/opt/LK8000/etc/avahi-daemon.conf; \
 fi
 
 endef

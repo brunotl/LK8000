@@ -52,6 +52,20 @@ BR2_PACKAGE_HOST_ENVIRONMENT_SETUP=y
 # manual `ip addr add`. Not an LK8000 runtime dependency.
 BR2_PACKAGE_DNSMASQ=y
 
+# avahi-daemon: mDNS responder, bundled to /opt/LK8000/bin and used by
+# kobo/debug-network-init.sh (KOBO_DEBUG_NET=y builds only) so the device
+# answers to lk8000.local on the USB gadget link instead of the fixed
+# 192.168.2.1 needing to be remembered/typed. AVAHI_DAEMON auto-selects
+# libdaemon+expat; dbus support is pulled in for free since
+# BR2_PACKAGE_DBUS is already on below (for gattlib) -- see
+# kobo/avahi-daemon.conf and build/kobo.mk's KOBO_AVAHI_* variables for
+# the exact set of shared libs this adds. autoipd (IPv4LL) is unneeded --
+# the USB gadget IP is always static, assigned by dnsmasq/ifconfig, not
+# link-local autoconfiguration. Not an LK8000 runtime dependency.
+BR2_PACKAGE_AVAHI=y
+BR2_PACKAGE_AVAHI_DAEMON=y
+# BR2_PACKAGE_AVAHI_AUTOIPD is not set
+
 # LK8000 dependencies (see LK8000/Scripts/kobo-build-rootfs for the
 # equivalent shell-script-based build of these same libraries)
 BR2_PACKAGE_BOOST=y
