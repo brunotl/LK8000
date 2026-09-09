@@ -30,6 +30,7 @@
 #include <gio/gio.h>
 
 #include <atomic>
+#include <chrono>
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -98,6 +99,41 @@ class Mainloop {
   std::thread thread_;
 };
 
+// gattlib_adapter_scan_enable() blocks until scan_disable()/timeout, but its
+// DBus/BlueZ-backed implementation keeps a single, non-thread-safe
+// `ble_scan` struct per adapter object -- and gattlib_adapter_open(nullptr,
+// ...) always resolves to the same ref-counted adapter (one hci0 per
+// process), so two callers (two BlueZGattSensor Connections, or a
+// Connection racing the scan-menu's StartScan()) calling
+// gattlib_adapter_scan_enable() concurrently race on that shared struct:
+// each call's internal memset()/re-init (dbus/gattlib_adapter.c,
+// _gattlib_adapter_scan_enable_with_filter) clobbers the other's in-flight
+// scan state (timeout id, signal-handler ids, is_scanning flag), and the
+// blocking call can end up waiting on a "scan stopped" signal that never
+// arrives for it specifically -- a real hang, confirmed against gattlib
+// 0.7.2's own source. Serialize every scan_enable() call process-wide so
+// only one is ever in flight; scan_disable() itself stays unlocked, since
+// that's what unblocks whichever call currently holds this.
+std::mutex g_scan_mutex;
+
+// Polls for g_scan_mutex rather than blocking on it outright: whichever
+// scan currently holds it (the device-scan menu's effectively-unbounded
+// StartScan(), or another Connect()'s own 10s discovery) can hold it for a
+// while, and both StopScan() and Disconnect() join() the thread that's
+// waiting here -- on the main/UI thread in StopScan()'s case (dialog
+// close). Checking `cancelled` every 100ms instead of just locking keeps
+// that join() bounded instead of turning into the same kind of hang this
+// mutex was added to fix.
+bool AcquireScanSlot(const std::atomic<bool>& cancelled) {
+  while (!cancelled.load()) {
+    if (g_scan_mutex.try_lock()) {
+      return true;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  return false;
+}
+
 std::string UuidToString(const uuid_t& uuid) {
   char buf[64] = {0};
   gattlib_uuid_to_string(&uuid, buf, sizeof(buf));
@@ -136,13 +172,32 @@ uuid128_t ToUuid128(const uuid_t& uuid) {
 
 struct Connection {
   gattlib_adapter_t* adapter = nullptr;
-  gattlib_connection_t* conn = nullptr;
+  // Written from whichever thread gattlib invokes its connect/disconnect
+  // callbacks on (not necessarily the one that created this Connection);
+  // atomic so DiscoverAndSubscribe() can safely poll it for an unsolicited
+  // disconnect racing its own in-flight discovery calls.
+  std::atomic<gattlib_connection_t*> conn{nullptr};
   gattlib_stream_t* stream = nullptr;
   Callbacks callbacks;
   std::string address;
   uuid_t write_uuid{};
   bool has_write_uuid = false;
   std::atomic<bool> shutting_down{false};
+  // Serializes HandleConnect()/the on-disconnect handler (both invoked by
+  // gattlib on its own GLib-main-loop thread) against Disconnect() (called
+  // from LK8000's port-management thread, e.g. GattSensor::Close()) tearing
+  // this Connection down concurrently. Confirmed on a real device: without
+  // this, Disconnect() can close the adapter / delete this Connection while
+  // DiscoverAndSubscribe()'s in-flight gattlib_discover_primary/char() call
+  // -- or a reconnect kicked off by the on-disconnect handler -- is still
+  // using it, crashing inside gattlib itself ("assertion 'G_IS_DBUS_PROXY
+  // (proxy)' failed" followed by a SIGSEGV, seen in kobo/error.log). This is
+  // what actually closes that race; the self->conn checks in
+  // DiscoverAndSubscribe() only narrowed it. Recursive because gattlib_connect()
+  // can invoke OnConnectCb synchronously, inline, on the calling thread for
+  // fast-fail cases -- including from the on-disconnect handler's own
+  // reconnect call below, which already holds this lock.
+  std::recursive_mutex callback_mutex;
   // Characteristic UUID string -> owning service UUID, filled in during
   // discovery; gattlib's notification callback only carries the
   // characteristic UUID, not its service.
@@ -159,9 +214,28 @@ void OnConnectCb(gattlib_adapter_t* adapter, const char* dst,
                  gattlib_connection_t* connection, int error, void* user_data);
 
 bool DiscoverAndSubscribe(Connection* self, gattlib_connection_t* conn) {
+  // Each of the gattlib_* calls below is a synchronous D-Bus round-trip
+  // that can take a noticeable moment; an unsolicited disconnect (BlueZ
+  // dropping the device, e.g.) racing this discovery sequence has been
+  // observed to crash inside gattlib itself (invalid GDBusProxy assertion
+  // followed by a SIGSEGV) rather than fail cleanly -- bail out early on
+  // every disconnect gattlib has told us about via our own callback (see
+  // the disconnect handler in HandleConnect(), which clears self->conn)
+  // instead of continuing to hand it a connection that's going away. This
+  // narrows the race rather than closing it: it can't catch an invalidation
+  // that happens strictly inside one already-in-flight gattlib call.
+  if (self->conn.load() != conn) {
+    return false;
+  }
+
   gattlib_primary_service_t* services = nullptr;
   int services_count = 0;
   if (gattlib_discover_primary(conn, &services, &services_count) != GATTLIB_SUCCESS) {
+    return false;
+  }
+
+  if (self->conn.load() != conn) {
+    free(services);
     return false;
   }
 
@@ -172,9 +246,15 @@ bool DiscoverAndSubscribe(Connection* self, gattlib_connection_t* conn) {
     return false;
   }
 
+  if (self->conn.load() != conn) {
+    free(characteristics);
+    free(services);
+    return false;
+  }
+
   self->char_to_service.clear();
 
-  for (int i = 0; i < char_count; ++i) {
+  for (int i = 0; i < char_count && self->conn.load() == conn; ++i) {
     const gattlib_characteristic_t& ch = characteristics[i];
 
     const gattlib_primary_service_t* owning_service = nullptr;
@@ -219,6 +299,18 @@ bool DiscoverAndSubscribe(Connection* self, gattlib_connection_t* conn) {
 }
 
 void HandleConnect(Connection* self, gattlib_connection_t* conn, int error) {
+  std::lock_guard<std::recursive_mutex> callback_lock(self->callback_mutex);
+
+  if (self->shutting_down.load()) {
+    // Disconnect() is tearing this Connection down (possibly already gone
+    // by the time this callback got scheduled) -- don't touch it, and don't
+    // leak a connection nobody else will now close.
+    if (conn != nullptr) {
+      gattlib_disconnect(conn, false /* wait_disconnection */);
+    }
+    return;
+  }
+
   if (error != GATTLIB_SUCCESS || conn == nullptr) {
     self->callbacks.on_connected(self->callbacks.user_data, false);
     return;
@@ -227,6 +319,8 @@ void HandleConnect(Connection* self, gattlib_connection_t* conn, int error) {
   self->conn = conn;
   gattlib_register_on_disconnect(conn, [](gattlib_connection_t*, void* user_data) {
     auto* self = static_cast<Connection*>(user_data);
+    std::lock_guard<std::recursive_mutex> callback_lock(self->callback_mutex);
+
     self->conn = nullptr;
     self->stream = nullptr; // was bound to the now-dead connection
 
@@ -256,7 +350,7 @@ void HandleConnect(Connection* self, gattlib_connection_t* conn, int error) {
 
   const bool ok = DiscoverAndSubscribe(self, conn);
 
-  if (ok && self->has_write_uuid) {
+  if (ok && self->has_write_uuid && self->conn.load() == conn) {
     uuid_t write_uuid = self->write_uuid;
     uint16_t mtu = 0;
     // Best-effort: Write() falls back to an unchunked write if this failed.
@@ -280,6 +374,7 @@ struct ScanHandle {
   std::thread thread;
   std::mutex seen_mutex;
   std::unordered_map<std::string, bool> seen; // address -> is_classic_spp
+  std::atomic<bool> stop_requested{false};
 };
 
 namespace {
@@ -377,7 +472,12 @@ ScanHandle* StartScan(void (*callback)(void*, const char*, const char*, bool), v
   // effectively-unbounded timeout means it really runs until StopScan().
   handle->thread = std::thread([handle] {
     constexpr size_t kScanTimeoutSeconds = 3600;
-    gattlib_adapter_scan_enable(handle->adapter, &OnDiscoveredCb, kScanTimeoutSeconds, handle);
+    if (AcquireScanSlot(handle->stop_requested)) {
+      if (!handle->stop_requested.load()) {
+        gattlib_adapter_scan_enable(handle->adapter, &OnDiscoveredCb, kScanTimeoutSeconds, handle);
+      }
+      g_scan_mutex.unlock();
+    }
   });
 
   return handle;
@@ -387,6 +487,7 @@ void StopScan(ScanHandle* handle) {
   if (!handle) {
     return;
   }
+  handle->stop_requested = true;
   if (handle->adapter) {
     gattlib_adapter_scan_disable(handle->adapter);
   }
@@ -431,7 +532,14 @@ void OnDiscoveredForConnect(gattlib_adapter_t* adapter, const char* addr, const 
 
 void ScanThenConnect(Connection* self) {
   constexpr size_t kDiscoverTimeoutSeconds = 10;
-  gattlib_adapter_scan_enable(self->adapter, &OnDiscoveredForConnect, kDiscoverTimeoutSeconds, self);
+  if (AcquireScanSlot(self->shutting_down)) {
+    // Disconnect() may have been requested while this was queued behind
+    // another in-flight scan -- don't bother starting a new one.
+    if (!self->shutting_down.load()) {
+      gattlib_adapter_scan_enable(self->adapter, &OnDiscoveredForConnect, kDiscoverTimeoutSeconds, self);
+    }
+    g_scan_mutex.unlock();
+  }
   // If the target address was never seen (timed out) or was found but
   // gattlib_connect() itself failed synchronously, on_connected(false) is
   // owed here (once) -- either way that's exactly connect_attempted
@@ -473,7 +581,16 @@ void Disconnect(Connection* connection) {
     return;
   }
 
-  connection->shutting_down = true;
+  {
+    // Taking the lock here (before setting shutting_down) closes the gap
+    // where HandleConnect()/the on-disconnect handler already read
+    // shutting_down as false and is about to act on a stale conn/adapter --
+    // they now either haven't started yet (and will see it true once they
+    // do get the lock) or are already inside their own critical section, in
+    // which case the block below waits for them to finish first.
+    std::lock_guard<std::recursive_mutex> callback_lock(connection->callback_mutex);
+    connection->shutting_down = true;
+  }
 
   if (connection->adapter) {
     gattlib_adapter_scan_disable(connection->adapter);
@@ -481,6 +598,13 @@ void Disconnect(Connection* connection) {
   if (connection->scan_before_connect_thread.joinable()) {
     connection->scan_before_connect_thread.join();
   }
+
+  // Wait for any HandleConnect()/on-disconnect callback that was already
+  // in flight when shutting_down was set above to finish -- only after this
+  // returns is it safe to close the adapter and free `connection` out from
+  // under gattlib.
+  { std::lock_guard<std::recursive_mutex> callback_lock(connection->callback_mutex); }
+
   if (connection->stream) {
     gattlib_write_char_stream_close(connection->stream);
     connection->stream = nullptr;
