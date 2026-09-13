@@ -32,11 +32,11 @@ class BlueZGattSensor : public GattSensor {
   void DoReadGattCharacteristic(const uuid_t& service, const uuid_t& characteristic) override;
 
  private:
-  static void OnConnected(void* user_data, bool success);
-  static void OnDisconnected(void* user_data);
-  static bool ShouldEnableNotification(void* user_data, const uuid_t& service,
+  static void OnConnected(BlueZGattSensor* self, bool success);
+  static void OnDisconnected(BlueZGattSensor* self);
+  static bool ShouldEnableNotification(BlueZGattSensor* self, const uuid_t& service,
                                        const uuid_t& characteristic);
-  static void OnCharacteristicChangedCb(void* user_data, const uuid_t& service,
+  static void OnCharacteristicChangedCb(BlueZGattSensor* self, const uuid_t& service,
                                         const uuid_t& characteristic,
                                         const uint8_t* data, size_t length);
 

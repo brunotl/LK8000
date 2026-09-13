@@ -15,7 +15,7 @@
 
 bool BlueZGattSensor::Connect() {
   gattlib_backend::Callbacks callbacks = {
-    .user_data = this,
+    .self = this,
     .on_connected = &BlueZGattSensor::OnConnected,
     .on_disconnected = &BlueZGattSensor::OnDisconnected,
     .should_enable_notification = &BlueZGattSensor::ShouldEnableNotification,
@@ -66,8 +66,7 @@ void BlueZGattSensor::DoReadGattCharacteristic(const uuid_t& service, const uuid
   }
 }
 
-void BlueZGattSensor::OnConnected(void* user_data, bool success) {
-  auto* self = static_cast<BlueZGattSensor*>(user_data);
+void BlueZGattSensor::OnConnected(BlueZGattSensor* self, bool success) {
   self->port_state = success ? PortState::READY : PortState::FAILED;
   if (!success) {
     self->PortError("Failed to connect to Bluetooth LE device");
@@ -75,22 +74,19 @@ void BlueZGattSensor::OnConnected(void* user_data, bool success) {
   self->PortStateChanged();
 }
 
-void BlueZGattSensor::OnDisconnected(void* user_data) {
-  auto* self = static_cast<BlueZGattSensor*>(user_data);
+void BlueZGattSensor::OnDisconnected(BlueZGattSensor* self) {
   self->port_state = PortState::LIMBO;
   self->PortStateChanged();
 }
 
-bool BlueZGattSensor::ShouldEnableNotification(void* user_data, const uuid_t& service,
+bool BlueZGattSensor::ShouldEnableNotification(BlueZGattSensor* self, const uuid_t& service,
                                                const uuid_t& characteristic) {
-  auto* self = static_cast<BlueZGattSensor*>(user_data);
   return self->DoEnableNotification(service, characteristic);
 }
 
-void BlueZGattSensor::OnCharacteristicChangedCb(void* user_data, const uuid_t& service,
+void BlueZGattSensor::OnCharacteristicChangedCb(BlueZGattSensor* self, const uuid_t& service,
                                                 const uuid_t& characteristic,
                                                 const uint8_t* data, size_t length) {
-  auto* self = static_cast<BlueZGattSensor*>(user_data);
   self->OnCharacteristicChanged(service, characteristic,
                                 std::vector<uint8_t>(data, data + length));
 }

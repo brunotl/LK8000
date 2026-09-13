@@ -300,7 +300,7 @@ bool DiscoverAndSubscribe(Connection* self, gattlib_connection_t* conn) {
     }
 
     if (!self->callbacks.should_enable_notification(
-            self->callbacks.user_data, backend_service, backend_char)) {
+            self->callbacks.self, backend_service, backend_char)) {
       continue;
     }
 
@@ -313,7 +313,7 @@ bool DiscoverAndSubscribe(Connection* self, gattlib_connection_t* conn) {
       size_t buffer_len = 0;
       bluez_uuid_t read_uuid = ch.uuid;
       if (gattlib_read_char_by_uuid(conn, &read_uuid, &buffer, &buffer_len) == GATTLIB_SUCCESS) {
-        self->callbacks.on_characteristic_changed(self->callbacks.user_data, backend_service, backend_char,
+        self->callbacks.on_characteristic_changed(self->callbacks.self, backend_service, backend_char,
                                                    static_cast<const uint8_t*>(buffer), buffer_len);
         gattlib_characteristic_free_value(buffer);
       }
@@ -339,7 +339,7 @@ void HandleConnect(Connection* self, gattlib_connection_t* conn, int error) {
   }
 
   if (error != GATTLIB_SUCCESS || conn == nullptr) {
-    self->callbacks.on_connected(self->callbacks.user_data, false);
+    self->callbacks.on_connected(self->callbacks.self, false);
     return;
   }
 
@@ -351,7 +351,7 @@ void HandleConnect(Connection* self, gattlib_connection_t* conn, int error) {
     self->conn = nullptr;
     self->stream = nullptr; // was bound to the now-dead connection
 
-    self->callbacks.on_disconnected(self->callbacks.user_data);
+    self->callbacks.on_disconnected(self->callbacks.self);
 
     if (self->shutting_down.load()) {
       return;
@@ -372,7 +372,7 @@ void HandleConnect(Connection* self, gattlib_connection_t* conn, int error) {
     const uuid_t char_uuid = ToUuid128(*uuid);
     auto it = self->char_to_service.find(char_uuid);
     const uuid_t service_uuid = (it != self->char_to_service.end()) ? it->second : uuid_t{};
-    self->callbacks.on_characteristic_changed(self->callbacks.user_data, service_uuid,
+    self->callbacks.on_characteristic_changed(self->callbacks.self, service_uuid,
                                               char_uuid, data, data_length);
   }, self);
 
@@ -385,7 +385,7 @@ void HandleConnect(Connection* self, gattlib_connection_t* conn, int error) {
     gattlib_write_char_by_uuid_stream_open(conn, &write_uuid, &self->stream, &mtu);
   }
 
-  self->callbacks.on_connected(self->callbacks.user_data, ok);
+  self->callbacks.on_connected(self->callbacks.self, ok);
 }
 
 void OnConnectCb(gattlib_adapter_t* adapter, const char* dst,
@@ -575,7 +575,7 @@ void ScanThenConnect(Connection* self) {
   // established, matched by OnConnectCb never firing.
   bool expected = false;
   if (self->connect_attempted.compare_exchange_strong(expected, true)) {
-    self->callbacks.on_connected(self->callbacks.user_data, false);
+    self->callbacks.on_connected(self->callbacks.self, false);
   }
 }
 
@@ -677,7 +677,7 @@ void ReadCharacteristic(Connection* connection, const uuid_t& service, const uui
     void* buffer = nullptr;
     size_t buffer_len = 0;
     if (gattlib_read_char_by_uuid(connection->conn, &uuid, &buffer, &buffer_len) == GATTLIB_SUCCESS) {
-      connection->callbacks.on_characteristic_changed(connection->callbacks.user_data, service, characteristic,
+      connection->callbacks.on_characteristic_changed(connection->callbacks.self, service, characteristic,
                                                        static_cast<const uint8_t*>(buffer), buffer_len);
       gattlib_characteristic_free_value(buffer);
     }

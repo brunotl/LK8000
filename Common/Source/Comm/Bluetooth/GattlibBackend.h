@@ -16,29 +16,32 @@
 #include <cstddef>
 #include <cstdint>
 #include "utils/uuid.h"
+
+class BlueZGattSensor;
+
 namespace gattlib_backend {
 
 struct Connection;
 
 struct Callbacks {
-  void* user_data = nullptr;
+  BlueZGattSensor* self = nullptr;
 
   /** The initial connection attempt (including service discovery) either
    *  succeeded or failed. */
-  void (*on_connected)(void* user_data, bool success) = nullptr;
+  void (*on_connected)(BlueZGattSensor*, bool success) = nullptr;
 
   /** The connection dropped after having been ready. A reconnect attempt
    *  is made internally; on_connected() is called again once it resolves. */
-  void (*on_disconnected)(void* user_data) = nullptr;
+  void (*on_disconnected)(BlueZGattSensor*) = nullptr;
 
   /** Asked once per discovered characteristic, to decide whether to
    *  subscribe to notifications (or, lacking that, do a one-shot read). */
-  bool (*should_enable_notification)(void* user_data, const uuid_t& service,
+  bool (*should_enable_notification)(BlueZGattSensor*, const uuid_t& service,
                                      const uuid_t& characteristic) = nullptr;
 
   /** Delivers a notification, or the result of a read requested via
    *  ReadCharacteristic() (which echoes back the `service` it was given). */
-  void (*on_characteristic_changed)(void* user_data, const uuid_t& service,
+  void (*on_characteristic_changed)(BlueZGattSensor*, const uuid_t& service,
                                     const uuid_t& characteristic,
                                     const uint8_t* data, size_t length) = nullptr;
 };
