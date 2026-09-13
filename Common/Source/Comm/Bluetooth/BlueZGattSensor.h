@@ -40,7 +40,7 @@ class BlueZGattSensor : public GattSensor {
                                         const gattlib_backend::uuid128_t& characteristic,
                                         const uint8_t* data, size_t length);
 
-  Mutex mutex;
+  mutable Mutex mutex;
   gattlib_backend::Connection* connection = nullptr;
 
   std::atomic<PortState> port_state{PortState::LIMBO};

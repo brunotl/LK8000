@@ -74,10 +74,12 @@ GattSensor::PortState BlueZGattSensor::GetPortState() const {
 }
 
 bool BlueZGattSensor::WriteData(const void* data, size_t size) {
+  const std::lock_guard lock(mutex);
   return connection && gattlib_backend::Write(connection, data, size);
 }
 
 void BlueZGattSensor::DoWriteGattCharacteristic(const uuid_t& service, const uuid_t& characteristic, const void* data, size_t size) const {
+  const std::lock_guard lock(mutex);
   // gattlib writes by characteristic UUID only; `service` can't be used to
   // disambiguate a UUID reused across services.
   if (connection) {
@@ -86,6 +88,7 @@ void BlueZGattSensor::DoWriteGattCharacteristic(const uuid_t& service, const uui
 }
 
 void BlueZGattSensor::DoReadGattCharacteristic(const uuid_t& service, const uuid_t& characteristic) {
+  const std::lock_guard lock(mutex);
   if (connection) {
     gattlib_backend::ReadCharacteristic(connection, ToBackendUuid(service), ToBackendUuid(characteristic));
   }
