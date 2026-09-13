@@ -47,6 +47,7 @@ GattSensor::PortState BluetoothSensor::GetPortState() const {
 }
 
 bool BluetoothSensor::WriteData(const void* data, size_t size) {
+  const std::lock_guard lock(mutex);
   if (!bridge) {
     return false;
   }
@@ -66,12 +67,14 @@ bool BluetoothSensor::WriteData(const void* data, size_t size) {
 }
 
 void BluetoothSensor::DoWriteGattCharacteristic(const uuid_t& service, const uuid_t& characteristic, const void *data, size_t size) const {
+  const std::lock_guard lock(mutex);
   if (bridge) {
     bridge->writeGattCharacteristic(Java::GetEnv(), service, characteristic, data, size);
   }
 }
 
 void BluetoothSensor::DoReadGattCharacteristic(const uuid_t& service, const uuid_t& characteristic) {
+  const std::lock_guard lock(mutex);
   if (bridge) {
     bridge->readGattCharacteristic(Java::GetEnv(), service, characteristic);
   }
