@@ -6,15 +6,7 @@
  * File:   GattlibBackend.h
  *
  * A minimal, LK8000-agnostic wrapper around gattlib/BlueZ D-Bus GATT client
- * calls, used by BlueZGattSensor. Kept deliberately free of any LK8000
- * header (in particular utils/uuid.h): gattlib.h drags in BlueZ's
- * <bluetooth/bluetooth.h>, which declares its own unrelated `uuid_t`
- * (a legacy SDP struct) -- naming a plain 128-bit value the same as
- * LK8000's own uuid_t class. The two can't be visible in the same
- * translation unit, so this header/implementation pair is the wall between
- * them: BlueZGattSensor.cpp sees LK8000's uuid_t and this header only;
- * GattlibBackend.cpp sees gattlib.h and this header only, and converts
- * to/from the plain byte array below at the boundary.
+ * calls, used by BlueZGattSensor.
  */
 
 #ifndef COMM_BLUETOOTH_GATTLIBBACKEND_H
@@ -23,11 +15,8 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-
+#include "utils/uuid.h"
 namespace gattlib_backend {
-
-/** Big-endian 128-bit UUID bytes, e.g. {00 00 FF E1 00 00 10 00 80 00 00 80 5F 9B 34 FB}. */
-using uuid128_t = std::array<uint8_t, 16>;
 
 struct Connection;
 
@@ -44,13 +33,13 @@ struct Callbacks {
 
   /** Asked once per discovered characteristic, to decide whether to
    *  subscribe to notifications (or, lacking that, do a one-shot read). */
-  bool (*should_enable_notification)(void* user_data, const uuid128_t& service,
-                                     const uuid128_t& characteristic) = nullptr;
+  bool (*should_enable_notification)(void* user_data, const uuid_t& service,
+                                     const uuid_t& characteristic) = nullptr;
 
   /** Delivers a notification, or the result of a read requested via
    *  ReadCharacteristic() (which echoes back the `service` it was given). */
-  void (*on_characteristic_changed)(void* user_data, const uuid128_t& service,
-                                    const uuid128_t& characteristic,
+  void (*on_characteristic_changed)(void* user_data, const uuid_t& service,
+                                    const uuid_t& characteristic,
                                     const uint8_t* data, size_t length) = nullptr;
 };
 
@@ -88,7 +77,7 @@ void StopScan(ScanHandle* handle);
  * If `has_write_characteristic`, `write_characteristic` is opened as a
  * chunked write stream once connected, for use by Write().
  */
-Connection* Connect(const char* address, const uuid128_t& write_characteristic,
+Connection* Connect(const char* address, const uuid_t& write_characteristic,
                     bool has_write_characteristic, const Callbacks& callbacks);
 
 /**
@@ -105,7 +94,7 @@ void Disconnect(Connection* connection);
 bool Write(Connection* connection, const void* data, size_t size);
 
 /** Writes to an arbitrary characteristic (fire-and-forget, no chunking). */
-bool WriteCharacteristic(Connection* connection, const uuid128_t& characteristic,
+bool WriteCharacteristic(Connection* connection, const uuid_t& characteristic,
                          const void* data, size_t size);
 
 /**
@@ -113,8 +102,8 @@ bool WriteCharacteristic(Connection* connection, const uuid128_t& characteristic
  * on failure) is delivered later through Callbacks::on_characteristic_changed,
  * echoing back `service` as given here.
  */
-void ReadCharacteristic(Connection* connection, const uuid128_t& service,
-                        const uuid128_t& characteristic);
+void ReadCharacteristic(Connection* connection, const uuid_t& service,
+                        const uuid_t& characteristic);
 
 } // namespace gattlib_backend
 

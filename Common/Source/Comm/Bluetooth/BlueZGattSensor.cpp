@@ -8,7 +8,7 @@
 
 #include "externs.h"
 #include "BlueZGattSensor.h"
-#include "Comm/Bluetooth/gatt_utils.h"
+#include "gatt_utils.h"
 
 #include <stdexcept>
 #include <utility>
@@ -21,26 +21,6 @@ namespace {
 // RX_TX_CHARACTERISTIC_UUID).
 constexpr uuid_t HM10_RX_TX_CHARACTERISTIC = bluetooth::gatt_uuid(0xFFE1);
 
-gattlib_backend::uuid128_t ToBackendUuid(uuid_t uuid) {
-  gattlib_backend::uuid128_t out{};
-  const uint64_t msb = uuid.msb();
-  const uint64_t lsb = uuid.lsb();
-  for (int i = 0; i < 8; ++i) {
-    out[i] = static_cast<uint8_t>(msb >> (8 * (7 - i)));
-    out[8 + i] = static_cast<uint8_t>(lsb >> (8 * (7 - i)));
-  }
-  return out;
-}
-
-uuid_t FromBackendUuid(const gattlib_backend::uuid128_t& b) {
-  uint64_t msb = 0, lsb = 0;
-  for (int i = 0; i < 8; ++i) {
-    msb = (msb << 8) | b[i];
-    lsb = (lsb << 8) | b[8 + i];
-  }
-  return uuid_t(msb, lsb);
-}
-
 } // namespace
 
 bool BlueZGattSensor::Connect() {
@@ -52,7 +32,7 @@ bool BlueZGattSensor::Connect() {
   callbacks.on_characteristic_changed = &BlueZGattSensor::OnCharacteristicChangedCb;
 
   gattlib_backend::Connection* new_connection = gattlib_backend::Connect(
-      GetPortName(), ToBackendUuid(HM10_RX_TX_CHARACTERISTIC), true, callbacks);
+      GetPortName(), HM10_RX_TX_CHARACTERISTIC, true, callbacks);
   if (!new_connection) {
     throw std::runtime_error("Failed to start Bluetooth LE connection");
   }
@@ -83,14 +63,14 @@ void BlueZGattSensor::DoWriteGattCharacteristic(const uuid_t& service, const uui
   // gattlib writes by characteristic UUID only; `service` can't be used to
   // disambiguate a UUID reused across services.
   if (connection) {
-    gattlib_backend::WriteCharacteristic(connection, ToBackendUuid(characteristic), data, size);
+    gattlib_backend::WriteCharacteristic(connection, characteristic, data, size);
   }
 }
 
 void BlueZGattSensor::DoReadGattCharacteristic(const uuid_t& service, const uuid_t& characteristic) {
   const std::lock_guard lock(mutex);
   if (connection) {
-    gattlib_backend::ReadCharacteristic(connection, ToBackendUuid(service), ToBackendUuid(characteristic));
+    gattlib_backend::ReadCharacteristic(connection, service, characteristic);
   }
 }
 
@@ -109,16 +89,16 @@ void BlueZGattSensor::OnDisconnected(void* user_data) {
   self->PortStateChanged();
 }
 
-bool BlueZGattSensor::ShouldEnableNotification(void* user_data, const gattlib_backend::uuid128_t& service,
-                                               const gattlib_backend::uuid128_t& characteristic) {
+bool BlueZGattSensor::ShouldEnableNotification(void* user_data, const uuid_t& service,
+                                               const uuid_t& characteristic) {
   auto* self = static_cast<BlueZGattSensor*>(user_data);
-  return self->DoEnableNotification(FromBackendUuid(service), FromBackendUuid(characteristic));
+  return self->DoEnableNotification(service, characteristic);
 }
 
-void BlueZGattSensor::OnCharacteristicChangedCb(void* user_data, const gattlib_backend::uuid128_t& service,
-                                                const gattlib_backend::uuid128_t& characteristic,
+void BlueZGattSensor::OnCharacteristicChangedCb(void* user_data, const uuid_t& service,
+                                                const uuid_t& characteristic,
                                                 const uint8_t* data, size_t length) {
   auto* self = static_cast<BlueZGattSensor*>(user_data);
-  self->OnCharacteristicChanged(FromBackendUuid(service), FromBackendUuid(characteristic),
+  self->OnCharacteristicChanged(service, characteristic,
                                 std::vector<uint8_t>(data, data + length));
 }

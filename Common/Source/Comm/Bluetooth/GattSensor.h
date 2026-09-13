@@ -17,10 +17,11 @@
 #ifndef COMM_BLUETOOTH_GATTSENSOR_H
 #define COMM_BLUETOOTH_GATTSENSOR_H
 
-#include "Thread/Mutex.hpp"
 #include "ComPort.h"
 #include "Device/Port/Listener.hpp"
 #include "IO/DataHandler.hpp"
+#include "../DeviceDescriptor.h"
+#include "../device.h"
 
 #include <vector>
 #include <string>

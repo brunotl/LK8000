@@ -20,13 +20,14 @@ namespace bluetooth {
  * Converts a Bluetooth SIG defined short Id to a full GATT UUID.
  */
 constexpr static
-uuid_t gatt_uuid(uint16_t id) {
+uuid_t gatt_uuid(uint32_t id) {
   constexpr uuid_t base_uuid = "00000000-0000-1000-8000-00805F9B34FB";
   uint64_t msb = (static_cast<uint64_t>(id) << 32) | base_uuid.msb();
   return { msb, base_uuid.lsb() };
 }
 
 static_assert(gatt_uuid(0x1234) == "00001234-0000-1000-8000-00805F9B34FB", "gatt_uuid() failed.");
+static_assert(gatt_uuid(0x12345678) == "12345678-0000-1000-8000-00805F9B34FB", "gatt_uuid() failed.");
 
 template<typename Type>
 class service_table_t {

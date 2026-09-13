@@ -14,8 +14,8 @@
 #ifndef COMM_BLUETOOTH_BLUEZGATTSENSOR_H
 #define COMM_BLUETOOTH_BLUEZGATTSENSOR_H
 
-#include "Comm/Bluetooth/GattSensor.h"
-#include "Comm/Bluetooth/GattlibBackend.h"
+#include "GattSensor.h"
+#include "GattlibBackend.h"
 
 #include <atomic>
 
@@ -34,10 +34,10 @@ class BlueZGattSensor : public GattSensor {
  private:
   static void OnConnected(void* user_data, bool success);
   static void OnDisconnected(void* user_data);
-  static bool ShouldEnableNotification(void* user_data, const gattlib_backend::uuid128_t& service,
-                                       const gattlib_backend::uuid128_t& characteristic);
-  static void OnCharacteristicChangedCb(void* user_data, const gattlib_backend::uuid128_t& service,
-                                        const gattlib_backend::uuid128_t& characteristic,
+  static bool ShouldEnableNotification(void* user_data, const uuid_t& service,
+                                       const uuid_t& characteristic);
+  static void OnCharacteristicChangedCb(void* user_data, const uuid_t& service,
+                                        const uuid_t& characteristic,
                                         const uint8_t* data, size_t length);
 
   mutable Mutex mutex;

@@ -5,9 +5,11 @@
  *
  * File:   GattlibBackend.cpp
  *
- * NOTE: this file must never include any LK8000 header that (transitively)
- * includes utils/uuid.h -- see the comment in GattlibBackend.h.
- *
+ */
+
+#include "GattlibBackend.h"
+
+/*
  * gattlib.h transitively includes BlueZ's <bluetooth/sdp.h>, which declares
  * its own unrelated "uuid_t" (a legacy SDP struct) -- the exact same global
  * name as LK8000's own uuid_t class (utils/uuid.h), used throughout the rest
@@ -22,23 +24,24 @@
  * genuinely distinct type by name, not just by (unenforced) intent.
  */
 
-#include "GattlibBackend.h"
-
-#define uuid_t bluez_sdp_uuid_t
+#define uuid_t bluez_uuid_t
 #include <gattlib.h>
+#undef uuid_t
 
 #include <gio/gio.h>
 
 #include <atomic>
 #include <chrono>
 #include <cstdio>
-#include <cstring>
 #include <cstdlib>
 #include <condition_variable>
 #include <mutex>
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <cstdint>
+#include <span>
+#include "gatt_utils.h"
 
 namespace gattlib_backend {
 
@@ -134,38 +137,40 @@ bool AcquireScanSlot(const std::atomic<bool>& cancelled) {
   return false;
 }
 
-std::string UuidToString(const uuid_t& uuid) {
-  char buf[64] = {0};
-  gattlib_uuid_to_string(&uuid, buf, sizeof(buf));
-  return std::string(buf);
-}
-
-uuid_t ToGattlibUuid(const uuid128_t& b) {
-  char str[64];
-  snprintf(str, sizeof(str),
-          "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-          b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7],
-          b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]);
-  uuid_t out{};
-  gattlib_string_to_uuid(str, strlen(str), &out);
-  return out;
-}
-
-uuid128_t ParseUuidString(const std::string& s) {
-  uuid128_t out{};
-  unsigned bytes[16] = {0};
-  sscanf(s.c_str(), "%2x%2x%2x%2x-%2x%2x-%2x%2x-%2x%2x-%2x%2x%2x%2x%2x%2x",
-        &bytes[0], &bytes[1], &bytes[2], &bytes[3], &bytes[4], &bytes[5],
-        &bytes[6], &bytes[7], &bytes[8], &bytes[9], &bytes[10], &bytes[11],
-        &bytes[12], &bytes[13], &bytes[14], &bytes[15]);
-  for (int i = 0; i < 16; ++i) {
-    out[i] = static_cast<uint8_t>(bytes[i]);
+// Store a 64-bit value in big-endian byte order (network byte order)
+constexpr void StoreUuidHalf(std::span<uint8_t, 8> bytes, uint64_t value) {
+  for (size_t i = 0; i < 8; ++i) {
+    bytes[i] = static_cast<uint8_t>(value >> ((7 - i) * 8));
   }
+}
+
+constexpr bluez_uuid_t ToGattlibUuid(const uuid_t& uuid) {
+  bluez_uuid_t out {
+    .type = SDP_UUID128,
+    .value = {0}
+  };
+  auto bytes = std::span(out.value.uuid128.data);
+  auto high_bytes = bytes.template subspan<0, 8>();
+  auto low_bytes = bytes.template subspan<8, 8>();
+  StoreUuidHalf(high_bytes, uuid.msb());
+  StoreUuidHalf(low_bytes, uuid.lsb());
   return out;
 }
 
-uuid128_t ToUuid128(const uuid_t& uuid) {
-  return ParseUuidString(UuidToString(uuid));
+constexpr uuid_t ToUuid128(const bluez_uuid_t& uuid) {
+  switch (uuid.type) {
+    case SDP_UUID16:
+      // 16-bit UUID: insert at bytes 2-3 of the base UUID
+      return bluetooth::gatt_uuid(uuid.value.uuid16);
+    case SDP_UUID32:
+      // 32-bit UUID: insert at bytes 0-3 of the base UUID
+      return bluetooth::gatt_uuid(uuid.value.uuid32);
+    case SDP_UUID128:
+      // 128-bit UUID: load from big-endian byte array
+      return uuid_t(uuid.value.uuid128.data);
+    default:
+      return uuid_t(0, 0);
+  }
 }
 
 } // namespace
@@ -180,7 +185,7 @@ struct Connection {
   gattlib_stream_t* stream = nullptr;
   Callbacks callbacks;
   std::string address;
-  uuid_t write_uuid{};
+  bluez_uuid_t write_uuid{};
   bool has_write_uuid = false;
   std::atomic<bool> shutting_down{false};
   // Serializes HandleConnect()/the on-disconnect handler (both invoked by
@@ -198,10 +203,10 @@ struct Connection {
   // fast-fail cases -- including from the on-disconnect handler's own
   // reconnect call below, which already holds this lock.
   std::recursive_mutex callback_mutex;
-  // Characteristic UUID string -> owning service UUID, filled in during
+  // Characteristic UUID -> owning service UUID, filled in during
   // discovery; gattlib's notification callback only carries the
   // characteristic UUID, not its service.
-  std::unordered_map<std::string, uuid_t> char_to_service;
+  std::unordered_map<uuid_t, uuid_t, ::uuid_hash> char_to_service;
 
   // Thread running the pre-connect discovery scan (see Connect()).
   std::thread scan_before_connect_thread;
@@ -268,23 +273,23 @@ bool DiscoverAndSubscribe(Connection* self, gattlib_connection_t* conn) {
       continue;
     }
 
-    self->char_to_service[UuidToString(ch.uuid)] = owning_service->uuid;
+    const uuid_t backend_service = ToUuid128(owning_service->uuid);
+    const uuid_t backend_char = ToUuid128(ch.uuid);
 
-    const uuid128_t backend_service = ToUuid128(owning_service->uuid);
-    const uuid128_t backend_char = ToUuid128(ch.uuid);
+    self->char_to_service[backend_char] = backend_service;
 
     if (!self->callbacks.should_enable_notification(self->callbacks.user_data, backend_service, backend_char)) {
       continue;
     }
 
     if (ch.properties & GATTLIB_CHARACTERISTIC_NOTIFY) {
-      uuid_t notify_uuid = ch.uuid;
+      bluez_uuid_t notify_uuid = ch.uuid;
       gattlib_notification_start(conn, &notify_uuid);
     }
     else if (ch.properties & GATTLIB_CHARACTERISTIC_READ) {
       void* buffer = nullptr;
       size_t buffer_len = 0;
-      uuid_t read_uuid = ch.uuid;
+      bluez_uuid_t read_uuid = ch.uuid;
       if (gattlib_read_char_by_uuid(conn, &read_uuid, &buffer, &buffer_len) == GATTLIB_SUCCESS) {
         self->callbacks.on_characteristic_changed(self->callbacks.user_data, backend_service, backend_char,
                                                    static_cast<const uint8_t*>(buffer), buffer_len);
@@ -340,18 +345,19 @@ void HandleConnect(Connection* self, gattlib_connection_t* conn, int error) {
     gattlib_connect(self->adapter, self->address.c_str(), GATTLIB_CONNECTION_OPTIONS_NONE, &OnConnectCb, self);
   }, self);
 
-  gattlib_register_notification(conn, [](const uuid_t* uuid, const uint8_t* data, size_t data_length, void* user_data) {
+  gattlib_register_notification(conn, [](const bluez_uuid_t* uuid, const uint8_t* data, size_t data_length, void* user_data) {
     auto* self = static_cast<Connection*>(user_data);
-    auto it = self->char_to_service.find(UuidToString(*uuid));
+    const uuid_t char_uuid = ToUuid128(*uuid);
+    auto it = self->char_to_service.find(char_uuid);
     const uuid_t service_uuid = (it != self->char_to_service.end()) ? it->second : uuid_t{};
-    self->callbacks.on_characteristic_changed(self->callbacks.user_data, ToUuid128(service_uuid),
-                                              ToUuid128(*uuid), data, data_length);
+    self->callbacks.on_characteristic_changed(self->callbacks.user_data, service_uuid,
+                                              char_uuid, data, data_length);
   }, self);
 
   const bool ok = DiscoverAndSubscribe(self, conn);
 
   if (ok && self->has_write_uuid && self->conn.load() == conn) {
-    uuid_t write_uuid = self->write_uuid;
+    bluez_uuid_t write_uuid = self->write_uuid;
     uint16_t mtu = 0;
     // Best-effort: Write() falls back to an unchunked write if this failed.
     gattlib_write_char_by_uuid_stream_open(conn, &write_uuid, &self->stream, &mtu);
@@ -553,7 +559,7 @@ void ScanThenConnect(Connection* self) {
 
 } // namespace
 
-Connection* Connect(const char* address, const uuid128_t& write_characteristic,
+Connection* Connect(const char* address, const uuid_t& write_characteristic,
                     bool has_write_characteristic, const Callbacks& callbacks) {
   auto* self = new Connection();
   self->address = address;
@@ -629,20 +635,20 @@ bool Write(Connection* connection, const void* data, size_t size) {
   if (connection->stream) {
     return gattlib_write_char_stream_write(connection->stream, data, size) == GATTLIB_SUCCESS;
   }
-  uuid_t uuid = connection->write_uuid;
+  bluez_uuid_t uuid = connection->write_uuid;
   return gattlib_write_char_by_uuid(connection->conn, &uuid, data, size) == GATTLIB_SUCCESS;
 }
 
-bool WriteCharacteristic(Connection* connection, const uuid128_t& characteristic,
+bool WriteCharacteristic(Connection* connection, const uuid_t& characteristic,
                          const void* data, size_t size) {
   if (!connection || !connection->conn) {
     return false;
   }
-  uuid_t uuid = ToGattlibUuid(characteristic);
+  bluez_uuid_t uuid = ToGattlibUuid(characteristic);
   return gattlib_write_char_by_uuid(connection->conn, &uuid, data, size) == GATTLIB_SUCCESS;
 }
 
-void ReadCharacteristic(Connection* connection, const uuid128_t& service, const uuid128_t& characteristic) {
+void ReadCharacteristic(Connection* connection, const uuid_t& service, const uuid_t& characteristic) {
   if (!connection || !connection->conn) {
     return;
   }
@@ -652,7 +658,7 @@ void ReadCharacteristic(Connection* connection, const uuid128_t& service, const 
     if (!connection->conn) {
       return;
     }
-    uuid_t uuid = ToGattlibUuid(characteristic);
+    bluez_uuid_t uuid = ToGattlibUuid(characteristic);
     void* buffer = nullptr;
     size_t buffer_len = 0;
     if (gattlib_read_char_by_uuid(connection->conn, &uuid, &buffer, &buffer_len) == GATTLIB_SUCCESS) {

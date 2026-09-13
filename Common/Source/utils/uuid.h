@@ -29,11 +29,10 @@
 #define _utils_uuid_h_
 
 #include "parse_hex.h"
-#include <array>
-#include "OS/ByteOrder.hpp"
+#include <span>
 
 #ifdef uuid_t
-// yhis is required to solve conflict on win32 platform
+// this is required to solve conflict on win32 platform
 #undef uuid_t
 #endif
 
@@ -59,14 +58,19 @@ class uuid_t {
   constexpr uuid_t(uuid_t&&) = default;
   constexpr uuid_t(const uuid_t&) = default;
 
+  uuid_t& operator=(uuid_t&&) = default;
+  uuid_t& operator=(const uuid_t&) = default;
+
   constexpr uuid_t(const char (&string)[37]) 
       : uuid_t(uuid_msb(string), uuid_lsb(string)) {}
 
-  constexpr uuid_t(uint64_t msb, uint64_t lsb)
-      : _msb(msb),
-        _lsb(lsb)
-  {}
+  constexpr uuid_t(uint64_t msb, uint64_t lsb) : _msb(msb), _lsb(lsb) {}
 
+  // Load from big-endian byte array
+  constexpr uuid_t(const std::span<const uint8_t, 16>& bytes)
+      : _msb(load_uuid_half(bytes.template subspan<0, 8>())),
+        _lsb(load_uuid_half(bytes.template subspan<8, 8>())) {}
+  
   constexpr bool operator==(uuid_t uuid) const {
     return uuid._msb == _msb && uuid._lsb == _lsb;
   }
@@ -105,6 +109,16 @@ class uuid_t {
     lsb <<= 32;
     lsb |= hex::to_uint32_t(str + 28);  // 8 digit
     return lsb;
+  }
+
+  constexpr static
+  uint64_t load_uuid_half(const std::span<const uint8_t, 8>& bytes) {
+    uint64_t half = 0;
+    for (size_t i = 0; i < bytes.size(); ++i) {
+      half <<= 8;
+      half |= bytes[i];
+    }
+    return half;
   }
 };
 
