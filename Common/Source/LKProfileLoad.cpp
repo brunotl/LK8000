@@ -408,7 +408,7 @@ void LKParseProfileString(const char *sname, const char *svalue) {
   unsigned dwIdxPort;
   if (settings::read(sname, svalue, szRegistryPort1Index, dwIdxPort)) {
 
-#ifdef ANDROID
+#if defined(ANDROID) || defined(USE_BLE)
     const std::lock_guard lock(COMMPort_mutex);
 #endif
 
@@ -423,7 +423,7 @@ void LKParseProfileString(const char *sname, const char *svalue) {
 
   if (settings::read(sname, svalue, szRegistryPort2Index, dwIdxPort)) {
 
-#ifdef ANDROID
+#if defined(ANDROID) || defined(USE_BLE)
     const std::lock_guard lock(COMMPort_mutex);
 #endif
 

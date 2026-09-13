@@ -158,7 +158,7 @@ bool devIsDisabled() {
 }
 
 void RefreshComPortList() {
-#ifdef ANDROID
+#if defined(ANDROID) || defined(USE_BLE)
     const std::lock_guard lock(COMMPort_mutex);
 #endif
 
