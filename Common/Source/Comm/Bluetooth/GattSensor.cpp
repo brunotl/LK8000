@@ -288,6 +288,9 @@ void GattSensor::BatteryLevel(const std::vector<uint8_t>& data) {
 }
 
 void GattSensor::HeartRateMeasurement(const std::vector<uint8_t>& data) {
+  if (data.empty()) {
+    return;
+  }
   auto bpm = [&]() -> uint32_t {
     if (data[0] & 0x01) {
       return characteristic_value<uint16_t>(data).get(1);
