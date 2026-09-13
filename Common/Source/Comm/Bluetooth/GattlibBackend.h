@@ -77,8 +77,7 @@ void StopScan(ScanHandle* handle);
  * If `has_write_characteristic`, `write_characteristic` is opened as a
  * chunked write stream once connected, for use by Write().
  */
-Connection* Connect(const char* address, const uuid_t& write_characteristic,
-                    bool has_write_characteristic, const Callbacks& callbacks);
+Connection* Connect(const char* address, const Callbacks& callbacks);
 
 /**
  * Disconnects (if connected) and frees `connection`. Blocks until any

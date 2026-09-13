@@ -176,6 +176,16 @@ constexpr uuid_t ToUuid128(const bluez_uuid_t& uuid) {
 } // namespace
 
 struct Connection {
+  Connection() = delete;
+  Connection(const Connection&) = delete;
+  Connection& operator=(const Connection&) = delete;
+
+  Connection(std::string address, const Callbacks& callbacks)
+      : address(std::move(address)), callbacks(callbacks) {}
+
+  std::string address;
+  Callbacks callbacks;
+
   gattlib_adapter_t* adapter = nullptr;
   // Written from whichever thread gattlib invokes its connect/disconnect
   // callbacks on (not necessarily the one that created this Connection);
@@ -183,8 +193,6 @@ struct Connection {
   // disconnect racing its own in-flight discovery calls.
   std::atomic<gattlib_connection_t*> conn{nullptr};
   gattlib_stream_t* stream = nullptr;
-  Callbacks callbacks;
-  std::string address;
   bluez_uuid_t write_uuid{};
   bool has_write_uuid = false;
   std::atomic<bool> shutting_down{false};
@@ -214,6 +222,12 @@ struct Connection {
 };
 
 namespace {
+
+// The HM-10 and compatible bluetooth modules' data characteristic, used as
+// the default write target for GattSensor::WriteData() -- matches the
+// Android backend (Android/BluetoothGattClientPort.java's
+// RX_TX_CHARACTERISTIC_UUID).
+constexpr uuid_t HM10_RX_TX_CHARACTERISTIC = bluetooth::gatt_uuid(0xFFE1);
 
 void OnConnectCb(gattlib_adapter_t* adapter, const char* dst,
                  gattlib_connection_t* connection, int error, void* user_data);
@@ -257,28 +271,36 @@ bool DiscoverAndSubscribe(Connection* self, gattlib_connection_t* conn) {
     return false;
   }
 
+  std::span char_span(characteristics, char_count);
+  std::span service_span(services, services_count);
+
   self->char_to_service.clear();
 
-  for (int i = 0; i < char_count && self->conn.load() == conn; ++i) {
-    const gattlib_characteristic_t& ch = characteristics[i];
-
-    const gattlib_primary_service_t* owning_service = nullptr;
-    for (int j = 0; j < services_count; ++j) {
-      if (ch.handle >= services[j].attr_handle_start && ch.handle <= services[j].attr_handle_end) {
-        owning_service = &services[j];
-        break;
-      }
-    }
-    if (owning_service == nullptr) {
+  for (const auto& ch : char_span) {
+    auto it = std::ranges::find_if(
+        service_span, [&ch](const gattlib_primary_service_t& service) {
+          return ch.handle >= service.attr_handle_start &&
+                 ch.handle <= service.attr_handle_end;
+        });
+    if (it == service_span.end()) {
       continue;
     }
 
+    const gattlib_primary_service_t* owning_service = &(*it);
     const uuid_t backend_service = ToUuid128(owning_service->uuid);
     const uuid_t backend_char = ToUuid128(ch.uuid);
 
     self->char_to_service[backend_char] = backend_service;
 
-    if (!self->callbacks.should_enable_notification(self->callbacks.user_data, backend_service, backend_char)) {
+    if (backend_char == HM10_RX_TX_CHARACTERISTIC) {
+      if (ch.properties & GATTLIB_CHARACTERISTIC_WRITE) {
+        self->write_uuid = ch.uuid;
+        self->has_write_uuid = true;
+      }
+    }
+
+    if (!self->callbacks.should_enable_notification(
+            self->callbacks.user_data, backend_service, backend_char)) {
       continue;
     }
 
@@ -559,15 +581,8 @@ void ScanThenConnect(Connection* self) {
 
 } // namespace
 
-Connection* Connect(const char* address, const uuid_t& write_characteristic,
-                    bool has_write_characteristic, const Callbacks& callbacks) {
-  auto* self = new Connection();
-  self->address = address;
-  self->callbacks = callbacks;
-  if (has_write_characteristic) {
-    self->write_uuid = ToGattlibUuid(write_characteristic);
-    self->has_write_uuid = true;
-  }
+Connection* Connect(const char* address, const Callbacks& callbacks) {
+  auto* self = new Connection(address, callbacks);
 
   Mainloop::Instance().Acquire();
 
@@ -577,7 +592,7 @@ Connection* Connect(const char* address, const uuid_t& write_characteristic,
     return nullptr;
   }
 
-  self->scan_before_connect_thread = std::thread([self]() { ScanThenConnect(self); });
+  self->scan_before_connect_thread = std::thread(ScanThenConnect, self);
 
   return self;
 }

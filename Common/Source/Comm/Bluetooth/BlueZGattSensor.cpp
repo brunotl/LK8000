@@ -13,26 +13,18 @@
 #include <stdexcept>
 #include <utility>
 
-namespace {
-
-// The HM-10 and compatible bluetooth modules' data characteristic, used as
-// the default write target for GattSensor::WriteData() -- matches the
-// Android backend (Android/BluetoothGattClientPort.java's
-// RX_TX_CHARACTERISTIC_UUID).
-constexpr uuid_t HM10_RX_TX_CHARACTERISTIC = bluetooth::gatt_uuid(0xFFE1);
-
-} // namespace
-
 bool BlueZGattSensor::Connect() {
-  gattlib_backend::Callbacks callbacks;
-  callbacks.user_data = this;
-  callbacks.on_connected = &BlueZGattSensor::OnConnected;
-  callbacks.on_disconnected = &BlueZGattSensor::OnDisconnected;
-  callbacks.should_enable_notification = &BlueZGattSensor::ShouldEnableNotification;
-  callbacks.on_characteristic_changed = &BlueZGattSensor::OnCharacteristicChangedCb;
+  gattlib_backend::Callbacks callbacks = {
+    .user_data = this,
+    .on_connected = &BlueZGattSensor::OnConnected,
+    .on_disconnected = &BlueZGattSensor::OnDisconnected,
+    .should_enable_notification = &BlueZGattSensor::ShouldEnableNotification,
+    .on_characteristic_changed = &BlueZGattSensor::OnCharacteristicChangedCb,
+  };
 
-  gattlib_backend::Connection* new_connection = gattlib_backend::Connect(
-      GetPortName(), HM10_RX_TX_CHARACTERISTIC, true, callbacks);
+  gattlib_backend::Connection* new_connection =
+      gattlib_backend::Connect(GetPortName(), callbacks);
+
   if (!new_connection) {
     throw std::runtime_error("Failed to start Bluetooth LE connection");
   }
