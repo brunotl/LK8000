@@ -34,61 +34,61 @@ static void setVariables(WndForm* wf) {
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB0"));
   if (wp) {
     DataField* dfb = wp->GetDataField();
-    dfb->Set(ConfBB0);
+    dfb->Set(ConfBB[0]);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB1"));
   if (wp) {
     DataField* dfb = wp->GetDataField();
-    dfb->Set(ConfBB1);
+    dfb->Set(ConfBB[1]);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB2"));
   if (wp) {
     DataField* dfb = wp->GetDataField();
-    dfb->Set(ConfBB2);
+    dfb->Set(ConfBB[2]);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB3"));
   if (wp) {
     DataField* dfb = wp->GetDataField();
-    dfb->Set(ConfBB3);
+    dfb->Set(ConfBB[3]);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB4"));
   if (wp) {
     DataField* dfb = wp->GetDataField();
-    dfb->Set(ConfBB4);
+    dfb->Set(ConfBB[4]);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB5"));
   if (wp) {
     DataField* dfb = wp->GetDataField();
-    dfb->Set(ConfBB5);
+    dfb->Set(ConfBB[5]);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB6"));
   if (wp) {
     DataField* dfb = wp->GetDataField();
-    dfb->Set(ConfBB6);
+    dfb->Set(ConfBB[6]);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB7"));
   if (wp) {
     DataField* dfb = wp->GetDataField();
-    dfb->Set(ConfBB7);
+    dfb->Set(ConfBB[7]);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB8"));
   if (wp) {
     DataField* dfb = wp->GetDataField();
-    dfb->Set(ConfBB8);
+    dfb->Set(ConfBB[8]);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB9"));
   if (wp) {
     DataField* dfb = wp->GetDataField();
-    dfb->Set(ConfBB9);
+    dfb->Set(ConfBB[9]);
     wp->RefreshDisplay();
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB0Auto"));
@@ -126,79 +126,79 @@ void dlgBottomBarShowModal(void){
 
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB0"));
   if (wp) {
-	if (ConfBB0 != (wp->GetDataField()->GetAsBoolean())) {
-		ConfBB0 = (wp->GetDataField()->GetAsBoolean());
+	if (ConfBB[0] != (wp->GetDataField()->GetAsBoolean())) {
+		ConfBB[0] = (wp->GetDataField()->GetAsBoolean());
 		changed=true;
 	}
   }
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB1"));
   if (wp) {
-	if (ConfBB1 != (wp->GetDataField()->GetAsBoolean())) {
-		ConfBB1 = (wp->GetDataField()->GetAsBoolean());
+	if (ConfBB[1] != (wp->GetDataField()->GetAsBoolean())) {
+		ConfBB[1] = (wp->GetDataField()->GetAsBoolean());
 		changed=true;
 	}
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB2"));
   if (wp) {
-	if (ConfBB2 != (wp->GetDataField()->GetAsBoolean())) {
-		ConfBB2 = (wp->GetDataField()->GetAsBoolean());
+	if (ConfBB[2] != (wp->GetDataField()->GetAsBoolean())) {
+		ConfBB[2] = (wp->GetDataField()->GetAsBoolean());
 		changed=true;
 	}
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB3"));
   if (wp) {
-	if (ConfBB3 != (wp->GetDataField()->GetAsBoolean())) {
-		ConfBB3 = (wp->GetDataField()->GetAsBoolean());
+	if (ConfBB[3] != (wp->GetDataField()->GetAsBoolean())) {
+		ConfBB[3] = (wp->GetDataField()->GetAsBoolean());
 		changed=true;
 	}
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB4"));
   if (wp) {
-	if (ConfBB4 != (wp->GetDataField()->GetAsBoolean())) {
-		ConfBB4 = (wp->GetDataField()->GetAsBoolean());
+	if (ConfBB[4] != (wp->GetDataField()->GetAsBoolean())) {
+		ConfBB[4] = (wp->GetDataField()->GetAsBoolean());
 		changed=true;
 	}
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB5"));
   if (wp) {
-	if (ConfBB5 != (wp->GetDataField()->GetAsBoolean())) {
-		ConfBB5 = (wp->GetDataField()->GetAsBoolean());
+	if (ConfBB[5] != (wp->GetDataField()->GetAsBoolean())) {
+		ConfBB[5] = (wp->GetDataField()->GetAsBoolean());
 		changed=true;
 	}
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB6"));
   if (wp) {
-	if (ConfBB6 != (wp->GetDataField()->GetAsBoolean())) {
-		ConfBB6 = (wp->GetDataField()->GetAsBoolean());
+	if (ConfBB[6] != (wp->GetDataField()->GetAsBoolean())) {
+		ConfBB[6]  = (wp->GetDataField()->GetAsBoolean());
 		changed=true;
 	}
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB7"));
   if (wp) {
-	if (ConfBB7 != (wp->GetDataField()->GetAsBoolean())) {
-		ConfBB7 = (wp->GetDataField()->GetAsBoolean());
+	if (ConfBB[7] != (wp->GetDataField()->GetAsBoolean())) {
+		ConfBB[7] = (wp->GetDataField()->GetAsBoolean());
 		changed=true;
 	}
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB8"));
   if (wp) {
-	if (ConfBB8 != (wp->GetDataField()->GetAsBoolean())) {
-		ConfBB8 = (wp->GetDataField()->GetAsBoolean());
+	if (ConfBB[8] != (wp->GetDataField()->GetAsBoolean())) {
+		ConfBB[8] = (wp->GetDataField()->GetAsBoolean());
 		changed=true;
 	}
   }
 
   wp = wf->FindByName<WndProperty>(TEXT("prpConfBB9"));
   if (wp) {
-	if (ConfBB9 != (wp->GetDataField()->GetAsBoolean())) {
-		ConfBB9 = (wp->GetDataField()->GetAsBoolean());
+	if (ConfBB[9] != (wp->GetDataField()->GetAsBoolean())) {
+		ConfBB[9] = (wp->GetDataField()->GetAsBoolean());
 		changed=true;
 	}
   }
@@ -212,25 +212,24 @@ void dlgBottomBarShowModal(void){
   }
 
   if (changed) {
-
-    if (!(ConfBB1 || ConfBB2 || ConfBB3 || ConfBB4 || ConfBB5 ||
-        ConfBB6 || ConfBB7 || ConfBB8 || ConfBB9)) {
-      MessageBoxX(
-                   MsgToken<16>(), // can't disable all non-TRM0
-                   TEXT(""), mbOk);        // bottom bar stripes
+    bool all_off = std::none_of(&ConfBB[1], &ConfBB[10], [](auto v) {
+      return v;
+    });
+    if (all_off) {
+      MessageBoxX(MsgToken<16>(),   // can't disable all non-TRM0
+                  _T(""), mbOk);  // bottom bar stripes
       // Automatically enable NAV1 bottom bar
-      ConfBB1 = true;
+      ConfBB[1] = true;
     }
 
-    UpdateConfBB();
-    MessageBoxX (MsgToken<1607>(), // bottom bar config saved
-                 TEXT(""), mbOk);
+    if (UpdateConfBB()) {
+      MessageBoxX(MsgToken<16>(),   // can't disable all non-TRM0
+                  _T(""), mbOk);  // bottom bar stripes
+    }
 
-    // If the user just disabled the currently-shown BB stripe, then
-    // automatically advance to the next enabled stripe.
-    if (!ConfBB[BottomMode]) BottomBarChange(true);
+    MessageBoxX(MsgToken<1607>(),  // bottom bar config saved
+                _T(""), mbOk);
   }
-
 
   delete wf;
 }

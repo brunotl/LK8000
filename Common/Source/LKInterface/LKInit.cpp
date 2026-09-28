@@ -26,33 +26,21 @@ void DeInitCustomHardware(void) {
 
 }
 
-
-
-void UpdateConfBB(void) {
-
-  ConfBB[0]=ConfBB0; // thermal mode can appear also while circling, if configured so by ConfBB0Auto
-  ConfBB[1]=ConfBB1;
-  ConfBB[2]=ConfBB2;
-  ConfBB[3]=ConfBB3;
-  ConfBB[4]=ConfBB4;
-  ConfBB[5]=ConfBB5;
-  ConfBB[6]=ConfBB6;
-  ConfBB[7]=ConfBB7;
-  ConfBB[8]=ConfBB8;
-  ConfBB[9]=ConfBB9;
-
-  if (ConfBB2==false && ConfBB3==false &&
-      ConfBB4==false && ConfBB5==false &&
-      ConfBB6==false && ConfBB7==false &&
-      ConfBB8==false && ConfBB9==false) {
-
-		// we need at least one bottom bar stripe available (thermal apart)
+bool UpdateConfBB() {
+  auto all_off = std::none_of(&ConfBB[1], &ConfBB[10], [](auto v) {
+    return v;
+  });
+  if (all_off) {
+    // we need at least one bottom bar stripe available (thermal apart)
     ConfBB[1] = true;
   }
 
+  // If the user just disabled the currently-shown BB stripe, then
+  // automatically advance to the next enabled stripe.
   while (!ConfBB[BottomMode]) {
     BottomBarChange(true);
   }
+  return all_off;
 }
 
 void UpdateConfIP(void) {

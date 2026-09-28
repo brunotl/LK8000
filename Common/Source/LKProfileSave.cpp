@@ -94,16 +94,16 @@ void LKProfileSave(const TCHAR *szFile) {
   write_settings(szRegistryCircleZoom, MapWindow::zoom.CircleZoom());
   write_settings(szRegistryClipAlt, ClipAltitude);
 
-  write_settings(szRegistryConfBB0, ConfBB0);
-  write_settings(szRegistryConfBB1, ConfBB1);
-  write_settings(szRegistryConfBB2, ConfBB2);
-  write_settings(szRegistryConfBB3, ConfBB3);
-  write_settings(szRegistryConfBB4, ConfBB4);
-  write_settings(szRegistryConfBB5, ConfBB5);
-  write_settings(szRegistryConfBB6, ConfBB6);
-  write_settings(szRegistryConfBB7, ConfBB7);
-  write_settings(szRegistryConfBB8, ConfBB8);
-  write_settings(szRegistryConfBB9, ConfBB9);
+  write_settings(szRegistryConfBB0, ConfBB[0]);
+  write_settings(szRegistryConfBB1, ConfBB[1]);
+  write_settings(szRegistryConfBB2, ConfBB[2]);
+  write_settings(szRegistryConfBB3, ConfBB[3]);
+  write_settings(szRegistryConfBB4, ConfBB[4]);
+  write_settings(szRegistryConfBB5, ConfBB[5]);
+  write_settings(szRegistryConfBB6, ConfBB[6]);
+  write_settings(szRegistryConfBB7, ConfBB[7]);
+  write_settings(szRegistryConfBB8, ConfBB[8]);
+  write_settings(szRegistryConfBB9, ConfBB[9]);
   write_settings(szRegistryConfBB0Auto, ConfBB0Auto);
   write_settings(szRegistryConfIP11, ConfIP11);
   write_settings(szRegistryConfIP12, ConfIP12);

@@ -330,16 +330,16 @@ void LKProfileResetDefault() {
   UseTwoLines = 1;
   SonarWarning_Config = 1; // sonar enabled by default on reset
   // default BB and IP is all ON
-  ConfBB0 = 0; // TRM is off by default on v4
-  ConfBB1 = 1;
-  ConfBB2 = 1;
-  ConfBB3 = 1;
-  ConfBB4 = 1;
-  ConfBB5 = 1;
-  ConfBB6 = 1;
-  ConfBB7 = 1;
-  ConfBB8 = 1;
-  ConfBB9 = 1;
+  ConfBB[0] = false; // TRM is off by default on v4
+  ConfBB[1] = true;
+  ConfBB[2] = true;
+  ConfBB[3] = true;
+  ConfBB[4] = true;
+  ConfBB[5] = true;
+  ConfBB[6] = true;
+  ConfBB[7] = true;
+  ConfBB[8] = true;
+  ConfBB[9] = true;
   ConfBB0Auto = 1;
 
   ConfIP11 = 1;

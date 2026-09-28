@@ -117,8 +117,10 @@ void CreateDirectoryIfAbsent(const TCHAR *filename);
 
 RECT WindowResize(unsigned int x, unsigned int y);
 
+// Update the bottom bar configuration and ensure at least one stripe is active.
+// return true if all bottom bar stripes were initially off, false otherwise.
+bool UpdateConfBB();
 
-void UpdateConfBB();
 void UpdateConfIP();
 void UpdateMultimapOrient();
 void SetInitialModeTypes();

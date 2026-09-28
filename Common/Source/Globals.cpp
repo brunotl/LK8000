@@ -254,7 +254,10 @@ void Globals_Init(void) {
 
   for (i=0; i<10; i++) ConfMP[i]=1;
 
-  ConfBB0=0, ConfBB1=1, ConfBB2=1, ConfBB3=1, ConfBB4=1, ConfBB5=1, ConfBB6=1, ConfBB7=1, ConfBB8=1, ConfBB9=1, ConfBB0Auto=1;
+  ConfBB[0] = false, ConfBB[1] = true, ConfBB[2] = true, ConfBB[3] = true, ConfBB[4] = true, ConfBB[5] = true,
+  ConfBB[6] = true, ConfBB[7] = true, ConfBB[8] = true, ConfBB[9] = true;
+
+  ConfBB0Auto=1;
   ConfIP11=1, ConfIP12=1, ConfIP13=1, ConfIP14=1, ConfIP15=1, ConfIP16=1, ConfIP17=1, ConfIP21=1, ConfIP22=1;
   ConfIP23=1, ConfIP24=1, ConfIP31=1, ConfIP32=1, ConfIP33=1;
   AverEffTime=0;
