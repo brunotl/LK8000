@@ -19,10 +19,9 @@ void Heading(NMEA_INFO *Basic, DERIVED_INFO *Calculated)
   static double LastTime = 0;
   static double lastHeading = 0;
 
-  if (DoInit[MDI_HEADING]) {
-	LastTime = 0;
-	lastHeading = 0;
-	DoInit[MDI_HEADING]=false;
+  if (DoInit(MDI_HEADING)) {
+    LastTime = 0;
+    lastHeading = 0;
   }
 
   if ((Basic->Speed>0)||(Calculated->WindSpeed>0)) {

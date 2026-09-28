@@ -26,11 +26,10 @@ void DoCalculationsSlow(NMEA_INFO *Basic, DERIVED_INFO *Calculated) {
   static bool	validHomeWaypoint=false;
   static bool	gotValidFix=false;
 
-  if (DoInit[MDI_DOCALCULATIONSSLOW]) {
+  if (DoInit(MDI_DOCALCULATIONSSLOW)) {
 	LastSearchBestTime = 0; 
 	validHomeWaypoint=false;
 	gotValidFix=false;
-	DoInit[MDI_DOCALCULATIONSSLOW]=false;
   }
 
   // See also same redundant check inside AirspaceWarning

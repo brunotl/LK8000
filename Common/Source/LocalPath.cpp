@@ -104,11 +104,9 @@ const TCHAR * LKGetLocalPath(void) {
 
     static TCHAR localpath[MAX_PATH + 1] = {0};
 
-    if (!DoInit[MDI_GETLOCALPATH]) {
+    if (!DoInit(MDI_GETLOCALPATH)) {
         return localpath;
     }
-
-    DoInit[MDI_GETLOCALPATH] = false;
 
 #ifdef ANDROID
     const tstring path = context->GetExternalFilesDir(Java::GetEnv()).ToString();

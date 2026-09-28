@@ -3616,7 +3616,7 @@ void dlgConfigurationShowModal(short mode){
   if (wp) {
       if (UseTwoLines != wp->GetDataField()->GetAsBoolean()) {
           UseTwoLines = wp->GetDataField()->GetAsBoolean();
-          Reset_Single_DoInits(MDI_DRAWNEAREST);
+          Reset_DoInit(MDI_DRAWNEAREST);
     }
   }
 
@@ -4033,7 +4033,7 @@ int ival;
     const LKVarioBar_t tmpValue = static_cast<LKVarioBar_t>(wp->GetDataField()->GetAsInteger());
     if (LKVarioBar != tmpValue) {
       LKVarioBar = tmpValue;
-      Reset_Single_DoInits(MDI_DRAWVARIO);
+      Reset_DoInit(MDI_DRAWVARIO);
     }
   }
   wp = pForm->FindByName<WndProperty>(TEXT("prpLKVarioVal"));
@@ -4048,8 +4048,8 @@ int ival;
   if (wp) {
       if (HideUnits != (HideUnits_t) (wp->GetDataField()->GetAsBoolean())) {
           HideUnits = (HideUnits_t) (wp->GetDataField()->GetAsBoolean());
-          Reset_Single_DoInits(MDI_DRAWBOTTOMBAR);
-          Reset_Single_DoInits(MDI_DRAWFLIGHTMODE);
+          Reset_DoInit(MDI_DRAWBOTTOMBAR);
+          Reset_DoInit(MDI_DRAWFLIGHTMODE);
       }
   }
   wp = pForm->FindByName<WndProperty>(TEXT("prpDeclutterMode")); // VENTA10
@@ -4158,7 +4158,7 @@ int ival;
   if (wp) {
     if (OverlaySize != wp->GetDataField()->GetAsInteger() ) {
       OverlaySize = wp->GetDataField()->GetAsInteger();
-      Reset_Single_DoInits(MDI_DRAWLOOK8000);
+      Reset_DoInit(MDI_DRAWLOOK8000);
     }
   }
 

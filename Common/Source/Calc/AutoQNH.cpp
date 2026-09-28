@@ -18,9 +18,8 @@
 void DoAutoQNH(NMEA_INFO *Basic, DERIVED_INFO *Calculated) {
   static int done_autoqnh = 0;
 
-  if (DoInit[MDI_DOAUTOQNH]) {
+  if (DoInit(MDI_DOAUTOQNH)) {
 	done_autoqnh=0;
-	DoInit[MDI_DOAUTOQNH]=false;
   }
 
   // Reject if already done

@@ -749,29 +749,28 @@ double GlidePolar::MacCreadyAltitude(double emcready,
   static double cache_TaskAltDiff[CASIZE];
 #endif
 
-  if (DoInit[MDI_MCREADYCACHE]) {
-	for (i=0; i<CASIZE; i++) {
-		cache_checksum[i]=0;
-		cache_altitude[i]=0;
-		cache_emcready[i]=0;
-		cache_Distance[i]=0;
-		cache_Bearing[i]=0;
-		cache_WindSpeed[i]=0;
-		cache_WindBearing[i]=0;
-  #ifndef BCT_ALT_FIX
-		cache_BestCruiseTrack[i]=0;
-  #endif
-		cache_VMacCready[i]=0;
-		cache_TimeToGo[i]=0;
-		cache_AltitudeAboveTarget[i]=0;
-		cache_cruise_efficiency[i]=0;
-		cache_isFinalGlide[i]=false;
-  #ifdef BCT_ALT_FIX
-    cache_TaskAltDiff[i]=0;
-  #endif
-	}
-	cacheIndex=0;
-	DoInit[MDI_MCREADYCACHE]=false;
+  if (DoInit(MDI_MCREADYCACHE)) {
+    for (i = 0; i < CASIZE; i++) {
+      cache_checksum[i] = 0;
+      cache_altitude[i] = 0;
+      cache_emcready[i] = 0;
+      cache_Distance[i] = 0;
+      cache_Bearing[i] = 0;
+      cache_WindSpeed[i] = 0;
+      cache_WindBearing[i] = 0;
+#ifndef BCT_ALT_FIX
+      cache_BestCruiseTrack[i] = 0;
+#endif
+      cache_VMacCready[i] = 0;
+      cache_TimeToGo[i] = 0;
+      cache_AltitudeAboveTarget[i] = 0;
+      cache_cruise_efficiency[i] = 0;
+      cache_isFinalGlide[i] = false;
+#ifdef BCT_ALT_FIX
+      cache_TaskAltDiff[i] = 0;
+#endif
+    }
+    cacheIndex = 0;
   }
 
 #ifdef BCT_ALT_FIX

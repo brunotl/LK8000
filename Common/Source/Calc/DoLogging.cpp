@@ -36,17 +36,16 @@ void DoLogging(NMEA_INFO *Basic, DERIVED_INFO *Calculated) {
   double dtSnail = 2.0;
   double dtStats = 60.0;
 
-  if (DoInit[MDI_CALCLOGGING]) {
-	SnailLastTime=0;
-	LogLastTime=0;
-	StatsLastTime=0;
-	maxerrlog=MAXERRDOLOG;
-	Time_last=0;
-	Longitude_last = 10;
-	Latitude_last = 10;
-	Longitude_snailed = 10;
-	Latitude_snailed = 10;
-	DoInit[MDI_CALCLOGGING]=false;
+  if (DoInit(MDI_CALCLOGGING)) {
+    SnailLastTime = 0;
+    LogLastTime = 0;
+    StatsLastTime = 0;
+    maxerrlog = MAXERRDOLOG;
+    Time_last = 0;
+    Longitude_last = 10;
+    Latitude_last = 10;
+    Longitude_snailed = 10;
+    Latitude_snailed = 10;
   }
 
   if (Basic->NAVWarning) return;

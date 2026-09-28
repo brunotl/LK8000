@@ -133,31 +133,36 @@ void ReinitScreen(void) {
   // DoInits will require new values (at least PROCESSVIRTUALKEYS)
   main_window->UpdateActiveScreenZone(rc);
 
-  Reset_Single_DoInits(MDI_DRAWLOOK8000);
-  Reset_Single_DoInits(MDI_DRAWTRI);
-  Reset_Single_DoInits(MDI_DRAWAHRS);
-  Reset_Single_DoInits(MDI_DRAWHSI);
-  Reset_Single_DoInits(MDI_DRAWFLARMTRAFFIC);
-  Reset_Single_DoInits(MDI_DRAWINFOPAGE);
-  Reset_Single_DoInits(MDI_WRITEINFO);
-  Reset_Single_DoInits(MDI_DRAWLOOK8000);
-  Reset_Single_DoInits(MDI_DRAWNEAREST);
-  Reset_Single_DoInits(MDI_DRAWTARGET);
-  Reset_Single_DoInits(MDI_DRAWVARIO);
-  Reset_Single_DoInits(MDI_PROCESSVIRTUALKEY);
-  Reset_Single_DoInits(MDI_MAPWPVECTORS);
-  Reset_Single_DoInits(MDI_FLARMRADAR);
-  Reset_Single_DoInits(MDI_DRAWBOTTOMBAR);
-  Reset_Single_DoInits(MDI_DRAWFLIGHTMODE);
+
+  // clang-format off
+  Reset_DoInit({
+      MDI_DRAWLOOK8000,
+      MDI_DRAWTRI,
+      MDI_DRAWAHRS,
+      MDI_DRAWHSI,
+      MDI_DRAWFLARMTRAFFIC,
+      MDI_DRAWINFOPAGE,
+      MDI_WRITEINFO,
+      MDI_DRAWLOOK8000,
+      MDI_DRAWNEAREST,
+      MDI_DRAWTARGET,
+      MDI_DRAWVARIO,
+      MDI_PROCESSVIRTUALKEY,
+      MDI_MAPWPVECTORS,
+      MDI_FLARMRADAR,
+      MDI_DRAWBOTTOMBAR,
+      MDI_DRAWFLIGHTMODE
+    });
+  // clang-format on
 
   // Some parameters need to be reset in advance, otherwise they will be retuned only when the
   // relative DoInit is accomplished. This is a mistake of course.
-  TopSize=0; // requires a DrawNearest. 0 is Ok on startup.
 
-  TestLog(_T("... ChangeScreen resuming Draw Thread\n"));
-
+  TopSize = 0;  // requires a DrawNearest. 0 is Ok on startup.
 
   MapWindow::Initialize();
+
+  TestLog(_T("... ChangeScreen resuming Draw Thread\n"));
   MapWindow::ResumeDrawingThread();
   main_window->SetToForeground();
 }

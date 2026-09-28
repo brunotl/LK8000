@@ -21,10 +21,8 @@ extern long VKtime;
 
 void MapWindow::LKDrawMultimap_Test(LKSurface& Surface, const RECT& rc)
 {
-
-  if (DoInit[MDI_MAPTEST]) {
-	// init statics here and then clear init to false
-	DoInit[MDI_MAPTEST]=false;
+  if (DoInit(MDI_MAPTEST)) {
+    // init statics here and then clear init to false
   }
 
   //

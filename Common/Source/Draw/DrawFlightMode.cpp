@@ -129,8 +129,7 @@ void MapWindow::DrawFlightMode(LKSurface& Surface, const RECT& rc)
 
   LKIcon* ptmpBitmap = NULL;
 
-  if (DoInit[MDI_DRAWFLIGHTMODE]) {
-      DoInit[MDI_DRAWFLIGHTMODE]=false;
+  if (DoInit(MDI_DRAWFLIGHTMODE)) {
 
       ptmpBitmap=&hLogger;
       loggerIconSize = ptmpBitmap->GetSize();

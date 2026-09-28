@@ -56,7 +56,7 @@ void MapWindow::LKDrawVario(LKSurface& Surface, const RECT& rc) {
 
 	PixelScalar BottomSize = GetBottomBarSize();
 
-    if (DoInit[MDI_DRAWVARIO]) {
+    if (DoInit(MDI_DRAWVARIO)) {
 
         const int boxthick = IBLSCALE(BOXTHICK);
         const int hpixelseparate = (LKVarioBar > vBarVarioGR) ? 0 : IBLSCALE(PIXELSEPARATE);
@@ -209,8 +209,6 @@ void MapWindow::LKDrawVario(LKSurface& Surface, const RECT& rc) {
         }
         // update last box for hide rounding artefact 
         negativeBricks[negative_brick_count - 1].bottom = hbrc.bottom;
-
-        DoInit[MDI_DRAWVARIO] = false;
     } // END of INIT
 
     double vario_value = 0; // can be vario, vario netto or STF offset, depending of config and map mode

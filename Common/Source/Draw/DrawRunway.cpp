@@ -77,8 +77,7 @@ void MapWindow::DrawRunway(LKSurface& Surface, const WAYPOINT* wp, const RECT& r
   // So we can use floating point arithmetic for accuracy.
 
 
-  if (DoInit[MDI_MAPWPVECTORS])
-  {
+  if (DoInit(MDI_MAPWPVECTORS)) {
 
     //
     // Everything rescales properly on all resolutions.
@@ -131,7 +130,6 @@ void MapWindow::DrawRunway(LKSurface& Surface, const WAYPOINT* wp, const RECT& r
                 dmax_realscale=MAX_REALSCALE;
                 break;
     }
-    DoInit[MDI_MAPWPVECTORS]=false;
   }
   // END OF DOINIT
 

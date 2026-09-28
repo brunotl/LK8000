@@ -74,7 +74,7 @@ void MapWindow::DrawNearest(LKSurface& Surface, const RECT& rc) {
 
 	PixelScalar BottomSize = GetBottomBarSize();
 
-    if (DoInit[MDI_DRAWNEAREST]) {
+    if (DoInit(MDI_DRAWNEAREST)) {
 
         SIZE K1TextSize[MSM_TOP + 1], K2TextSize[MSM_TOP + 1], K3TextSize[MSM_TOP + 1], K4TextSize[MSM_TOP + 1];
         SIZE InfoTextSize, InfoNumberSize;
@@ -499,7 +499,6 @@ void MapWindow::DrawNearest(LKSurface& Surface, const RECT& rc) {
         hColumn4 = s_sortBox[3].right - NIBLSCALE(2);
         hColumn5 = s_sortBox[4].right - NIBLSCALE(2);
 
-        DoInit[MDI_DRAWNEAREST] = false;
         return;
     } // doinit
 

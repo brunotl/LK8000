@@ -61,33 +61,30 @@ bool DoRangeWaypointList(NMEA_INFO *Basic, DERIVED_INFO *Calculated) {
    // We need a locked GPS position to proceed!
 
    // TODO FIX LOCK DATA IN DRAWNEAREST when updating this list!
-   if (DoInit[MDI_DORANGEWAYPOINTLIST]) {
-	for (i=0; i<MAXRANGELANDABLE; i++) {
-		RangeLandableIndex[i]= -1;
-		RangeAirportIndex[i]= -1;
-	}
-	for (i=0; i<MAXRANGETURNPOINT; i++) {
-		RangeTurnpointIndex[i]= -1;
-	}
-	RangeLandableNumber=0;
-	RangeAirportNumber=0;
-	RangeTurnpointNumber=0;
+  if (DoInit(MDI_DORANGEWAYPOINTLIST)) {
+    std::ranges::fill(RangeLandableIndex, -1);
+    RangeLandableNumber = 0;
 
-	// Reset all statics for Master DoInits actions
-	dstrangeturnpoint=DSTRANGETURNPOINT;
-	dstrangelandable=DSTRANGELANDABLE;
-	retunecount=0;
-	retryretunecount=0;
-	lastRetryRetuneTime=0;
+    std::ranges::fill(RangeAirportIndex, -1);
+    RangeAirportNumber = 0;
 
-	DoInit[MDI_DORANGEWAYPOINTLIST]=false;
+    std::ranges::fill(RangeTurnpointIndex, -1);
+    RangeTurnpointNumber = 0;
+
+    // Reset all statics for Master DoInits actions
+    dstrangeturnpoint = DSTRANGETURNPOINT;
+    dstrangelandable = DSTRANGELANDABLE;
+    retunecount = 0;
+    retryretunecount = 0;
+    lastRetryRetuneTime = 0;
+
 	#if DEBUG_DORANGE
 	StartupStore(_T(".... >> DoRangeWaypointList INIT done, return <<\n"));
 	#endif
 	return false;
-   }
+  }
 
-   #if 0
+#if 0
    DoStatusMessage(_T("WAIT RECALCULATING WAYPOINTS"));
    #endif
 

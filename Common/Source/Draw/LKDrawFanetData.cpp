@@ -121,7 +121,7 @@ void MapWindow::LKDrawFanetData(LKSurface& Surface, const RECT& rc, const Screen
 //static int	iCircleSize = 7;
 //static int	iRectangleSize = 4;
   static short tscaler=0;
-  if (DoInit[MDI_DRAWFANETDATA]) {
+  if (DoInit(MDI_DRAWFANETDATA)) {
 
 	switch (ScreenSize) {
 		case ss480x640:
@@ -145,7 +145,6 @@ void MapWindow::LKDrawFanetData(LKSurface& Surface, const RECT& rc, const Screen
 	for (int i = 0;i < MAXFANETWEATHER;i++){
 		DrawInfo.FANET_Weather[i].Time_Fix = 0; //reset all Data
 	}
-	DoInit[MDI_DRAWFANETDATA]=false;
   }
 
   //POINT Arrow[5];

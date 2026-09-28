@@ -14,10 +14,11 @@
 #ifndef DOINITS_H
 #define DOINITS_H
 
+#include <array>
+#include <initializer_list>
 
  // Master of Do Inits
  enum MDI_t : unsigned {
-	MDI_FIRST_DOINIT,
 	MDI_DORANGEWAYPOINTLIST,	// wp file change
 	MDI_DOCALCULATIONSSLOW,		// force recalc bestalt, optimizer, validFix check
 	MDI_HEADING,			// time change
@@ -51,10 +52,9 @@
 	MDI_LAST_DOINIT,
  };
 
-void Reset_Single_DoInits(MDI_t position);
+void Reset_DoInit(MDI_t position);
+void Reset_DoInit(std::initializer_list<MDI_t> list);
 
-using DoInit_t = std::array<bool, MDI_LAST_DOINIT>;
-
-extern DoInit_t DoInit;
+bool DoInit(MDI_t position);
 
 #endif // DOINITS_H

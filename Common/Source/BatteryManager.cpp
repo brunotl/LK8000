@@ -225,7 +225,7 @@ void BatteryManager::Manage() {
   if (invalid) {
     return;
   }
-  if (DoInit[MDI_BATTERYMANAGER]) {
+  if (DoInit(MDI_BATTERYMANAGER)) {
     invalid = false, recharging = false;
     warn33 = true, warn100 = true;
     last_time = 0, init_time = 0;
@@ -237,14 +237,12 @@ void BatteryManager::Manage() {
           _T("... LK BatteryManager V1: internal battery information not ")
           _T("available, function disabled"));
       invalid = true;
-      DoInit[MDI_BATTERYMANAGER] = false;  // just to be sure
       return;
     }
 
     StartupStore(_T(". LK Battery Manager V1 started, current charge=%d%%"),
                  PDABatteryPercent);
     init_time = GPS_INFO.Time;
-    DoInit[MDI_BATTERYMANAGER] = false;
   }
 
   // if first run,  and not passed 30 seconds, do nothing

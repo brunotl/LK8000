@@ -30,7 +30,7 @@ void MapWindow::DrawTarget(LKSurface& Surface, const RECT& rc, int ttop, int tbo
 
   static int nleft,nright,ntop,nbottom;
   static int ncenterx, ncentery;
-  if (DoInit[MDI_DRAWTARGET]) {
+  if (DoInit(MDI_DRAWTARGET)) {
 
 	nleft=tleft+IBLSCALE(3);
 	nright=tright;
@@ -136,8 +136,6 @@ void MapWindow::DrawTarget(LKSurface& Surface, const RECT& rc, int ttop, int tbo
 	altline_left[5].y		=	ncentery+(alth*3);
 	altline_right[5].x		=	ncenterx+altw;
 	altline_right[5].y		=	ncentery+(alth*3);
-
-	DoInit[MDI_DRAWTARGET]=false;
   }
 
   // The flag "disabled" will force no plane to be painted

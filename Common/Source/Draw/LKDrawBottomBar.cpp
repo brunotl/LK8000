@@ -28,12 +28,8 @@ void MapWindow::InitBottomBar(LKSurface& Surface, const RECT& rc) {
 }
 
 void MapWindow::DrawBottomBar(LKSurface& Surface, const RECT& rc) {
-
-  if (DoInit[MDI_DRAWBOTTOMBAR]) {
-
+  if (DoInit(MDI_DRAWBOTTOMBAR)) {
     ResetBottomBarDrawer();
-
-    DoInit[MDI_DRAWBOTTOMBAR] = false;
   }  // end doinit
 
   const std::lock_guard lock(bottom_bar_mutex);
@@ -60,12 +56,14 @@ unsigned MapWindow::GetBottomBarSize() {
   unsigned new_size = bottom_bar_ptr->get_size();
   if (last_bottom_bar_size != new_size) {
     // Screen size has changed
-    DoInit[MDI_DRAWHSI] = true; 
-    DoInit[MDI_DRAWINFOPAGE] = true;
-    DoInit[MDI_DRAWLOOK8000] = true;
-    DoInit[MDI_DRAWNEAREST] = true;
-    DoInit[MDI_DRAWVARIO] = true;
-    DoInit[MDI_DRAWFLIGHTMODE] = true;
+    Reset_DoInit({
+        MDI_DRAWHSI,
+        MDI_DRAWINFOPAGE,
+        MDI_DRAWLOOK8000,
+        MDI_DRAWNEAREST,
+        MDI_DRAWVARIO,
+        MDI_DRAWFLIGHTMODE
+      });
 
     last_bottom_bar_size = new_size;
   }

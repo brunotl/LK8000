@@ -50,14 +50,15 @@ void MapWindow::DrawInfoPage(LKSurface& Surface,  const RECT& rc, bool forceinit
   bool showunit=false;
   lk::strcpy(Empty,_T(""));
 
-  if (forceinit) DoInit[MDI_DRAWINFOPAGE]=true;
+  if (forceinit) {
+    Reset_DoInit(MDI_DRAWINFOPAGE);
+  }
 
 	const auto oldfont = Surface.SelectObject(LKINFOFONT); // save font
 
 	PixelScalar BottomSize = GetBottomBarSize();
 
-  if (DoInit[MDI_DRAWINFOPAGE]) {
-	DoInit[MDI_DRAWINFOPAGE]=false;
+  if (DoInit(MDI_DRAWINFOPAGE)) {
 	// function can only be called in fullscreen  and thus can be inited here
 	column[0]=rc.left+LEFTLIMITER;
 	column[1]=((rc.right-RIGHTLIMITER-LEFTLIMITER-rc.left)/PANELCOLUMNS)+LEFTLIMITER+rc.left;
@@ -1146,7 +1147,7 @@ void MapWindow::WriteInfo(LKSurface& Surface, bool* showunit,
   DrawBmp_t lBmpValue = BmpNone;
   if (BmpValue != NULL) lBmpValue = *BmpValue;
   static short unitrowoffset=0;
-  if (DoInit[MDI_WRITEINFO]) {
+  if (DoInit(MDI_WRITEINFO)) {
 	switch(ScreenSize) {
 #if 1 // TODO WE SHOULD USE GENERAL default, after CHECKING
 		case ss800x480:
@@ -1206,7 +1207,6 @@ void MapWindow::WriteInfo(LKSurface& Surface, bool* showunit,
 			}
 			break;
 	}
-	DoInit[MDI_WRITEINFO]=false;
   }
 
 	Surface.SelectObject(LK8PanelBigFont);

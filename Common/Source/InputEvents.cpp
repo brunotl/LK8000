@@ -1708,21 +1708,19 @@ void InputEvents::eventCalcWind(const TCHAR *misc) {
   }
 }
 
-void InputEvents::eventInvertColor(const TCHAR *misc) { // 100114
-
+void InputEvents::eventInvertColor(const TCHAR* misc) {  // 100114
   static short oldOutline;
-  if (DoInit[MDI_EVENTINVERTCOLOR]) {
-	oldOutline=OutlinedTp;
-	DoInit[MDI_EVENTINVERTCOLOR]=false;
+  if (DoInit(MDI_EVENTINVERTCOLOR)) {
+    oldOutline = OutlinedTp;
   }
 
-  if (OutlinedTp>(OutlinedTp_t)otDisabled)
-	OutlinedTp=(OutlinedTp_t)otDisabled;
-  else
-	OutlinedTp=oldOutline;
+  if (OutlinedTp > (OutlinedTp_t)otDisabled) {
+    OutlinedTp = (OutlinedTp_t)otDisabled;
+  }
+  else {
+    OutlinedTp = oldOutline;
+  }
   Appearance.InverseInfoBox = !Appearance.InverseInfoBox;
-  return;
-
 }
 
 void InputEvents::eventResetTask(const TCHAR *misc) { // 100117

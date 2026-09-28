@@ -27,7 +27,7 @@ void MapWindow::LKDrawFLARMTraffic(LKSurface& Surface, const RECT& rc, const Scr
 static int	iCircleSize = 7;
 static int	iRectangleSize = 4;
   static short tscaler=0;
-  if (DoInit[MDI_DRAWFLARMTRAFFIC]) {
+  if (DoInit(MDI_DRAWFLARMTRAFFIC)) {
 
 	switch (ScreenSize) {
 		case ss480x640:
@@ -54,9 +54,6 @@ static int	iRectangleSize = 4;
 			tscaler=NIBLSCALE(7);
 			break;
 	}
-
-
-	DoInit[MDI_DRAWFLARMTRAFFIC]=false;
   }
 
   POINT Arrow[5];

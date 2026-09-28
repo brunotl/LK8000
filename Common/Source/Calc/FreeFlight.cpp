@@ -58,8 +58,8 @@ bool DetectFreeFlying(NMEA_INFO *Basic, DERIVED_INFO *Calculated) {
 
   bool forcereset=LKSW_ForceFreeFlightRestart;
 
-  if (DoInit[MDI_DETECTFREEFLYING]) {
-    for (int i=0; i<8; i++) vario[i]=0;
+  if (DoInit(MDI_DETECTFREEFLYING)) {
+    std::ranges::fill(vario, 0);
     gndAltitude=0;
     winchdetected=false;
     wlaunch=0;
@@ -69,7 +69,6 @@ bool DetectFreeFlying(NMEA_INFO *Basic, DERIVED_INFO *Calculated) {
     safeTakeoffDetected=false;
     nowGearWarning=true; // we are here before freeflight!
     noMessages=0;	// after a new takeoff we can give warnings again!
-    DoInit[MDI_DETECTFREEFLYING]=false;
   }
 
   // reset on ground

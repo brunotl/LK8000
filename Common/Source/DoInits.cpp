@@ -5,30 +5,34 @@
  */
 
 #include <array>
+#include <utility>
+#include <cassert>
 #include "MessageLog.h"
 #include "DoInits.h"
 
 namespace {
 
-template <std::size_t ... Is>
-std::array<bool, sizeof...(Is)>
-Init_DoInit(std::index_sequence<Is...>) {
-  return {{(void(Is), true)...}};
+template <std::size_t... I>
+constexpr auto Init_DoInit(std::index_sequence<I...>) {
+  return std::array<bool, sizeof...(I)>({(void(I), true)...});
 }
 
-DoInit_t Init_DoInit() {
-  return Init_DoInit(std::make_index_sequence<MDI_LAST_DOINIT>());
+auto do_init = Init_DoInit(std::make_index_sequence<MDI_LAST_DOINIT>());
+
+}  // namespace
+
+void Reset_DoInit(MDI_t position) {
+  assert(position < do_init.size());
+  do_init[position] = true;
 }
 
-} // namespace
-
-DoInit_t DoInit = Init_DoInit();
-
-void Reset_Single_DoInits(MDI_t position) {
-  if (position < DoInit.size()) {
-    DoInit[position] = true;
+void Reset_DoInit(std::initializer_list<MDI_t> list) {
+  for (MDI_t position : list) {
+    Reset_DoInit(position);
   }
-  else {
-    TestLog(_T("... invalid reset single DoInits position=%u"), position);
-  }
+}
+
+bool DoInit(MDI_t position) {
+  assert(position < do_init.size());
+  return std::exchange(do_init[position], false);
 }

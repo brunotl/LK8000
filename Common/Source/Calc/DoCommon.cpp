@@ -94,11 +94,10 @@ void DoCommon(NMEA_INFO *Basic, DERIVED_INFO *Calculated)
    static double LastRunTime=0;
 
    // Safe initialisation, passthrough mode
-   if (DoInit[MDI_DOCOMMON]) {
-        for (i=0; i<MAXCOMMON; i++) CommonIndex[i]=-1;
-	CommonNumber=0;
-	DoCommonList(Basic,Calculated);
-        DoInit[MDI_DOCOMMON]=false;
+   if (DoInit(MDI_DOCOMMON)) {
+     std::ranges::fill(CommonIndex, -1);
+     CommonNumber = 0;
+     DoCommonList(Basic, Calculated);
    }
 
    if (WayPointList.empty()) return;

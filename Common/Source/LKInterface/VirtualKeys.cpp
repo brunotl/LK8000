@@ -46,7 +46,7 @@ int ProcessVirtualKey(int X, int Y, long keytime, short vkmode) {
 	#endif
 
 
-	if (DoInit[MDI_PROCESSVIRTUALKEY]) {
+	if (DoInit(MDI_PROCESSVIRTUALKEY)) {
 
 		// calculate left and right starting from center
 		s_xleft=(MapWindow::MapRect.right+MapWindow::MapRect.left)/2 -(MapWindow::MapRect.right-MapWindow::MapRect.left)/6;
@@ -55,7 +55,6 @@ int ProcessVirtualKey(int X, int Y, long keytime, short vkmode) {
 		// same for bottom navboxes: they do not exist in infobox mode
 		s_bottomY=MapWindow::Y_BottomBar-NIBLSCALE(2);
 		TestLog(_T("... Virtualkeys: s_xleft=%d s_xright=%d s_bottomY=%d"),s_xleft,s_xright,s_bottomY);
-		DoInit[MDI_PROCESSVIRTUALKEY]=false;
 	}
 
 

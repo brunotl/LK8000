@@ -110,7 +110,7 @@ TCHAR *GetOvertargetHeader(void) {
   // Maxmode + 1 because maxmode does not account pos 0
   static TCHAR targetheader[OVT_MAXMODE+1][OVERTARGETHEADER_MAX+2];
 
-  if (DoInit[MDI_GETOVERTARGETHEADER]) {
+  if (DoInit(MDI_GETOVERTARGETHEADER)) {
 	// LKTOKEN _@M1323_ "T>"
 	LK_tcsncpy(targetheader[OVT_TASK], MsgToken<1323>(), OVERTARGETHEADER_MAX);
 	// LKTOKEN _@M1323_ "T>"
@@ -132,8 +132,9 @@ TCHAR *GetOvertargetHeader(void) {
 
 	LK_tcsncpy(targetheader[OVT_XC], TEXT("X>"), OVERTARGETHEADER_MAX); // No need for translation here. X international code for Cross Country !
 
-	for (int i=0; i<OVT_MAXMODE+1; i++) targetheader[i][OVERTARGETHEADER_MAX]='\0';
-	DoInit[MDI_GETOVERTARGETHEADER]=false;
+    for (int i = 0; i < OVT_MAXMODE + 1; i++) {
+      targetheader[i][OVERTARGETHEADER_MAX] = '\0';
+    }
   }
 
   return(targetheader[OvertargetMode]);

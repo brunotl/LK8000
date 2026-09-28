@@ -156,7 +156,7 @@ void MapWindow::DrawLook8000(LKSurface& Surface, const RECT& rc) {
 
 	PixelScalar BottomSize = GetBottomBarSize();
 
-    if (DoInit[MDI_DRAWLOOK8000]) {
+    if (DoInit(MDI_DRAWLOOK8000)) {
 
         compass={rc.right-COMPASS_SPACE, rc.top+COMPASS_SPACE};
 
@@ -224,10 +224,6 @@ void MapWindow::DrawLook8000(LKSurface& Surface, const RECT& rc) {
         yMcSafety+=NIBLSCALE(1);
         yAltSafety+= NIBLSCALE(1);
         #endif
-
-
-        DoInit[MDI_DRAWLOOK8000] = false;
-
     } // end doinit
 
     distcolor=OverColorRef;

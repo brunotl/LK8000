@@ -80,8 +80,7 @@ void MapWindow::DrawTRI(LKSurface& Surface, const RECT& rc) {
   double beta=0.0;
   bool disabled=false;
 
-   if (DoInit[MDI_DRAWTRI])
-  {
+  if (DoInit(MDI_DRAWTRI)) {
 
   top=(((rc.bottom-BottomSize-(rc.top+TOPLIMITER)-BOTTOMLIMITER)/PANELROWS)+rc.top+TOPLIMITER)- (rc.top+TOPLIMITER);
   Start.y = ((rc.bottom-BottomSize-top)/2)+top-NIBLSCALE(10);
@@ -171,7 +170,6 @@ void MapWindow::DrawTRI(LKSurface& Surface, const RECT& rc) {
   d60[1][3].x= Start.x + (long) (innerradius*fastcosine(60.0));
   d60[1][3].y= Start.y - (long) (innerradius*fastsine(60.0));
 
-  DoInit[MDI_DRAWTRI]=false;
   } // end dirty hack doinit
 
   //if (!CALCULATED_INFO.Flying) {
@@ -337,7 +335,7 @@ void MapWindow::DrawAHRS(LKSurface& Surface, const RECT& rc) {
 
   TCHAR Buffer[LKSIZEBUFFERVALUE];
 
-  if (DoInit[MDI_DRAWAHRS]) {
+  if (DoInit(MDI_DRAWAHRS)) {
     innerradius = radius - NIBLSCALE(8);
 
     double alpha = 0;
@@ -425,8 +423,6 @@ void MapWindow::DrawAHRS(LKSurface& Surface, const RECT& rc) {
     d60[0][3].y = Start.y - radius * fastsine(60.0);
     d60[1][3].x = Start.x + innerradius * fastcosine(60.0);
     d60[1][3].y = Start.y - innerradius * fastsine(60.0);
-
-    DoInit[MDI_DRAWAHRS] = false;
   }  // end dirty hack doinit
 
   const PenReference hpBlack = LKPen_Black_N1;

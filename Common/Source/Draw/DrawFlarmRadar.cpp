@@ -764,8 +764,8 @@ DiagrammStruct sDia;
 			Arrow[q].x  = (long) ((double)Arrow[q].x * 1.7);
 			Arrow[q].y  = (long) ((double)Arrow[q].y * 1.7);
 		}
-  if (DoInit[MDI_FLARMRADAR])
-  {
+
+  if (DoInit(MDI_FLARMRADAR)) {
 
 	  fScaleFact =5.0;
 
@@ -812,7 +812,6 @@ DiagrammStruct sDia;
 	iCircleSize    = IBLSCALE(4);
 	iTraceDotSize  = IBLSCALE(2);
 	iRectangleSize = IBLSCALE(4);
-	DoInit[MDI_FLARMRADAR]=false;
   }
 
 
