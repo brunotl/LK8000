@@ -23,7 +23,7 @@
 #include "Util/UTF8.hpp"
 #include "utils/tokenizer.h"
 #include "utils/printf.h"
-#include "utils/charset_helper.h"
+#include "utils/stream_helper.h"
 #include "Calc/Task/TimeGates.h"
 #include "Waypoints/SetHome.h"
 
@@ -329,7 +329,7 @@ bool LoadCupTaskSingle(LPCTSTR szFileName, TCHAR (&TaskLine)[size], int Selected
     std::istream in(&stream);
     std::string src_line;
 
-    while (std::getline(in, src_line)) {
+    while (lk::getline_unknown_charset(in, src_line)) {
       if ((FileSection == none) &&
           (src_line.starts_with("name,code,country") ||
            src_line.starts_with("Title,Code,Country"))) {
