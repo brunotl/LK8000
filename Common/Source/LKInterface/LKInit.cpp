@@ -44,10 +44,11 @@ void UpdateConfBB(void) {
   if (ConfBB2==false && ConfBB3==false &&
       ConfBB4==false && ConfBB5==false &&
       ConfBB6==false && ConfBB7==false &&
-      ConfBB8==false && ConfBB9==false)
+      ConfBB8==false && ConfBB9==false) {
 
 		// we need at least one bottom bar stripe available (thermal apart)
-		ConfBB[1]=true;
+    ConfBB[1] = true;
+  }
 
   while (!ConfBB[BottomMode]) {
     BottomBarChange(true);
@@ -64,11 +65,6 @@ void UpdateConfIP(void) {
   ConfIP[0][MP_MAPASP]=true; 	// multimap asp
   ConfIP[0][MP_VISUALGLIDE]=true; // multimap radar
   ConfIP[0][MP_RADAR]=true; 	// multimap radar
-#if TESTBENCH
-  ConfIP[0][MP_TEST]=false; 	// multimap test page
-#else
-  ConfIP[0][MP_TEST]=false; 	// multimap test page
-#endif
   ConfMP[0]=true; // map mode
 
   // LKMODE_INFOMODE is 1
@@ -187,7 +183,6 @@ void InitModeTable() {
 	ModeTable[LKMODE_MAP][MP_MAPASP]	=	MSM_MAPASP;
 	ModeTable[LKMODE_MAP][MP_VISUALGLIDE]	=	MSM_VISUALGLIDE;
 	ModeTable[LKMODE_MAP][MP_RADAR]		=	MSM_MAPRADAR;
-	ModeTable[LKMODE_MAP][MP_TEST]		=	MSM_MAPTEST;
 
 	ModeTable[LKMODE_WP][WP_AIRPORTS]	=	MSM_AIRPORTS;
 	ModeTable[LKMODE_WP][WP_LANDABLE]	=	MSM_LANDABLE;

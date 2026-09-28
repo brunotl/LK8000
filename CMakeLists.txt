@@ -459,7 +459,6 @@ add_library( LK8000 SHARED
     Common/Source/Draw/Multimaps/DrawMultimap.cpp
     Common/Source/Draw/Multimaps/DrawMultimap_Asp.cpp
     Common/Source/Draw/Multimaps/DrawMultimap_Radar.cpp
-    Common/Source/Draw/Multimaps/DrawMultimap_Test.cpp
     Common/Source/Draw/Multimaps/GetVisualGlidePoints.cpp
     Common/Source/Draw/Multimaps/RenderAirspace.cpp
     Common/Source/Draw/Multimaps/RenderAirspaceTerrain.cpp

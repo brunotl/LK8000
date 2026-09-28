@@ -24,44 +24,27 @@ int	Current_Multimap_SizeY=SIZE1;
 RECT	Current_Multimap_TopRect={0,0,1,1};
 
 
-
+//
+// All multimaps excluded MSM_MAP
+//
+bool IsMultiMapNoMain() {
+  return (MapSpaceMode >= MSM_MAPRADAR) && (MapSpaceMode <= MSM_VISUALGLIDE);
+}
 
 //
 // All multimaps including MSM_MAP main
 // These are badly managed here, since they depend on enumeration in Defines.h, but no problems.
 //
 bool IsMultiMap() {
-
-  if ( ((MapSpaceMode >= MSM_MAPRADAR) && (MapSpaceMode <= MSM_MAPTEST))||(MapSpaceMode==MSM_MAP))
-	return true;
-  else
-	return false;
+  return IsMultiMapNoMain() || (MapSpaceMode == MSM_MAP);
 }
-
-
-//
-// All multimaps excluded MSM_MAP
-//
-bool IsMultiMapNoMain() {
-
-  if ( (MapSpaceMode >= MSM_MAPRADAR) && (MapSpaceMode <= MSM_MAPTEST))
-	return true;
-  else
-	return false;
-}
-
 
 //
 // All multimapped page, not sharing map customkeys and events
 //
 bool IsMultiMapCustom() {
-  //if ( (MapSpaceMode >= MSM_MAPRADAR) && (MapSpaceMode <= MSM_MAPTEST))
-  if ( (MapSpaceMode == MSM_MAPRADAR) || (MapSpaceMode == MSM_MAPTEST))
-	return true;
-  else
-	return false;
+  return MapSpaceMode == MSM_MAPRADAR;
 }
-
 
 //
 // Multimaps sharing events and customkeys with main map, INCLUDING MSM_MAP
@@ -106,9 +89,6 @@ short Get_Current_Multimap_Type() {
 		break;
 	case MSM_MAPASP:
 		ret=MP_MAPASP;
-		break;
-	case MSM_MAPTEST:
-		ret=MP_TEST;
 		break;
 	case MSM_VISUALGLIDE:
 		ret=MP_VISUALGLIDE;
@@ -393,13 +373,6 @@ void Reset_Multimap_Flags(void) {
   Multimap_Flags_Overlays_Text[MP_RADAR]=false;
   Multimap_Flags_Overlays_Gauges[MP_RADAR]=false;
   Multimap_SizeY[MP_RADAR]=SIZE2;
-
-  // this is not enabled normally
-  Multimap_Flags_Overlays_Text[MP_TEST]=false;
-  Multimap_Flags_Overlays_Gauges[MP_TEST]=false;
-
-
-
 }
 
 

@@ -680,7 +680,6 @@ class MapWindow {
   static short GetVisualGlidePoints(unsigned short numslots );
   static void LKDrawFlarmRadar(LKSurface& Surface, const RECT& rci);
   static void LKDrawMultimap_Example(LKSurface& Surface, const RECT& rci);
-  static void LKDrawMultimap_Test(LKSurface& Surface, const RECT& rci);
   static void LKDrawMultimap_Asp(LKSurface& Surface, const RECT& rci);
   static void LKDrawMultimap_Radar(LKSurface& Surface, const RECT& rci);
 

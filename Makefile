@@ -930,7 +930,6 @@ DRAW	:=\
 	$(DRW)/Multimaps/DrawMultimap.cpp \
 	$(DRW)/Multimaps/DrawMultimap_Asp.cpp \
 	$(DRW)/Multimaps/DrawMultimap_Radar.cpp \
-	$(DRW)/Multimaps/DrawMultimap_Test.cpp \
 	$(DRW)/Multimaps/GetVisualGlidePoints.cpp \
 	$(DRW)/Multimaps/RenderAirspace.cpp\
 	$(DRW)/Multimaps/RenderAirspaceTerrain.cpp\

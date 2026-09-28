@@ -137,9 +137,6 @@ void MapWindow::DrawMapSpace(LKSurface& Surface,  const RECT& rc) {
 		SetSideviewPage(IM_VISUALGLIDE);
 		LKDrawMultimap_Asp(Surface,rc);
 		break;
-	case MSM_MAPTEST:
-		LKDrawMultimap_Test(Surface,rc);
-		break;
 	case MSM_LANDABLE:
 	case MSM_NEARTPS:
 	case MSM_AIRPORTS:

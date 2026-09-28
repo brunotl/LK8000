@@ -444,11 +444,10 @@
 #define MSM_MAPWPT		20	// this is multimapped
 #define MSM_MAPASP		21	// this is multimapped
 #define MSM_VISUALGLIDE		22	// multimapped, work in progress
-#define MSM_MAPTEST		23	// multimapped, for testing purposes
-#define MSM_INFO_HSI		24
+#define MSM_INFO_HSI		23
 // turnaround point is TOP
 // remember that arrays must count from zero, so MSM_TOP+1
-#define MSM_TOP			24
+#define MSM_TOP			23
 //
 // THIS CONFIGURATION GIVES THE ORDER OF MENUs. ALL ITEMS MUST ALSO BE ADDED INSIDE INITMODETABLE()
 // in Utils2.cpp WHERE each mode is paired with an MSM_xxx item.
@@ -470,8 +469,7 @@
 #define MP_MAPASP		4
 #define MP_VISUALGLIDE		5
 #define MP_RADAR		6
-#define MP_TEST			7
-#define MP_TOP			7
+#define MP_TOP			6
 
 // M1 M2 M3 M4, not test and radar that are custom.
 // All multimaps that need to have shared Display parameters
