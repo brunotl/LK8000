@@ -29,6 +29,7 @@ Copyright_License {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstring>
 
 #ifdef MESA_KMS
 #include <errno.h>
@@ -200,11 +201,45 @@ TopCanvas::Create(PixelSize new_size,
 
 #endif
 
+static EGLDisplay GetPlatformDisplay(EGLNativeDisplayType native_display) {
+  EGLDisplay display = EGL_NO_DISPLAY;
+
+#ifdef USE_X11
+
+  const char* client_ext = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+
+  const bool has_platform_base =
+      client_ext != nullptr &&
+      strstr(client_ext, "EGL_EXT_platform_base") != nullptr;
+
+  const bool has_platform_x11 =
+      client_ext != nullptr &&
+      (strstr(client_ext, "EGL_EXT_platform_x11") != nullptr ||
+       strstr(client_ext, "EGL_KHR_platform_x11") != nullptr);
+
+  if (has_platform_base && has_platform_x11) {
+    auto eglGetPlatformDisplayEXT =
+        reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(
+            eglGetProcAddress("eglGetPlatformDisplayEXT"));
+    if (eglGetPlatformDisplayEXT != nullptr) {
+      display = eglGetPlatformDisplayEXT(EGL_PLATFORM_X11_EXT, native_display,
+                                         nullptr);
+    }
+  }
+#endif
+
+  if (display == EGL_NO_DISPLAY) {
+    display = eglGetDisplay(native_display);
+  }
+
+  return display;
+}
+
 void
 TopCanvas::CreateEGL(EGLNativeDisplayType native_display,
                      EGLNativeWindowType native_window)
 {
-  display = eglGetDisplay(native_display);
+  display = GetPlatformDisplay(native_display);
   if (display == EGL_NO_DISPLAY) {
     fprintf(stderr, "eglGetDisplay(EGL_DEFAULT_DISPLAY) failed\n");
     exit(EXIT_FAILURE);

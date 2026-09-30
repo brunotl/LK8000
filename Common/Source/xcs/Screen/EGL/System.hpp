@@ -40,6 +40,7 @@ Copyright_License {
 #endif
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #ifdef USE_X11
 #undef Font
