@@ -28,7 +28,9 @@ class winhttp_handle_ptr {
   }
 
   winhttp_handle_ptr& operator=(winhttp_handle_ptr&& src) noexcept {
-    std::swap(hHandle, src.hHandle);
+    if (this != &src) {
+        std::swap(hHandle, src.hHandle);
+    }
     return *this;
   }
 
