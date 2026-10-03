@@ -1,0 +1,7 @@
+# Keep all org.LK8000 classes and their members (accessed from native code via JNI)
+-keep class ioio.lib.** {
+    *;
+}
+
+-dontwarn com.android.future.usb.UsbAccessory
+-dontwarn com.android.future.usb.UsbManager
