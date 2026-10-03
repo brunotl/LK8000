@@ -25,7 +25,9 @@ public:
   }
 
   curl_ptr& operator=(curl_ptr&& src) {
-    std::swap(curl, src.curl);
+    if (this != &src) {
+        std::swap(curl, src.curl);
+    }
     return *this;
   }
 
