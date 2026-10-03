@@ -19,8 +19,10 @@ zzip_mem_disk::~zzip_mem_disk() {
 }
 
 zzip_mem_disk& zzip_mem_disk::operator=(zzip_mem_disk&& other) noexcept {
-  std::swap(m_disk, other.m_disk);
-  std::swap(m_data, other.m_data);
+  if (this != &other) {
+    std::swap(m_disk, other.m_disk);
+    std::swap(m_data, other.m_data);
+  }
   return *this;
 }
 
