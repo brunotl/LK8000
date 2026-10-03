@@ -23,17 +23,19 @@ zzip_file_stream::zzip_file_stream(zzip_file_stream&& other) noexcept
 
 
 zzip_file_stream& zzip_file_stream::operator=(zzip_file_stream&& other) noexcept {
-  std::swap(m_fp, other.m_fp);
-  std::swap(m_buffer, other.m_buffer);
+  if (this != &other) {
+    std::swap(m_fp, other.m_fp);
+    std::swap(m_buffer, other.m_buffer);
 
-  if (other.gptr() != nullptr && other.egptr() != nullptr) {
-    auto off = static_cast<off_type>(other.egptr() - other.gptr());
-    zzip_seek(m_fp.get(), -off, SEEK_CUR);
+    if (other.gptr() != nullptr && other.egptr() != nullptr) {
+      auto off = static_cast<off_type>(other.egptr() - other.gptr());
+      zzip_seek(m_fp.get(), -off, SEEK_CUR);
+    }
+
+    // Reset both get areas; underflow() will re-fill on next read
+    setg(nullptr, nullptr, nullptr);
+    other.setg(nullptr, nullptr, nullptr);
   }
-
-  // Reset both get areas; underflow() will re-fill on next read
-  setg(nullptr, nullptr, nullptr);
-  other.setg(nullptr, nullptr, nullptr);
   return *this;
 }
 
