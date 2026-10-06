@@ -6,13 +6,23 @@
  * File:   devVectorVario.cpp
  * Author: Bruno de Lacheisserie
  */
+#include "externs.h"
 #include "devVectorVario.h"
+#include <string_view>
+#include <charconv>
+#include <optional>
+#include <vector>
 #include "Comm/device.h"
+#include "MessageLog.h"
 #include "devGeneric.h"
 #include "Comm/Bluetooth/gatt_utils.h"
 #include "Comm/Bluetooth/characteristic_value.h"
 #include "Calc/Vario.h"
 #include "Units.h"
+#include "GliderPolar/Polar.h"
+#include "McReady.h"
+#include "utils/strcpy.h"
+#include "utils/charset_helper.h"
 
 extern Mutex CritSec_FlightData;
 
@@ -96,6 +106,85 @@ void VarioMode(DeviceDescriptor_t& d, NMEA_INFO& info,
 }
 #endif
 
+std::vector<std::string_view> ParseNmea(const std::string_view& sv) {
+  std::vector<std::string_view> fields;
+  fields.reserve(32);
+  size_t start = 0;
+  while (start <= sv.size()) {
+    size_t pos = sv.find(',', start);
+    if (pos == std::string_view::npos) {
+      fields.emplace_back(sv.substr(start));
+      break;
+    }
+    fields.emplace_back(sv.substr(start, pos - start));
+    start = pos + 1;
+  }
+  return fields;
+}
+
+enum XCTODFields : unsigned {
+  FW_VERSION = 7,
+  TAKEOFF,
+  SD_CARD,
+  SOUND_LEVEL,
+  PILOT_NAME,
+  PILOT_ID,
+  CONFIG,
+  SOUND_GND,
+  SOUND_BLE,
+  OPTION_RR,
+  NETTO_PLUS,
+  NETTO_MINUS,
+  NETTO_GLIDE,
+  CALCULATION_MODE,
+  INTEGRATION_TIME,
+  WING_CHOICE,
+  GLIDER_MODEL,
+  GLIDER_ID,
+  PROJECTED_SURFACE,
+  FLAT_ASPECT_RATIO,
+  HARNESS,
+  AUW
+};
+
+std::optional<double> ToDouble(std::string_view sv) {
+  double value;
+  auto res = std::from_chars(sv.data(), sv.data() + sv.size(), value);
+  if (res.ec != std::errc{}) {
+    return std::nullopt;
+  }
+  return value;
+}
+
+void Xctod(DeviceDescriptor_t& d, NMEA_INFO& info,
+          const std::vector<uint8_t>& data) {
+  try {
+    std::string_view sv(reinterpret_cast<const char*>(data.data()),
+                        data.size());
+    if (sv.starts_with("$XCTOD,")) {
+      std::vector<std::string_view> fields = ParseNmea(sv);
+      if (fields.size() <= AUW) {
+        return;  // Not enough fields
+      }
+      auto ps = ToDouble(fields[PROJECTED_SURFACE]);
+      auto ar = ToDouble(fields[FLAT_ASPECT_RATIO]);
+      auto harness = fields[HARNESS];
+      auto auw = ToDouble(fields[AUW]);
+
+      if (!ps || !ar || !auw || *ps <= 0 || *ar <= 0 || *auw <= 0) {
+        return;  // Invalid data
+      }
+      if (GliderPolar::Update(*ps, *ar, *auw, harness)) {
+        from_unknown_charset(std::string(fields[GLIDER_MODEL]).c_str(), szPolarName);
+        GlidePolar::SetBallast();
+      }
+    }
+  }
+  catch (const std::exception& e) {
+    DebugLog(_T("VectorVario Test: %s"), to_tstring(e.what()).c_str());
+  }
+}
+
 using OnGattCharacteristicT = std::function<void(
     DeviceDescriptor_t&, NMEA_INFO&, const std::vector<uint8_t>&)>;
 
@@ -119,6 +208,7 @@ const service_table_t& service_table() {
             {"2fce4902-0197-47e0-a825-d4777b9a5d67", {&VarioNetto}},
             {"2fce4897-0197-47e0-a825-d4777b9a5d67", {&Roll}},
             {"2fce4898-0197-47e0-a825-d4777b9a5d67", {&Pitch}},
+            {"2fce4899-0197-47e0-a825-d4777b9a5d67", {&Xctod}},
 #ifndef NDEBUG
             {"2fce4903-0197-47e0-a825-d4777b9a5d67", {&VarioMode}},
 #endif
