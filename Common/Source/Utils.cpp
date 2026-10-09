@@ -264,17 +264,19 @@ void ToggleDrawTaskFAI() {
 
 }
 
-double CalculateLXBalastFactor(double Ballast)
-{
-	double CurrentWeight = WEIGHTS[WEIGHT_PILOT] +WEIGHTS[WEIGHT_PLANEDRY] + (WEIGHTS[WEIGHT_WATER]*Ballast) +  GlidePolar::WeightOffset;
-	double WithoutBallastWeight =  WEIGHTS[WEIGHT_PILOT] +WEIGHTS[WEIGHT_PLANEDRY] +  GlidePolar::WeightOffset;
+double CalculateLXBalastFactor(double Ballast) {
+  const double polar_reference =
+      WEIGHTS[WEIGHT_PLANEDRY] + WEIGHTS[WEIGHT_PILOT];
+  if (polar_reference <= 0) {
+    return 1;
+  }
 
-	if(WithoutBallastWeight == 0)
-		WithoutBallastWeight = 1;
+  const double ballast_weight = WEIGHTS[WEIGHT_WATER] * Ballast;
+  if (ballast_weight <= 0) {
+    return 1;
+  }
 
-	return   CurrentWeight/WithoutBallastWeight;
-
-
+  return (polar_reference + ballast_weight) / polar_reference;
 }
 
 // Factor is the percent of dry weight,
@@ -288,10 +290,8 @@ double CalculateBalastFromLX(double Factor) {
     return 0;
   }
 
-  // TODO: check for correct GlidePolar::WeightOffset usage !
   const double polar_reference = WEIGHTS[WEIGHT_PLANEDRY] +
-                                 WEIGHTS[WEIGHT_PILOT] +
-                                 GlidePolar::WeightOffset;
+                                 WEIGHTS[WEIGHT_PILOT];
   if (polar_reference <= 0) {
     return 0;
   }
