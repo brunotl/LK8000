@@ -74,8 +74,9 @@ const char* ci_search_substr(const char* string, const char* sub_string);
 const wchar_t* ci_search_substr(const wchar_t* string, const wchar_t* sub_string);
 
 inline
-bool start_with(const std::string_view& nmea, const std::string_view& prefix) {
-  return nmea.substr(0, prefix.size()) == prefix;
+bool start_with(const std::string_view& string,
+                const std::string_view& prefix) {
+  return string.starts_with(prefix);
 }
 
 #endif /* __cplusplus */
