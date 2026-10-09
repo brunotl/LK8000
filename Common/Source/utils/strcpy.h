@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <cassert>
 #include <string_view>
+#include <type_traits>
+#include "Util/UTF8.hpp"
 
 namespace lk {
 
