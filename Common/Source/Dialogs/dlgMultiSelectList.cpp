@@ -24,6 +24,7 @@
 #include "Library/Utm.h"
 #include "utils/printf.h"
 #include "FlarmIdFile.h"
+#include "Window/WndMain.h"
 
 #define MAX_LEN 200
 #define MAX_COMMENT 80

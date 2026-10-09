@@ -11,6 +11,7 @@
 #include "externs.h"
 #include "CScreenOrientation.h"
 #include "Hardware/RotateDisplay.hpp"
+#include "Window/WndMain.h"
 
 #if !defined(WIN32)
 #include "DisplayOrientation.hpp"

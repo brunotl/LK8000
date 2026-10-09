@@ -13,6 +13,7 @@
 #include <oboe/Oboe.h>
 #include <Form/Form.hpp>
 #include "Java/String.hxx"
+#include "Window/WndMain.h"
 
 Java::TrivialClass LK8000Activity::cls;
 jmethodID LK8000Activity::check_permissions_method;

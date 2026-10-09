@@ -48,6 +48,7 @@
 #include <vector>
 #include <charconv>
 #include "MapDraw/Terrain/ColorRamps.h"
+#include "Window/WndMain.h"
 
 using std::string_view_literals::operator""sv;
 

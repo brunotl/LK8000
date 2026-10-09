@@ -9,6 +9,7 @@
 #include "LKProfiles.h"
 #include "ScreenGeometry.h"
 #include "utils/tokenizer.h"
+#include "Window/WndMain.h"
 
 #ifndef DEFAULT_QUALITY
 #define DEFAULT_QUALITY 0

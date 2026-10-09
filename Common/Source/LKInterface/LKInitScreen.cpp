@@ -11,6 +11,7 @@
 #include "LKInterface.h"
 #include "DoInits.h"
 #include "ScreenGeometry.h"
+#include "Window/WndMain.h"
 #ifdef ANDROID
 #include "Android/Main.hpp"
 #include "Android/NativeView.hpp"

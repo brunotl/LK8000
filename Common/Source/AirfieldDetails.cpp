@@ -8,6 +8,7 @@
 
 
 #include "externs.h"
+#include "Window/WndMain.h"
 #include "Dialogs/dlgProgress.h"
 #include "AirfieldDetails.h"
 #include "Waypointparser.h"

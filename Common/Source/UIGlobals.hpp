@@ -11,6 +11,12 @@
 #include "Compiler.h"
 
 class SingleWindow;
+class WndMain;
+
+#include <memory>
+
+extern std::unique_ptr<WndMain> main_window;
+
 
 namespace UIGlobals {
     

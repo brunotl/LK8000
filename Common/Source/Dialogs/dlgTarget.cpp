@@ -15,7 +15,7 @@
 #include "resource.h"
 #include "NavFunctions.h"
 #include "CalcTask.h"
-
+#include "Window/WndMain.h"
 #include <algorithm>
 
 static WndForm *wf=NULL;

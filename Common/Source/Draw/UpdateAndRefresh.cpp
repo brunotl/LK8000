@@ -9,7 +9,7 @@
 #include "externs.h"
 #include "Terrain.h"
 #include "Time/PeriodClock.hpp"
-
+#include "Window/WndMain.h"
 
 //
 // 111109 This will force immediate repaint of the OLD screen.

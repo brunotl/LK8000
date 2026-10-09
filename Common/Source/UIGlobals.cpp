@@ -1,7 +1,8 @@
 #include "UIGlobals.hpp"
-#include "externs.h"
 
 #ifndef WIN32
+#include "Window/WndMain.h"
+
 SingleWindow &
 UIGlobals::GetMainWindow()
 {

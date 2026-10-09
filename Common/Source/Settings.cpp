@@ -18,6 +18,7 @@
 #include "Dialogs.h"
 #include "ChangeScreen.h"
 #include "Waypoints/SetHome.h"
+#include "Window/WndMain.h"
 
 void SettingsEnter() {
   MenuActive = true;

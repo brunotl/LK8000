@@ -30,6 +30,7 @@
 #include <span>
 #include "utils/stringext.h"
 #include "LocalPath.h"
+#include "Window/WndMain.h"
 
 #ifndef USE_GDI
 #include "Screen/SubCanvas.hpp"

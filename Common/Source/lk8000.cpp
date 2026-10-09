@@ -59,7 +59,7 @@
 #include "Calc/LDRotaryBuffer.h"
 #include "Thread/NamedMutex.hpp"
 #include "Library/TimeFunctions.h"
-
+#include "Window/WndMain.h"
 #ifdef __linux__
 #include <sys/utsname.h>
 #endif

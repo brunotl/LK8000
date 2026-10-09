@@ -19,6 +19,7 @@
 #include "Draw/LoadSplash.h"
 #include "dlgTools.h"
 #include "dlgIGCProgress.h"
+#include "Window/WndMain.h"
 
 extern void  StopIGCRead(void);
 extern void  EOS_StopIGCRead(void);

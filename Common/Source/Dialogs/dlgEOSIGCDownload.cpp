@@ -17,6 +17,7 @@
 #include "utils/tokenizer.h"
 #include "utils/printf.h"
 #include "LocalPath.h"
+#include "Window/WndMain.h"
 
 #define EOS_PRPGRESS_DLG    
   

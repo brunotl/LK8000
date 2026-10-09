@@ -10,6 +10,7 @@
  */
 
 #include "externs.h"
+#include "Window/WndMain.h"
 #include "../RotateScreen.h"
 #include "Hardware/RotateDisplay.hpp"
 #include "LKInterface/CScreenOrientation.h"

@@ -12,6 +12,7 @@
 #include "Screen/LKSurface.h"
 #include "Window/WndTextEdit.h"
 #include "Event/Event.h"
+#include "Window/WndMain.h"
 #include <chrono>
 #include <optional>
 

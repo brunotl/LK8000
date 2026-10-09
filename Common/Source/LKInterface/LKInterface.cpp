@@ -11,6 +11,7 @@
 #include "InputEvents.h"
 #include "Multimap.h"
 #include "Sound/Sound.h"
+#include "Window/WndMain.h"
 
 extern bool IsMultimapConfigShown;
 

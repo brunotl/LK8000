@@ -16,6 +16,7 @@
 #include "LKObjects.h"
 #include "resource.h"
 #include "Draw/LoadSplash.h"
+#include "Window/WndMain.h"
 
 class dlgProgress final {
 public:

@@ -15,6 +15,7 @@
 #include "utils/tokenizer.h"
 #include "utils/printf.h"
 #include "LocalPath.h"
+#include "Window/WndMain.h"
 
 #define LST_STRG_LEN          100
 

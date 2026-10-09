@@ -20,6 +20,7 @@
 #include "Logger.h"
 #include "Units.h"
 #include "LKLanguage.h"
+#include "Window/WndMain.h"
 
 extern void ResetTaskWaypoint(int j);
 

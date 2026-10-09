@@ -20,6 +20,7 @@
 #include "Library/rapidxml/rapidxml.hpp"
 #include "Library/rapidxml/rapidxml_iterators.hpp"
 #include "Form/WndButtonImage.h"
+#include "Window/WndMain.h"
 
 #include <stdio.h>
 

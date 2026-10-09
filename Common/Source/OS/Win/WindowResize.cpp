@@ -7,6 +7,7 @@
 */
 
 #include "externs.h"
+#include "Window/WndMain.h"
 
 RECT WindowResize(unsigned int x, unsigned int y) {
 

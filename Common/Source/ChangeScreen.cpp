@@ -6,6 +6,7 @@
    $Id$
 */
 #include "externs.h"
+#include "Window/WndMain.h"
 #include "LKInterface.h"
 #include "resource.h"
 #include "Waypointparser.h"

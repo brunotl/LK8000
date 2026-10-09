@@ -20,6 +20,7 @@
 #include "utils/printf.h"
 #include "LocalPath.h"
 #include "utils/unique_file_ptr.h"
+#include "Window/WndMain.h"
 
 #define MAX_FLARM_ANSWER_LEN 640 
       // FLARM Docu does not tell the max. answer len

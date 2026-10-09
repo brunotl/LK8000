@@ -15,6 +15,7 @@
 #include "Hardware/CPU.hpp"
 #include "Draw/ScreenProjection.h"
 #include "OS/Sleep.h"
+#include "Window/WndMain.h"
 #ifndef USE_GDI
 #include "Screen/Canvas.hpp"
 #endif

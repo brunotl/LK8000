@@ -25,6 +25,7 @@
 #include "DisplayOrientation.hpp"
 #include "Asset.hpp"
 #include "ChangeScreen.h"
+#include "Window/WndMain.h"
 
 #ifdef USE_FREETYPE
 #include "Screen/FreeType/Init.hpp"

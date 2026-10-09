@@ -14,7 +14,7 @@
 #include "resource.h"
 #include "Util/TruncateString.hpp"
 #include "Radio.h"
-
+#include "Window/WndMain.h"
 
 #define SHORT_DEVICE_NAME_LEN 12
 

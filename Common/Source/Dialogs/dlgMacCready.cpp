@@ -14,7 +14,7 @@
 #include "dlgTools.h"
 #include "resource.h"
 #include "Event/Key.h"
-
+#include "Window/WndMain.h"
 
 namespace {
 

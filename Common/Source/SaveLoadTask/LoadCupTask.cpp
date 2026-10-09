@@ -26,6 +26,7 @@
 #include "utils/stream_helper.h"
 #include "Calc/Task/TimeGates.h"
 #include "Waypoints/SetHome.h"
+#include "Window/WndMain.h"
 
 int dlgTaskSelectListShowModal(void) ;
 

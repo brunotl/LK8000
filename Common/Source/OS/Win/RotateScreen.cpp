@@ -8,6 +8,7 @@
 
 #include "externs.h"
 #include "../RotateScreen.h"
+#include "Window/WndMain.h"
 
 bool CanRotateScreen() {
     return true;

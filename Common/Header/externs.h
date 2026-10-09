@@ -46,7 +46,6 @@
 #include "Comm/device.h"
 #include "Globals.h"
 #include "LKLanguage.h"
-#include "Window/WndMain.h"
 #include "LKCpu.h"
 
 // Include assert for LK testbench
@@ -71,6 +70,7 @@ bool Debounce();
 
 void DoStatusMessage(const TCHAR* text, const TCHAR* data = nullptr, const bool playsound = true) gcc_nonnull(1);
 
+class WndMain;
 extern std::unique_ptr<WndMain> main_window;
 
 
