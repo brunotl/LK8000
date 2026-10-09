@@ -13,8 +13,9 @@
 #define STRCPY_H
 
 #include "Compiler.h"
+#include <algorithm>
 #include <cassert>
-#include "Util/UTF8.hpp"
+#include <string_view>
 
 namespace lk {
 
@@ -42,6 +43,17 @@ void strcpy(CharT* gcc_restrict dst, const CharT* gcc_restrict src, size_t dst_s
 template <typename CharT, size_t dst_size>
 void strcpy(CharT (&dst)[dst_size], const CharT* src) {
   lk::strcpy(dst, src, dst_size);
+}
+
+template <typename CharT, size_t dst_size>
+void strcpy(CharT (&dst)[dst_size], const std::basic_string_view<CharT>& src) {
+  size_t size = std::min(src.size(), dst_size - 1);
+  std::ranges::copy_n(src.begin(), size, dst);
+  dst[size] = '\0';
+
+  if constexpr (std::is_same_v<CharT, char>) {
+    CropIncompleteUTF8(dst);
+  }
 }
 
 }  // namespace lk
