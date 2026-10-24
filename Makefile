@@ -493,6 +493,15 @@ ifeq ($(CONFIG_LINUX),y)
   CE_DEFS += -DUSE_CURL $(patsubst -I%,-isystem %,$(CURL_CPPFLAGS))
  endif
 
+# Bluetooth LE GATT sensor support (BLE: ports), via dbus-cxx talking to
+# BlueZ's D-Bus GATT API directly. Enabled automatically when pkg-config
+# finds dbus-cxx-2.0; disable with USE_BLE=n.
+ USE_BLE ?= $(shell $(PKG_CONFIG) --exists dbus-cxx-2.0 && echo y)
+ ifeq ($(USE_BLE),y)
+  $(eval $(call pkg-config-library,DBUS_CXX,dbus-cxx-2.0))
+  CE_DEFS += -DUSE_BLE $(patsubst -I%,-isystem %,$(DBUS_CXX_CPPFLAGS))
+ endif
+
 endif
 
 ifeq ($(CONFIG_WIN32),y)
@@ -675,6 +684,7 @@ ifeq ($(CONFIG_LINUX),y)
  LDLIBS += $(LIBINPUT_LDLIBS)
  LDLIBS += $(LIBUDEV_LDLIBS)
  LDLIBS += $(CURL_LDLIBS)
+ LDLIBS += $(DBUS_CXX_LDLIBS)
 
  ifneq ($(GCC_GTEQ_910),1) 
   LDLIBS += -lstdc++fs
@@ -1519,13 +1529,28 @@ DISTRIB_OUTPUT := \
 	Kobo-install-otg.zip \
 	Kobo-install.zip
 
-# temporary still we don't have kobo menu.	
+# temporary still we don't have kobo menu.
 SRC_FILES += \
 	$(SRC)/xcs/Kobo/System.cpp \
 	$(SRC)/xcs/Kobo/Kernel.cpp \
 	$(SRC)/xcs/Kobo/Model.cpp
-	
 
+endif
+
+ifeq ($(USE_BLE),y)
+SRC_FILES += \
+	$(CMM)/Bluetooth/BlueZ/BleManager.cpp \
+	$(CMM)/Bluetooth/BlueZ/CharacteristicProxy.cpp \
+	$(CMM)/Bluetooth/BlueZ/DBusRuntime.cpp \
+	$(CMM)/Bluetooth/BlueZ/PropertyMonitor.cpp \
+	$(CMM)/Bluetooth/BlueZ/DeviceProxy.cpp \
+	$(CMM)/Bluetooth/BlueZ/DeviceRegistry.cpp \
+	$(CMM)/Bluetooth/BlueZ/DeviceScanner.cpp \
+	$(CMM)/Bluetooth/BlueZ/DeviceSession.cpp \
+	$(CMM)/Bluetooth/BlueZ/BlueZLeScanner.cpp \
+	\
+	$(CMM)/Bluetooth/BlueZ/BlueZGattSensor.cpp \
+	$(CMM)/Bluetooth/GattSensor.cpp
 endif
 
 src_to_obj = $(patsubst $(SRC)%.c,$(BIN)%.o,\

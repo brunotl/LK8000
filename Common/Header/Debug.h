@@ -14,12 +14,13 @@
 #define DEBUG_BESTALTERNATE     // full bestalternate messages inside DEBUG.TXT in home directory
 */
 
-#define DEBUGNPM          // port monitor and hearthbeats in Parser
-
+// #define DEBUGNPM          // port monitor and hearthbeats in Parser
 // #define DEBUG_GDL90_DRIVER // log GDL90 driver messages in RUNTIME.log
 // #define DEBUG_ACD_DRIVER // log Air Control Display driver messages in RUNTIME.log
 
 // #define DEBUG_COMPORT_WRITE // log ComPort::Write() calls in RUNTIME.log
+
+ #define DEBUG_BLUETOOTH   // log Bluetooth communication in RUNTIME.log
 
 #endif
 
