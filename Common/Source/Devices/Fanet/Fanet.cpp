@@ -12,6 +12,7 @@
 #include "Calc/ThermalHistory.h"
 #include "utils/strcpy.h"
 #include "utils/printf.h"
+#include "OS/ByteOrder.hpp"
 
 static_assert(IsLittleEndian(), "Big-Endian Arch is not supported");
 
