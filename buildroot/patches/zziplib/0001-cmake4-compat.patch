@@ -1,0 +1,36 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required (VERSION 3.1)
++cmake_minimum_required(VERSION 3.5)
+ project(zziplib VERSION "0.13.72" LANGUAGES C)
+ 
+ if(NOT CMAKE_BUILD_TYPE) 
+
+--- a/zzip/CMakeLists.txt
++++ b/zzip/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required (VERSION 3.1)
++cmake_minimum_required (VERSION 3.5)
+ project(zzip VERSION "0.13.72" LANGUAGES C)
+
+ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeScripts")
+
+--- a/zzipwrap/CMakeLists.txt
++++ b/zzipwrap/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required (VERSION 3.1)
++cmake_minimum_required (VERSION 3.5)
+ project(zzipwrap VERSION "0.13.72" LANGUAGES C)
+
+ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeScripts")
+ 
+--- a/bins/CMakeLists.txt
++++ b/bins/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required (VERSION 3.1)
++cmake_minimum_required (VERSION 3.5)
+ project(zzipbins VERSION "0.13.72" LANGUAGES C)
+
+ if(NOT CMAKE_BUILD_TYPE) 
+     set(CMAKE_BUILD_TYPE Release)
