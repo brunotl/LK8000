@@ -45,6 +45,9 @@ BR2_TOOLCHAIN_EXTERNAL=y
 BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y
 BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_ARMV7_EABIHF_GLIBC_BLEEDING_EDGE=y
 BR2_PACKAGE_HOST_ENVIRONMENT_SETUP=y
+
+BR2_GLOBAL_PATCH_DIR="$(BR2_EXTERNAL_LK8000_PATH)/patches"
+
 # dnsmasq: a standalone DHCP server binary, statically-ish linked against
 # just glibc, bundled to /opt/LK8000/bin and used by
 # kobo/debug-network-init.sh (KOBO_DEBUG_NET=y builds only) so the USB
