@@ -681,6 +681,14 @@ ifeq ($(TARGET_IS_KOBO),y)
   # $(STAGING_DIR) is exported by the Buildroot SDK's environment-setup
   # script; its glibc/libs also need deploying to /opt/LK8000/lib on-device.
   LDFLAGS += -Wl,--rpath-link=$(STAGING_DIR)/usr/lib
+
+
+  CXXFLAGS += -DHAVE_STRLCAT=1
+  CXXFLAGS += -DHAVE_STRLCPY=1
+
+  CFLAGS += -DHAVE_STRLCPY=1
+  CFLAGS += -DHAVE_STRLCAT=1
+
  endif
 endif
 
