@@ -57,7 +57,7 @@ BR2_PACKAGE_DNSMASQ=y
 # answers to lk8000.local on the USB gadget link instead of the fixed
 # 192.168.2.1 needing to be remembered/typed. AVAHI_DAEMON auto-selects
 # libdaemon+expat; dbus support is pulled in for free since
-# BR2_PACKAGE_DBUS is already on below (for gattlib) -- see
+# BR2_PACKAGE_DBUS is already on below (for the BLE GATT backend) -- see
 # kobo/avahi-daemon.conf and build/kobo.mk's KOBO_AVAHI_* variables for
 # the exact set of shared libs this adds. autoipd (IPv4LL) is unneeded --
 # the USB gadget IP is always static, assigned by dnsmasq/ifconfig, not
@@ -78,6 +78,27 @@ BR2_PACKAGE_OPENSSL=y
 BR2_PACKAGE_LIBCURL_OPENSSL=y
 BR2_PACKAGE_LIBPNG=y
 BR2_PACKAGE_ZZIPLIB=y
+
+# Optional: LK8000's BLE: GATT sensor support (make TARGET=KOBO KOBO_SDK=y
+# USE_BLE=y). Not built by the plain `make ... boost zziplib ... geographiclib`
+# sequence above -- build explicitly with `make ... dbus-cxx` when wanted.
+# Talks to BlueZ directly over its D-Bus GATT API via dbus-cxx (mainline
+# Buildroot package) rather than through gattlib -- gattlib's own GDBus-based
+# internals turned out to have several real thread-safety bugs (races in
+# BlueZGattSensor's earlier gattlib backend worked around some of these; see
+# git history), so this drops gattlib and its GLib/GObject/GIO dependency
+# chain entirely. dbus-cxx's Config.in auto-selects BR2_PACKAGE_DBUS and
+# BR2_PACKAGE_LIBSIGC, but (unlike gattlib's Config.in) does not select
+# bluez5_utils -- bluetoothd itself is still needed on the device, so keep
+# that selected explicitly here.
+BR2_PACKAGE_DBUS_CXX=y
+BR2_PACKAGE_BLUEZ5_UTILS=y
+BR2_PACKAGE_DBUS=y
+# BR2_PACKAGE_LIBGLIB2 is left enabled even though the new BLE backend no
+# longer needs it -- removing it (and pruning KOBO_LIB_PATHS in
+# build/kobo.mk to match) is deferred to a separate change until the new
+# backend is confirmed working on a real device.
+BR2_PACKAGE_LIBGLIB2=y
 
 # LK8000WebSrv: HTTP file server for browsing/downloading/uploading/
 # deleting Logger trace and Task files on the Kobo (Scripts/externals/

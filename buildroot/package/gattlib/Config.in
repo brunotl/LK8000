@@ -1,0 +1,19 @@
+config BR2_PACKAGE_GATTLIB
+	bool "gattlib"
+	depends on BR2_INSTALL_LIBSTDCPP
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	select BR2_PACKAGE_BLUEZ5_UTILS
+	select BR2_PACKAGE_DBUS
+	select BR2_PACKAGE_LIBGLIB2
+	help
+	  Gattlib is a C library to access Bluetooth Low Energy (BLE) GATT
+	  characteristics, talking to BlueZ over its D-Bus API.
+
+	  Not packaged in mainline Buildroot; added here for LK8000's
+	  optional BLE: device support (Comm/Bluetooth/BlueZGattSensor),
+	  pkg-config name "gattlib".
+
+	  https://github.com/labapart/gattlib
+
+comment "gattlib needs a toolchain w/ C++ and threads"
+	depends on !BR2_INSTALL_LIBSTDCPP || !BR2_TOOLCHAIN_HAS_THREADS

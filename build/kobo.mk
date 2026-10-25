@@ -123,6 +123,27 @@ ifeq ($(USE_CURL),y)
 
 endif
 
+# dbus-cxx and its runtime dependencies: talks to bluetoothd directly over
+# org.bluez's D-Bus GATT API (libdbus-1), not through gattlib/GLib's GDBus
+# anymore. bluetoothd + a working hci adapter are assumed already present on
+# the device; this only ships what LK8000-KOBO itself dynamically links.
+# Confirmed sonames (built via `make BR2_EXTERNAL=$BR2_EXTERNAL dbus-cxx` on
+# this machine): libdbus-cxx.so.2 (pkg-config name "dbus-cxx-2.0" is
+# unrelated to the actual library filename) and libsigc-3.0.so.0.
+ifeq ($(USE_BLE),y)
+ KOBO_LIB_PATHS += \
+	$(KOBO_EXTRA_LIB_DIR)/libdbus-cxx.so.2 \
+	$(KOBO_EXTRA_LIB_DIR)/libsigc-3.0.so.0 \
+	$(KOBO_EXTRA_LIB_DIR)/libdbus-1.so.3 \
+
+endif
+
+ifeq ($(USE_BT_SPP),y)
+ KOBO_LIB_PATHS += \
+	$(KOBO_EXTRA_LIB_DIR)/libbluetooth.so.3 \
+
+endif
+
 # let only the existing file in the list
 KOBO_SYS_LIB_PATHS += $(filter $(KOBO_LIB_PATHS), $(wildcard $(KOBO_EXTRA_LIB_DIR)/*))
 

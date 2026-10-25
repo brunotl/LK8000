@@ -1,0 +1,26 @@
+common: add missing <ctype.h> include for tolower()
+
+gattlib_common_adapter.c's stricmp() calls tolower() without including
+<ctype.h>. GCC >= 14 (this project's Bootlin toolchain) treats an
+implicit function declaration as a hard error, not a warning, so 0.7.2
+fails to build:
+
+    common/gattlib_common_adapter.c:15:17: error: implicit declaration
+    of function 'tolower' [-Wimplicit-function-declaration]
+
+Fixed upstream after the 0.7.2 tag (gattlib master's
+common/gattlib_common_adapter.c already has this include, in the same
+place); backported here since we're pinned to the 0.7.2 release.
+Confirmed against a real cross-build with this toolchain.
+
+--- a/common/gattlib_common_adapter.c
++++ b/common/gattlib_common_adapter.c
+@@ -4,6 +4,8 @@
+  * Copyright (c) 2021-2024, Olivier Martin <olivier@labapart.org>
+  */
+
++#include <ctype.h>
++
+ #include "gattlib_internal.h"
+
+ // Keep track of the allocated adapters to avoid an adapter to be freed twice.
