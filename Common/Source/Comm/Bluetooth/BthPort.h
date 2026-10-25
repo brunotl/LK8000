@@ -14,7 +14,10 @@
 
 #ifdef ANDROID
 #include "Android/BluetoothPort.h"
-typedef  BluetoothPort BthPort;
+typedef BluetoothPort BthPort;
+#elif defined(USE_BT_SPP)
+#include "RFCommPort.h"
+typedef RFCommPort BthPort;
 #else
 #include "../NullComPort.h"
 typedef NullComPort BthPort;

@@ -533,6 +533,15 @@ ifeq ($(CONFIG_LINUX),y)
   CE_DEFS += -DUSE_BLE $(patsubst -I%,-isystem %,$(DBUS_CXX_CPPFLAGS))
  endif
 
+ # Classic Bluetooth (BT_SPP: ports), via raw AF_BLUETOOTH/RFCOMM sockets --
+ # needs only libbluetooth (for bdaddr_t/str2ba(), no D-Bus/bluetoothd
+ # interaction at all), unlike USE_BLE above.
+ USE_BT_SPP ?= $(shell $(PKG_CONFIG) --exists bluez && echo y)
+ ifeq ($(USE_BT_SPP),y)
+  $(eval $(call pkg-config-library,BLUEZ,bluez))
+  CE_DEFS += -DUSE_BT_SPP $(patsubst -I%,-isystem %,$(BLUEZ_CPPFLAGS))
+ endif
+
 endif
 
 ifeq ($(CONFIG_WIN32),y)
@@ -721,6 +730,7 @@ ifeq ($(CONFIG_LINUX),y)
  LDLIBS += $(LIBUDEV_LDLIBS)
  LDLIBS += $(CURL_LDLIBS)
  LDLIBS += $(DBUS_CXX_LDLIBS)
+ LDLIBS += $(BLUEZ_LDLIBS)
 
  ifneq ($(GCC_GTEQ_910),1) 
   LDLIBS += -lstdc++fs
@@ -1588,6 +1598,12 @@ SRC_FILES += \
 	$(CMM)/Bluetooth/BlueZ/BlueZGattSensor.cpp \
 	$(CMM)/Bluetooth/GattSensor.cpp
 endif
+
+ifeq ($(USE_BT_SPP),y)
+SRC_FILES += \
+	$(CMM)/Bluetooth/RFCommPort.cpp
+endif
+
 
 src_to_obj = $(patsubst $(SRC)%.c,$(BIN)%.o,\
              $(patsubst $(SRC)%.cpp,$(BIN)%.o,\
