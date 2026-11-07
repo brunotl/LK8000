@@ -56,13 +56,6 @@
 #define DYNABOXTIME 3.0  // seconds between infobox dynamic flipping
 
 /*
- * This is required because water labels (category 05 and 10 in topology) are special.
- * They are reset differently. This is the default in km zoom.
- */
-#define DEFAULT_WATER_LABELS_THRESHOLD	10
-
-
-/*
  * DOUBLECLICKINTERVAL is a general purpouse timing, used by both VK and synthetic double click
  *
  * No miracles. Couldn't do it any better.

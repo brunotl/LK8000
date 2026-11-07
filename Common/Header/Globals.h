@@ -338,6 +338,7 @@ GEXTERN int LKTopo;
 GEXTERN bool LKWaterTopology;
 
 
+GEXTERN double LKTopoZoomCat10;
 GEXTERN double LKTopoZoomCat20;
 GEXTERN double LKTopoZoomCat30;
 GEXTERN double LKTopoZoomCat40;

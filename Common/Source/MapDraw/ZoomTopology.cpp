@@ -18,12 +18,11 @@ namespace {
 
 // coast_areas and water_area zoom are special cases :
 //  - Polygon are always drawn, regardless of zoom level.
-//  - Zoom level (shared with "water_line") is used for determining when to
-//    display labels.
+//  - Zoom level is used for determining when to display labels.
 constexpr const TopologyZoomLevel topology_props[] = {
-    { topology_category::coast_areas,     LKTopoZoomCat20,  10, _T("")          },
-    { topology_category::water_area,      LKTopoZoomCat20,  10, _T("")          },
-    { topology_category::water_line,      LKTopoZoomCat20,  10, _T("prpCat20")  },
+    { topology_category::coast_areas,     LKTopoZoomCat10,  10, _T("")          },
+    { topology_category::water_area,      LKTopoZoomCat10,  10, _T("prpCat10")  },
+    { topology_category::water_line,      LKTopoZoomCat20,   7, _T("")          },
     { topology_category::big_road,        LKTopoZoomCat30,  25, _T("prpCat30")  },
     { topology_category::medium_road,     LKTopoZoomCat40,   6, _T("prpCat40")  },
     { topology_category::small_road,      LKTopoZoomCat50,   3, _T("prpCat50")  },

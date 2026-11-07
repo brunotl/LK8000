@@ -320,12 +320,12 @@ void LKParseProfileString(const char *sname, const char *svalue) {
     LKTopoZoomCat100 /= 1000;
     return;
   }
-  if (settings::read(sname, svalue, szRegistryLKTopoZoomCat110, LKTopoZoomCat110)) {
-    LKTopoZoomCat110 /= 1000;
+  if (settings::read(sname, svalue, szRegistryLKTopoZoomCat10, LKTopoZoomCat10)) {
+    LKTopoZoomCat10 /= 1000;
     return;
   }
-  if (settings::read(sname, svalue, szRegistryLKTopoZoomCat20, LKTopoZoomCat20)) {
-    LKTopoZoomCat20 /= 1000;
+  if (settings::read(sname, svalue, szRegistryLKTopoZoomCat110, LKTopoZoomCat110)) {
+    LKTopoZoomCat110 /= 1000;
     return;
   }
   if (settings::read(sname, svalue, szRegistryLKTopoZoomCat30, LKTopoZoomCat30)) {
